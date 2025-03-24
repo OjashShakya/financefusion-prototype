@@ -17,7 +17,7 @@ interface AuthContextType {
   signup: (email: string, password: string, fullname: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  verifyOTP: (otp: string) => Promise<void>;
+  verifyOTP: (otp: string, email: string) => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
   resetPassword: (newPassword: string) => Promise<void>;
 }
@@ -72,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authAPI.login(email, password);
       setUser(response.user);
+      console.log(response);
       localStorage.setItem('token', response.token);
       toast({
         title: "Login Successful",
@@ -110,9 +111,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const verifyOTP = async (otp: string) => {
+  const verifyOTP = async (otp: string, email: string) => {
     try {
-      const response = await authAPI.verifyOTP(otp);
+      const response = await authAPI.verifyOTP(otp, email);
       setUser(response.user);
       localStorage.setItem('token', response.token);
       toast({
@@ -120,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "Your email has been verified successfully.",
         variant: "success",
       });
-      router.push('/components/dashboard');
+      router.push('/login');
     } catch (error: any) {
       toast({
         title: "Verification Failed",

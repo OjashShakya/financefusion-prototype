@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import mainLogo from "../assets/mainLogo.png";
 import ResetPassword_icon from "../assets/Resetpassword.png";
 import { useAuth } from "../context/AuthContext";
@@ -13,6 +13,8 @@ const VerifyOTP: React.FC = () => {
   const [otp, setOtp] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
 
   const handleVerifyOTP = async () => {
     setError("");
@@ -23,7 +25,7 @@ const VerifyOTP: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await verifyOTP(otp);
+      await verifyOTP(otp, email);
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Invalid OTP. Please try again.");

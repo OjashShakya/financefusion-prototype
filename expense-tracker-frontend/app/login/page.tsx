@@ -23,7 +23,7 @@ const Login: React.FC = () => {
 
     try {
       await login(email, password);
-      router.push("/components/dashboard");
+      // router.push("/components/dashboard");
     } catch (err: any) {
       setError(err.message || "Login failed. Please try again.");
     } finally {
@@ -36,7 +36,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <form className="w-full min-h-screen bg-[#f9f9f9] flex flex-col items-center">
+    <form onSubmit={handleLogin} className="w-full min-h-screen bg-[#f9f9f9] flex flex-col items-center">
       <div className="h-[90px] pt-[50px] flex flex-col w-full justify-start max-w-[1200px] max-auto">
         <Image src={mainLogo} alt="Finance Fusion Logo" width={200} height={90} />
       </div>
