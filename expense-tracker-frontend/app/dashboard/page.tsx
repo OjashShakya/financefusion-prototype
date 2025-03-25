@@ -2,26 +2,24 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from './context/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import { FinanceDashboard } from '@/components/finance/finance-dashboard';
 
-export default function Home() {
+export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    const handleRouting = async () => {
+    const checkAuth = async () => {
       if (!loading) {
-        if (user) {
-          console.log('User found, redirecting to dashboard');
-          router.replace('/dashboard');
-        } else {
+        if (!user) {
           console.log('No user found, redirecting to login');
           router.replace('/login');
         }
       }
     };
 
-    handleRouting();
+    checkAuth();
   }, [user, loading, router]);
 
   if (loading) {
@@ -32,6 +30,13 @@ export default function Home() {
     );
   }
 
-  return null;
-}
+  if (!user) {
+    return null;
+  }
 
+  return (
+    <div className="min-h-screen">
+      <FinanceDashboard />
+    </div>
+  );
+} 

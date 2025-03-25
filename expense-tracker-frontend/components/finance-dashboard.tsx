@@ -45,149 +45,25 @@ export type SavingsGoal = {
 }
 
 export function FinanceDashboard() {
-  const { user } = useAuth()
-  const [expenses, setExpenses] = useState<Expense[]>([
-    {
-      id: "1",
-      description: "Groceries",
-      amount: 85.75,
-      category: "Food",
-      date: new Date("2025-03-18"),
-    },
-    {
-      id: "2",
-      description: "Movie tickets",
-      amount: 24.99,
-      category: "Entertainment",
-      date: new Date("2025-03-15"),
-    },
-    {
-      id: "3",
-      description: "Electricity bill",
-      amount: 120.5,
-      category: "Utilities",
-      date: new Date("2025-03-10"),
-    },
-    {
-      id: "4",
-      description: "Restaurant dinner",
-      amount: 65.3,
-      category: "Food",
-      date: new Date("2025-03-05"),
-    },
-    {
-      id: "5",
-      description: "Gas",
-      amount: 45.2,
-      category: "Transportation",
-      date: new Date("2025-03-02"),
-    },
-    {
-      id: "6",
-      description: "Internet bill",
-      amount: 59.99,
-      category: "Utilities",
-      date: new Date("2025-02-28"),
-    },
-    {
-      id: "7",
-      description: "Coffee shop",
-      amount: 12.5,
-      category: "Food",
-      date: new Date("2025-02-25"),
-    },
-  ])
+  const { user, loading } = useAuth()
 
-  const [incomes, setIncomes] = useState<Income[]>([
-    {
-      id: "1",
-      source: "Salary",
-      amount: 3500,
-      category: "Employment",
-      date: new Date("2025-03-01"),
-    },
-    {
-      id: "2",
-      source: "Freelance work",
-      amount: 750,
-      category: "Side Hustle",
-      date: new Date("2025-03-12"),
-    },
-    {
-      id: "3",
-      source: "Dividend payment",
-      amount: 120,
-      category: "Investments",
-      date: new Date("2025-03-15"),
-    },
-    {
-      id: "4",
-      source: "Rental income",
-      amount: 1200,
-      category: "Rental",
-      date: new Date("2025-02-28"),
-    },
-  ])
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
-  const [budgets, setBudgets] = useState<Budget[]>([
-    {
-      id: "1",
-      category: "Food",
-      amount: 400,
-      period: "monthly",
-      spent: 151.05,
-    },
-    {
-      id: "2",
-      category: "Entertainment",
-      amount: 200,
-      period: "monthly",
-      spent: 24.99,
-    },
-    {
-      id: "3",
-      category: "Utilities",
-      amount: 300,
-      period: "monthly",
-      spent: 120.5,
-    },
-    {
-      id: "4",
-      category: "Transportation",
-      amount: 150,
-      period: "monthly",
-      spent: 45.2,
-    },
-  ])
+  if (!user) {
+    return null;
+  }
 
-  const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([
-    {
-      id: "1",
-      name: "Vacation Fund",
-      targetAmount: 2000,
-      currentAmount: 750,
-      targetDate: new Date("2025-08-01"),
-      color: "#0088FE",
-    },
-    {
-      id: "2",
-      name: "Emergency Fund",
-      targetAmount: 10000,
-      currentAmount: 3500,
-      targetDate: new Date("2025-12-31"),
-      color: "#00C49F",
-    },
-    {
-      id: "3",
-      name: "New Laptop",
-      targetAmount: 1500,
-      currentAmount: 500,
-      targetDate: new Date("2025-06-30"),
-      color: "#FFBB28",
-    },
-  ])
-
-  const [activeView, setActiveView] = useState<string>("dashboard")
+  const [activeView, setActiveView] = useState("dashboard")
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [incomes, setIncomes] = useState<Income[]>([])
+  const [budgets, setBudgets] = useState<Budget[]>([])
+  const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([])
 
   const addExpense = (expense: Omit<Expense, "id">) => {
     const newExpense = {
@@ -277,39 +153,43 @@ export function FinanceDashboard() {
             incomes={incomes}
             budgets={budgets}
             savingsGoals={savingsGoals}
+            updateSavingsGoal={updateSavingsGoal}
+            setActiveView={setActiveView}
+            addExpense={addExpense}
+            addIncome={addIncome}
           />
         )
       case "expenses":
         return (
           <ExpensesView
             expenses={expenses}
-            onAddExpense={addExpense}
-            onDeleteExpense={deleteExpense}
+            onAdd={addExpense}
+            onDelete={deleteExpense}
           />
         )
       case "income":
         return (
           <IncomeView
             incomes={incomes}
-            onAddIncome={addIncome}
-            onDeleteIncome={deleteIncome}
+            onAdd={addIncome}
+            onDelete={deleteIncome}
           />
         )
       case "budget":
         return (
           <BudgetView
             budgets={budgets}
-            onAddBudget={addBudget}
-            onDeleteBudget={deleteBudget}
+            onAdd={addBudget}
+            onDelete={deleteBudget}
           />
         )
       case "savings":
         return (
           <SavingsView
-            savingsGoals={savingsGoals}
-            onAddSavingsGoal={addSavingsGoal}
-            onUpdateSavingsGoal={updateSavingsGoal}
-            onDeleteSavingsGoal={deleteSavingsGoal}
+            goals={savingsGoals}
+            onAdd={addSavingsGoal}
+            onUpdate={updateSavingsGoal}
+            onDelete={deleteSavingsGoal}
           />
         )
       default:
@@ -320,9 +200,9 @@ export function FinanceDashboard() {
   return (
     <SidebarProvider>
       <div className="flex h-screen">
-        <FinanceSidebar activeView={activeView} onViewChange={setActiveView} />
+        <FinanceSidebar activeView={activeView} setActiveView={setActiveView} />
         <div className="flex-1 flex flex-col">
-          <FinanceHeader user={user} />
+          <FinanceHeader activeView={activeView} />
           <main className="flex-1 overflow-auto p-6">{renderContent()}</main>
         </div>
       </div>

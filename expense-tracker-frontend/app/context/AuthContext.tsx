@@ -49,19 +49,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
-  const signup = async (email: string, password: string, fullname: string) => {
+  const signup = async (fullname: string, email: string, password: string) => {
     try {
-      await authAPI.register(email, password, fullname);
+      const response = await authAPI.register(fullname, email, password);
       toast({
         title: "Registration Successful",
         description: "Please check your email for OTP verification.",
         variant: "success",
       });
-      router.push('/verify');
+      router.push(`/verify?email=${encodeURIComponent(email)}`);
     } catch (error: any) {
       toast({
         title: "Registration Failed",
-        description: error.response?.data?.message || "Something went wrong. Please try again.",
+        description: error.response?.data?.message || "Registration failed. Please try again.",
         variant: "destructive",
       });
       throw error;
@@ -71,16 +71,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await authAPI.login(email, password);
+      console.log('Login response:', response);
       setUser(response.user);
-      console.log(response);
       localStorage.setItem('token', response.token);
       toast({
         title: "Login Successful",
         description: "Welcome back!",
         variant: "success",
       });
-      router.push('/');
+      // Force a hard navigation to ensure the page reloads with the new auth state
+      window.location.href = '/dashboard';
     } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: "Login Failed",
         description: error.response?.data?.message || "Invalid email or password.",
@@ -118,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('token', response.token);
       toast({
         title: "OTP Verified",
-        description: "Your email has been verified successfully.",
+        description: "Your email has been verified successfully. Please log in.",
         variant: "success",
       });
       router.push('/login');
@@ -183,7 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }
