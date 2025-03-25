@@ -41,7 +41,7 @@ const VerifyOTP: React.FC = () => {
       </div>
 
       <div className="mt-[50px] flex w-full max-w-[1200px] bg-[#f9f9f9] gap-28">
-        <div className="flex-1 w-full max-w-[510px] mt-[40px]">
+        <div className="flex-1 w-full max-w-[510px] mt-[140px]">
           <div className="flex">
             <p className="text-[47px] text-black mb-[15px] font-medium">Verify Your</p>
             <p className="text-[47px] text-[#27AE60] mb-[15px] pl-[15px] font-medium">OTP</p>
