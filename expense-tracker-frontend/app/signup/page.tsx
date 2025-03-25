@@ -32,7 +32,7 @@ const Signup: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await signup(email, password, fullname);
+      await signup(fullname, email, password);
     } catch (err: any) {
       setError(err.message || "An error occurred during registration. Please try again.");
     } finally {

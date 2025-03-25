@@ -14,7 +14,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signup: (email: string, password: string, fullname: string) => Promise<void>;
+  signup: (fullname: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   verifyOTP: (otp: string, email: string) => Promise<void>;
