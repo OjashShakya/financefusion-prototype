@@ -41,7 +41,7 @@ const Login: React.FC = () => {
         <Image src={mainLogo} alt="Finance Fusion Logo" width={200} height={90} />
       </div>
 
-      <div className="mt-[50px] flex w-full max-w-[1200px] bg-[#f9f9f9] gap-10">
+      <div className="mt-[50px] flex w-full max-w-[1200px] bg-[#f9f9f9] gap-28">
         <div className="flex-1 mt-[120px]">
           <div className="flex">
             <p className="text-[47px] text-black mb-[15px] font-medium">Login to Your</p>
