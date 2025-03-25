@@ -12,7 +12,7 @@ import { ExpenseDistributionChart } from "./charts/expense-distribution-chart"
 import { IncomeSourcesChart } from "./charts/income-sources-chart"
 import { CashFlowChart } from "./charts/cash-flow-chart"
 import { MonthlyComparisonChart } from "./charts/monthly-comparison-chart"
-import { useAuth } from "@/components/auth/auth-context"
+import { useAuth } from "@/app/context/AuthContext"
 
 interface DashboardViewProps {
   expenses: Expense[]
@@ -56,7 +56,7 @@ export function DashboardView({
       <div className="rounded-lg bg-muted/50 p-4 md:p-6">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">
-            {greeting}, {user?.name || "User"}!
+            {greeting}, {user?.fullname || "User"}!
           </h1>
           <p className="text-muted-foreground">
             Welcome to your financial dashboard. Here's an overview of your finances.

@@ -4,7 +4,7 @@ import { PiggyBank, Settings } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/ui/mode-toggle"
-import { useAuth } from "@/components/auth/auth-context"
+import { useAuth } from "@/app/context/AuthContext"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -56,15 +56,15 @@ export function FinanceHeader({ activeView }: FinanceHeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" alt={user?.name || "User"} />
-                <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
+                <AvatarImage src="/placeholder.svg?height=32&width=32" alt={user?.fullname || "User"} />
+                <AvatarFallback>{user?.fullname?.charAt(0) || "U"}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name}</p>
+                <p className="text-sm font-medium leading-none">{user?.fullname}</p>
                 <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuLabel>

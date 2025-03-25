@@ -34,14 +34,16 @@ const registerUser = async (req, res) => {
 
     const savedUser = await newUser.save();
 
+    // Send OTP via email
+    await sendVerificationEmail(email, fullname, otp);
+
     res.status(StatusCodes.CREATED).json({
       success: true,
-      message: "User Created Successfully",
+      message: "User Created Successfully. Please check your email for OTP verification.",
       data: {
         id: savedUser._id,
-        fullName: savedUser.fullName,
-        email: savedUser.email,
-        otp: savedUser.otp,
+        fullname: savedUser.fullname,
+        email: savedUser.email
       },
     });
   } catch (error) {
@@ -76,9 +78,18 @@ const verifyOTPUser = async (req, res) => {
     user.otp = null;
     await user.save();
 
+    // Generate token for the verified user
+    const token = generateToken(user);
+
     res.status(StatusCodes.OK).json({
       success: true,
       message: "OTP verified successfully",
+      user: {
+        id: user._id,
+        fullname: user.fullname,
+        email: user.email
+      },
+      token
     });
   } catch (error) {
     console.error("Error verifying OTP:", error);

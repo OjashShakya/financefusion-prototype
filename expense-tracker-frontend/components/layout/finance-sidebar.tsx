@@ -14,7 +14,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useAuth } from "@/components/auth/auth-context"
+import { useAuth } from "@/app/context/AuthContext"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface FinanceSidebarProps {
@@ -96,12 +96,12 @@ export function FinanceSidebar({ activeView, setActiveView }: FinanceSidebarProp
       <SidebarFooter className="border-t p-4">
         <div className={`flex items-center gap-2 ${state === "collapsed" ? "justify-center" : ""}`}>
           <Avatar className="h-8 w-8 flex-shrink-0">
-            <AvatarImage src="/placeholder.svg?height=40&width=40" alt={user?.name || "User"} />
-            <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
+            <AvatarImage src="/placeholder.svg?height=40&width=40" alt={user?.fullname || "User"} />
+            <AvatarFallback>{user?.fullname?.charAt(0) || "U"}</AvatarFallback>
           </Avatar>
           {state !== "collapsed" && (
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-medium truncate">{user?.name}</span>
+              <span className="text-sm font-medium truncate">{user?.fullname}</span>
               <span className="text-xs text-muted-foreground truncate">{user?.email}</span>
             </div>
           )}

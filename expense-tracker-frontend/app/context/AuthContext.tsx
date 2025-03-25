@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "Please check your email for OTP verification.",
         variant: "success",
       });
-      router.push('/otp/verify');
+      router.push('/verify');
     } catch (error: any) {
       toast({
         title: "Registration Failed",
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "Welcome back!",
         variant: "success",
       });
-      router.push('/components/dashboard');
+      router.push('/');
     } catch (error: any) {
       toast({
         title: "Login Failed",
