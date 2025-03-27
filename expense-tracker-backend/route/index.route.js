@@ -9,6 +9,7 @@ const verifyToken = require("../middlewares/auth.middleware");
 const { currentUser } = require("../controller/decodeToken.controller");
 
 router.use("/users", userRoutes);
+router.use("/dashboard", dashboardRoutes);
 router.get("/current-user", verifyToken, currentUser);
 
 module.exports = router;
