@@ -64,7 +64,7 @@ const Signup: React.FC = () => {
             onChange={(e) => setFullname(e.target.value)}
             required
             disabled={isLoading}
-            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50"
+            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50 bg-white text-black"
           />
 
           <h4 className="text-[20px] font-medium text-[#333] mt-[15px] mb-[5px]">Email</h4>
@@ -74,7 +74,7 @@ const Signup: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isLoading}
-            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50"
+            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50 bg-white text-black"
           />
 
           <h4 className="text-[20px] font-medium text-[#333] mt-[15px] mb-[5px]">Password</h4>
@@ -84,7 +84,7 @@ const Signup: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={isLoading}
-            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50"
+            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50 bg-white text-black"
           />
 
           <h4 className="text-[20px] font-medium text-[#333] mt-[15px] mb-[5px]">Confirm Password</h4>
@@ -94,7 +94,7 @@ const Signup: React.FC = () => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             disabled={isLoading}
-            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50"
+            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50 bg-white text-black"
           />
 
           <div className="flex items-center mt-[15px] gap-2">
@@ -103,7 +103,7 @@ const Signup: React.FC = () => {
               checked={termsAccepted}
               onChange={(e) => setTermsAccepted(e.target.checked)}
               disabled={isLoading}
-              className="w-4 h-4 border border-[#9E9E9E] rounded cursor-pointer disabled:opacity-50"
+              className="w-4 h-4 border border-[#9E9E9E] rounded cursor-pointer disabled:opacity-50 bg-white"
             />
             <span className="text-sm text-[#333]">I accept terms and policy</span>
           </div>
@@ -135,7 +135,7 @@ const Signup: React.FC = () => {
 
           <button
             type="button"
-            className="flex justify-center items-center mt-[15px] max-w-[510px] w-full h-[50px] rounded-lg border p-[6px_15px] gap-2.5 text-[15px] font-medium hover:scale-105 transition-transform duration-300 disabled:opacity-50"
+            className="flex justify-center items-center mt-[15px] max-w-[510px] w-full h-[50px] rounded-lg border p-[6px_15px] gap-2.5 text-[15px] font-medium hover:scale-105 transition-transform duration-300 disabled:opacity-50 text-[#777]"
             onClick={() => alert("Google signup feature coming soon!")}
             disabled={isLoading}
           >

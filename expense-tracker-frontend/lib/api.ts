@@ -51,12 +51,12 @@ export const authAPI = {
   },
 
   sendPasswordResetEmail: async (email: string) => {
-    const response = await api.post('/users/forgot-password', { email });
+    const response = await api.post('/users/password-reset/request', { email });
     return response.data;
   },
 
   resetPassword: async (newPassword: string) => {
-    const response = await api.post('/users/reset-password', { newPassword });
+    const response = await api.post('/users/password-reset/reset', { newPassword });
     return response.data;
   },
 };

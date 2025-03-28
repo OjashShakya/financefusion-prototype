@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "Please check your email for password reset instructions.",
         variant: "success",
       });
-      router.push('/otp/resetpassword');
+      router.push('/verify');
     } catch (error: any) {
       toast({
         title: "Reset Failed",
