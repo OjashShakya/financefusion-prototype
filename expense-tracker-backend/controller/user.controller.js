@@ -348,8 +348,7 @@ module.exports = {
   // updateProfile,
   getAllUser,
   getUserById,
-
-    requestPasswordReset,
-    resetPassword,
+  requestPasswordReset,
+  resetPassword,
   // getProfile,
 };
