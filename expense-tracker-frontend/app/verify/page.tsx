@@ -59,7 +59,7 @@ const VerifyOTP: React.FC = () => {
             placeholder="Enter 6-digit OTP"
             required
             disabled={isLoading}
-            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50"
+            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50 bg-white text-black "
           />
 
           <div className="flex flex-col items-center mt-[15px] gap-4">

@@ -59,7 +59,7 @@ const Login: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isLoading}
-            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50"
+            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50 bg-white text-black"
           />
 
           <div className="flex justify-between items-center w-full max-w-[510px]">
@@ -78,7 +78,7 @@ const Login: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={isLoading}
-            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50"
+            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50 bg-white text-black"
           />
 
           <div className="flex mt-[25px] gap-5">
@@ -91,7 +91,7 @@ const Login: React.FC = () => {
             </button>
             <button
               type="button"
-              className="w-[246.5px] h-[50px] px-[15px] py-[6px] border rounded-lg cursor-pointer text-[20px] font-medium bg-white hover:bg-[#e9e7e7] disabled:opacity-50"
+              className="w-[246.5px] h-[50px] px-[15px] py-[6px] border rounded-lg cursor-pointer text-[20px] font-medium bg-white hover:bg-[#e9e7e7] disabled:opacity-50 text-[#777]"
               onClick={() => router.push("/signup")}
               disabled={isLoading}
             >
@@ -107,7 +107,7 @@ const Login: React.FC = () => {
 
           <button
             type="button"
-            className="flex justify-center items-center mt-[27px] max-w-[510px] w-full h-[50px] rounded-lg border p-[6px_15px] gap-2.5 text-[15px] font-medium hover:scale-105 transition-transform duration-300 disabled:opacity-50"
+            className="flex justify-center items-center mt-[27px] max-w-[510px] w-full h-[50px] rounded-lg border p-[6px_15px] gap-2.5 text-[15px] font-medium hover:scale-105 transition-transform duration-300 disabled:opacity-50 text-[#777]"
             onClick={handleGoogleLogin}
             disabled={isLoading}
           >
