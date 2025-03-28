@@ -4,6 +4,7 @@ const dashboardRoutes = require("./dashboard.route");
 
 
 const userRoutes = require("./user.route");
+const incomeRoutes = require("./income.route");
 const verifyToken = require("../middlewares/auth.middleware");
 
 const { currentUser } = require("../controller/decodeToken.controller");
