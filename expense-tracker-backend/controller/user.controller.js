@@ -148,6 +148,81 @@ const loginUser = async (req, res) => {
     });
   }
 };
+const requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = generateOTP().otp;
+    user.otp = otp;
+    await user.save();
+
+    await sendVerificationEmail(email, user.fullname, otp);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "OTP sent to your email for password reset",
+    });
+
+  } catch (error) {
+    console.error("Error requesting password reset:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+/**
+ * Step 2: Verify OTP & Reset Password
+ */
+const resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    user.password = await hashPassword(newPassword);
+    user.otp = null;
+    await user.save();
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Password reset successfully. You can now log in.",
+    });
+
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+
 
 
 // const updateProfile = async (req, res, next) => {
@@ -273,5 +348,8 @@ module.exports = {
   // updateProfile,
   getAllUser,
   getUserById,
+
+    requestPasswordReset,
+    resetPassword,
   // getProfile,
 };
