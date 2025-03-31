@@ -5,13 +5,15 @@ const {
   verifyOTPUser,
   getAllUser,
   getUserById,
+  requestPasswordReset,
+  resetPassword
   // updateProfile,
   // getProfile,
 } = require("../controller/user.controller");
+const {currentUser} = require("../controller/decodeToken.controller");
 
-// const ZodUserSchema = require("../validations/user.validations");
-// const validationMiddleware = require("../middlewares/validation.middleware");
 const verifyToken = require("../middlewares/auth.middleware");
+const authenticateUser = require("../middlewares/auth.middleware");
 // const { profileUpload } = require("../middlewares/fileUpload.middleware");
 
 
@@ -27,17 +29,18 @@ router.post(
 );
 router.post("/login", loginUser);
 router.post("/verify-otp", verifyOTPUser);
-
 router.get(
   "/",
-  verifyToken,
+  authenticateUser,
   getAllUser
 );
 router.get(
   "/:id",
-  verifyToken,
+  currentUser,
   getUserById
 );
+router.post("/password-reset/request", requestPasswordReset);  // Request password reset (send OTP/link)
+router.post("/password-reset/reset", resetPassword);  // Reset password with token/OTP
 // router.patch(
 //   "/update/:id",
 //   verifyToken,

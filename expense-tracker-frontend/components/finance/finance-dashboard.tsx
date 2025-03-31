@@ -108,11 +108,11 @@ export function FinanceDashboard() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen w-full">
         <FinanceSidebar activeView={activeView} setActiveView={setActiveView} />
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <FinanceHeader activeView={activeView} />
-          <main className="container mx-auto p-6">{renderView()}</main>
+          <main className=" p-6 w-full">{renderView()}</main>
         </div>
       </div>
     </SidebarProvider>

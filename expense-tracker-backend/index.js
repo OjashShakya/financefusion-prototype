@@ -11,7 +11,7 @@ const app = express();
 
 // CORS setup
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001"],
+  origin: ["http://localhost:3000", "http://localhost:3001","http://localhost:3002","http://localhost:3003"],
   credentials: true,
 }));
 
@@ -22,10 +22,24 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Database connection
 connectDB();
 
-app.use("/api", mainRouter);
+// **Add session middleware**
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false,  // Set to true if using HTTPS
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+  }
+}));
 
+// **Initialize Passport session**
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Routes
+app.use("/api", mainRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CreditCard, TrendingUp, BarChart3, DollarSign, Plus, ArrowRight } from "lucide-react"
+import { CreditCard, TrendingUp, BarChart, Wallet, Plus, ArrowRight ,Banknote, ChartPie} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ExpenseForm } from "@/components/finance/expenses/expense-form"
 import { IncomeForm } from "@/components/finance/income/income-form"
 import type { Expense, Income } from "@/components/finance-dashboard"
+import { Bar } from "@/components/ui/chart"
 
 interface QuickActionsProps {
   setActiveView: (view: string) => void
@@ -32,30 +33,28 @@ export function QuickActions({ setActiveView, addExpense, addIncome }: QuickActi
       <Card className="relative overflow-hidden transition-all hover:shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-primary" />
-            Add Expense
+            <BarChart className="h-8 w-10 text-primary" />
+            Add Income
           </CardTitle>
-          <CardDescription>Record a new expense</CardDescription>
-        </CardHeader>
-        <CardContent className="pb-2">
-          <p className="text-sm text-muted-foreground">Quickly add your expenses to keep track of your spending.</p>
-        </CardContent>
+          <CardDescription>Record a new income</CardDescription>
+        </CardHeader> 
+      
         <CardFooter className="pt-2">
-          <Dialog open={expenseDialogOpen} onOpenChange={setExpenseDialogOpen}>
+          <Dialog open={incomeDialogOpen} onOpenChange={setIncomeDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full gap-2">
-                <Plus className="h-4 w-4" /> Add Expense
+              <Button className="w-full gap-2 bg-[#10B981] hover:bg-[#059669]">
+                <Plus className="h-4 w-4" /> Add Income
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>Add New Expense</DialogTitle>
-                <DialogDescription>Enter the details of your expense below.</DialogDescription>
+                <DialogTitle>Add New Income</DialogTitle>
+                <DialogDescription>Enter the details of your Income below.</DialogDescription>
               </DialogHeader>
-              <ExpenseForm
+              <IncomeForm
                 onSubmit={(data) => {
-                  addExpense(data)
-                  setExpenseDialogOpen(false)
+                  addIncome(data)
+                  setIncomeDialogOpen(false)
                 }}
               />
             </DialogContent>
@@ -77,30 +76,28 @@ export function QuickActions({ setActiveView, addExpense, addIncome }: QuickActi
       <Card className="relative overflow-hidden transition-all hover:shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-green-500" />
-            Add Income
+            <Banknote className="h-8 w-10" />
+            Add Expense
           </CardTitle>
-          <CardDescription>Record a new income</CardDescription>
+          <CardDescription>Record a new expense</CardDescription>
         </CardHeader>
-        <CardContent className="pb-2">
-          <p className="text-sm text-muted-foreground">Track your income sources to monitor your cash flow.</p>
-        </CardContent>
+       
         <CardFooter className="pt-2">
-          <Dialog open={incomeDialogOpen} onOpenChange={setIncomeDialogOpen}>
+          <Dialog open={expenseDialogOpen} onOpenChange={setExpenseDialogOpen}>
             <DialogTrigger asChild>
               <Button className="w-full gap-2" variant="outline">
-                <Plus className="h-4 w-4" /> Add Income
+                <Plus className="h-4 w-4" /> Add Expense
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>Add New Income</DialogTitle>
-                <DialogDescription>Enter the details of your income below.</DialogDescription>
+                <DialogTitle>Add New Expense</DialogTitle>
+                <DialogDescription>Enter the details of your expense below.</DialogDescription>
               </DialogHeader>
-              <IncomeForm
+              <ExpenseForm
                 onSubmit={(data) => {
-                  addIncome(data)
-                  setIncomeDialogOpen(false)
+                  addExpense(data)
+                  setExpenseDialogOpen(false)
                 }}
               />
             </DialogContent>
@@ -117,17 +114,15 @@ export function QuickActions({ setActiveView, addExpense, addIncome }: QuickActi
       <Card className="relative overflow-hidden transition-all hover:shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-blue-500" />
+            <ChartPie className="h-8 w-10" />
             Manage Budgets
           </CardTitle>
           <CardDescription>Set and track budgets</CardDescription>
         </CardHeader>
-        <CardContent className="pb-2">
-          <p className="text-sm text-muted-foreground">Create budgets for different categories to control spending.</p>
-        </CardContent>
+    
         <CardFooter className="pt-2">
           <Button variant="outline" className="w-full gap-2" onClick={() => setActiveView("budgeting")}>
-            <BarChart3 className="h-4 w-4" /> View Budgets
+            <ChartPie className="h-4 w-4" /> View Budgets
           </Button>
         </CardFooter>
       </Card>
@@ -136,17 +131,15 @@ export function QuickActions({ setActiveView, addExpense, addIncome }: QuickActi
       <Card className="relative overflow-hidden transition-all hover:shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-amber-500" />
+            <Wallet className="h-8 w-10 " />
             Savings Goals
           </CardTitle>
           <CardDescription>Track your savings</CardDescription>
         </CardHeader>
-        <CardContent className="pb-2">
-          <p className="text-sm text-muted-foreground">Set financial goals and track your progress over time.</p>
-        </CardContent>
+       
         <CardFooter className="pt-2">
           <Button variant="outline" className="w-full gap-2" onClick={() => setActiveView("savings")}>
-            <DollarSign className="h-4 w-4" /> View Goals
+            <Wallet className="h-4 w-4" /> View Goals
           </Button>
         </CardFooter>
       </Card>

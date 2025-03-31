@@ -25,7 +25,7 @@ export function FinanceHeader({ activeView }: FinanceHeaderProps) {
   const getTitle = () => {
     switch (activeView) {
       case "dashboard":
-        return "Financial Dashboard"
+        return "  Dashboard"
       case "expenses":
         return "Expense Management"
       case "income":
@@ -40,20 +40,24 @@ export function FinanceHeader({ activeView }: FinanceHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/95 px-4 sm:px-6 lg:h-[60px] backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="w-full sticky top-0 z-10 flex h-[100px] items-center gap-4 border-b bg-background/95 px-4 sm:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <SidebarTrigger className="md:hidden" />
       <div className="md:hidden flex items-center gap-2">
         <PiggyBank className="h-6 w-6" />
         <span className="font-semibold">FinanceTracker</span>
       </div>
       <div className="hidden md:block">
-        <h1 className="text-xl font-semibold">{getTitle()}</h1>
+        <h1 className="text-[28px] font-semibold">{getTitle()}</h1>
       </div>
       <div className="ml-auto flex items-center gap-4">
-        <ModeToggle />
-
+        <div className="rounded-[16px] border border-[1.5px] p-[12px] flex items-center gap-[12px] h-[56px] w-[56px]">
+          <ModeToggle />
+        </div>
+        <h1 className="text-[20px] font-400 tracking-tight">
+             {user?.fullname || "Username"}
+          </h1>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger asChild> 
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="/placeholder.svg?height=32&width=32" alt={user?.fullname || "User"} />

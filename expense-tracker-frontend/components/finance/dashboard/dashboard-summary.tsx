@@ -37,10 +37,10 @@ export function DashboardSummary({ expenses, incomes }: DashboardSummaryProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Income</CardTitle>
-          <TrendingUp className="h-4 w-4 text-green-500" />
+          {/* <TrendingUp className="h-4 w-4 text-green-500" /> */}
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${totalIncome.toFixed(2)}</div>
+          <div className="text-2xl font-bold">Rs.   {totalIncome}</div>
           <p className="text-xs text-muted-foreground">{incomes.length} income sources</p>
         </CardContent>
       </Card>
@@ -48,10 +48,10 @@ export function DashboardSummary({ expenses, incomes }: DashboardSummaryProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-          <TrendingDown className="h-4 w-4 text-destructive" />
+          {/* <TrendingDown className="h-4 w-4 text-destructive" /> */}
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${totalExpenses.toFixed(2)}</div>
+          <div className="text-2xl font-bold">Rs. {totalExpenses}</div>
           <p className="text-xs text-muted-foreground">{expenses.length} transactions</p>
         </CardContent>
       </Card>
@@ -67,7 +67,7 @@ export function DashboardSummary({ expenses, incomes }: DashboardSummaryProps) {
         </CardHeader>
         <CardContent>
           <div className={`text-2xl font-bold ${netIncome >= 0 ? "text-green-500" : "text-destructive"}`}>
-            ${Math.abs(netIncome).toFixed(2)}
+            Rs. {Math.abs(netIncome)}
           </div>
           <p className="text-xs text-muted-foreground">
             {netIncome >= 0 ? "Positive cash flow" : "Negative cash flow"}
@@ -78,7 +78,6 @@ export function DashboardSummary({ expenses, incomes }: DashboardSummaryProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Savings Rate</CardTitle>
-          <Wallet className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{savingsRate.toFixed(1)}%</div>

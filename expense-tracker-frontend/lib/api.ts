@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -51,14 +51,22 @@ export const authAPI = {
   },
 
   sendPasswordResetEmail: async (email: string) => {
-    const response = await api.post('/users/forgot-password', { email });
+    const response = await api.post('/users/password-reset/request', { email });
     return response.data;
   },
 
-  resetPassword: async (newPassword: string) => {
-    const response = await api.post('/users/reset-password', { newPassword });
+  resetPassword: async (newPassword: string , email: string) => {
+    const response = await api.post('/users/password-reset/reset', { newPassword , email });
     return response.data;
   },
+
+  // resetVerify: async (otp: string, email: string) => {
+  //   const response = await api.post('users/verify-otp', { email ,otp });
+  //   if (response.data.token) {
+  //     localStorage.setItem('token', response.data.token);
+  //   }
+  //   return response.data;
+  // },
 };
 
 export default api; 

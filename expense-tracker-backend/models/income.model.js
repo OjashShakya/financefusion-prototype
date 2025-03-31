@@ -13,7 +13,7 @@ const incomeSchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      enum: ["Salary", "Business", "Investments", "Freelancing", "Gifts", "Other"],
+      enum: ["Salary","Food", "Business", "Investments", "Freelancing", "Gifts", "Other"],
       required: true,
     },
     description: {

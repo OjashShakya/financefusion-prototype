@@ -185,7 +185,7 @@ const requestPasswordReset = async (req, res) => {
  * Step 2: Verify OTP & Reset Password
  */
 const resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
+  const { email, newPassword } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -197,22 +197,13 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    if (user.otp !== otp) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
-        message: "Invalid OTP",
-      });
-    }
-
     user.password = await hashPassword(newPassword);
-    user.otp = null;
     await user.save();
 
     res.status(StatusCodes.OK).json({
       success: true,
       message: "Password reset successfully. You can now log in.",
     });
-
   } catch (error) {
     console.error("Error resetting password:", error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -221,6 +212,7 @@ const resetPassword = async (req, res) => {
     });
   }
 };
+
 
 
 
@@ -348,8 +340,7 @@ module.exports = {
   // updateProfile,
   getAllUser,
   getUserById,
-
-    requestPasswordReset,
-    resetPassword,
+  requestPasswordReset,
+  resetPassword,
   // getProfile,
 };

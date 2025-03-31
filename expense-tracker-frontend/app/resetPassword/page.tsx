@@ -27,6 +27,7 @@ const ResetPassword: React.FC = () => {
     try {
       await sendPasswordResetEmail(email);
       setSuccess("Password reset email sent. Please check your inbox.");
+      
     } catch (err: any) {
       setError(err.message || "Failed to send reset email. Please try again.");
     } finally {
@@ -63,7 +64,7 @@ const ResetPassword: React.FC = () => {
             placeholder="Enter your email address"
             required
             disabled={isLoading}
-            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50"
+            className="w-full max-w-[510px] p-2.5 border border-[#9E9E9E] rounded-[5px] text-sm h-[50px] disabled:opacity-50 bg-white text-black"
           />
 
           <div className="flex flex-col items-center mt-[15px] gap-4">

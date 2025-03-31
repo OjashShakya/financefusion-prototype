@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const { StatusCodes } = require("http-status-codes");
 
-async function verifyToken(req, res, next) {
+async function authenticateUser(req, res, next) {
   let token = req.headers["authorization"];
 
   if (!token) {
@@ -25,7 +25,7 @@ async function verifyToken(req, res, next) {
     }
 
     req.user = {
-      userId: user._id,
+      id: user._id,
       permissions: user.permissions,
       role: user.role,
       fullName: user.fullName,
@@ -40,4 +40,4 @@ async function verifyToken(req, res, next) {
   }
 }
 
-module.exports = verifyToken;
+module.exports = authenticateUser;

@@ -37,8 +37,8 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
       <ComposedChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
         <defs>
           <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+            <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="#10B981" stopOpacity={0.1} />
           </linearGradient>
           <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.8} />
@@ -68,7 +68,7 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
           type="monotone"
           dataKey="income"
           name="Income"
-          stroke="hsl(var(--primary))"
+          stroke="#10B981"
           fillOpacity={1}
           fill="url(#colorIncome)"
           activeDot={{ r: 6 }}

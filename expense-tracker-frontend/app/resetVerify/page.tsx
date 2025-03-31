@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 
 const VerifyOTP: React.FC = () => {
   const router = useRouter();
-  const { verifyOTP } = useAuth();
+  const { resetVerify } = useAuth();
   const [otp, setOtp] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -25,8 +25,8 @@ const VerifyOTP: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await verifyOTP(otp, email);
-      router.push("/dashboard");
+      await resetVerify(otp, email);
+      // router.push("/newPassword");
     } catch (err: any) {
       setError(err.message || "Invalid OTP. Please try again.");
     } finally {
