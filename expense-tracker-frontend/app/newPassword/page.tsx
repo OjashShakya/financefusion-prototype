@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter , useSearchParams } from "next/navigation";
 import mainLogo from "../assets/mainLogo.png";
 import OTP_icon from "../../../assets/otp.png";
 import NewPassword_icon from "../assets/Newpassword.png";
@@ -15,6 +15,8 @@ const NewPassword: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
 
   const handleResetPassword = async () => {
     setError("");
@@ -29,8 +31,7 @@ const NewPassword: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await resetPassword(password);
-      // router.push("/login");
+      await resetPassword(password , email);
     } catch (err: any) {
       setError(err.message || "Failed to reset password. Please try again.");
     } finally {

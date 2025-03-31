@@ -19,7 +19,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   verifyOTP: (otp: string, email: string) => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
-  resetPassword: (newPassword: string) => Promise<void>;
+  resetPassword: (newPassword: string , email: string) => Promise<void>;
   resetVerify: (otp: string, email: string) => Promise<void>;
 }
 
@@ -155,9 +155,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const resetPassword = async (newPassword: string) => {
+  const resetPassword = async (newPassword: string , email: string) => {
     try {
-      await authAPI.resetPassword(newPassword);
+      await authAPI.resetPassword(newPassword, email);
       toast({
         title: "Password Reset",
         description: "Your password has been reset successfully.",
@@ -184,7 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "Your email has been verified successfully. Please Change your password.",
         variant: "success",
       });
-      router.push('/newPassword');
+      router.push(`/newPassword?email=${encodeURIComponent(email)}`);
     } catch (error: any) {
       toast({
         title: "Verification Failed",
