@@ -13,6 +13,7 @@ const {
 const {currentUser} = require("../controller/decodeToken.controller");
 
 const verifyToken = require("../middlewares/auth.middleware");
+const authenticateUser = require("../middlewares/auth.middleware");
 // const { profileUpload } = require("../middlewares/fileUpload.middleware");
 
 
@@ -30,7 +31,7 @@ router.post("/login", loginUser);
 router.post("/verify-otp", verifyOTPUser);
 router.get(
   "/",
-  currentUser,
+  authenticateUser,
   getAllUser
 );
 router.get(
