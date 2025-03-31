@@ -20,6 +20,7 @@ interface AuthContextType {
   verifyOTP: (otp: string, email: string) => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
   resetPassword: (newPassword: string) => Promise<void>;
+  resetVerify: (otp: string, email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = localStorage.getItem('token');
         if (token) {
           const userData = await authAPI.getCurrentUser();
+          console.log(token)
           setUser(userData);
         }
       } catch (error) {
@@ -142,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "Please check your email for password reset instructions.",
         variant: "success",
       });
-      router.push('/verify');
+      router.push(`/resetVerify?email=${encodeURIComponent(email)}`);
     } catch (error: any) {
       toast({
         title: "Reset Failed",
@@ -172,6 +174,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resetVerify = async (otp: string, email: string) => {
+    try {
+      const response = await authAPI.verifyOTP(otp, email);
+      setUser(response.user);
+      localStorage.setItem('token', response.token);
+      toast({
+        title: "OTP Verified",
+        description: "Your email has been verified successfully. Please Change your password.",
+        variant: "success",
+      });
+      router.push('/newPassword');
+    } catch (error: any) {
+      toast({
+        title: "Verification Failed",
+        description: error.response?.data?.message || "Invalid OTP. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -180,6 +203,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     verifyOTP,
     sendPasswordResetEmail,
+    resetVerify,
     resetPassword,
   };
 
