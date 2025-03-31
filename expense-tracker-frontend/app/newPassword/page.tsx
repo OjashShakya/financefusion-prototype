@@ -30,7 +30,7 @@ const NewPassword: React.FC = () => {
     setIsLoading(true);
     try {
       await resetPassword(password);
-      router.push("/login");
+      // router.push("/login");
     } catch (err: any) {
       setError(err.message || "Failed to reset password. Please try again.");
     } finally {
