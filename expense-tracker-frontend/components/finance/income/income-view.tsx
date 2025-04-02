@@ -3,7 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { IncomeForm } from "./income-form"
 import { IncomeList } from "./income-list"
-import type { Income } from "@/components/finance-dashboard"
+import type { Income } from "@/types/finance"
 
 interface IncomeViewProps {
   incomes: Income[]

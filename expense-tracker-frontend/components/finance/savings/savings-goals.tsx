@@ -110,7 +110,12 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                         <span className="text-sm font-medium">${goal.currentAmount.toFixed(2)} saved</span>
                         <span className="text-sm font-medium">{percentage.toFixed(0)}%</span>
                       </div>
-                      <Progress value={percentage} className="h-2" indicatorClassName={`bg-[${goal.color}]`} />
+                      <Progress 
+                        value={percentage} 
+                        className="h-2" 
+                        indicatorClassName="transition-all" 
+                        style={{ backgroundColor: goal.color }}
+                      />
                       <p className="text-xs text-muted-foreground">${remaining.toFixed(2)} remaining</p>
                     </div>
                   </CardContent>
