@@ -21,7 +21,7 @@ export function FinanceSidebar({ activeView, setActiveView, isCollapsed, setIsCo
   return (
     <div className={`fixed top-0 left-0 h-screen flex flex-col border-r bg-[#f9f9f9] transition-all duration-300 ${isCollapsed ? 'w-[80px]' : 'w-[320px]'}`}>
       {/* Logo */}
-      <div className="flex h-[100px] items-center px-4 justify-between">
+      <div className="flex mt-[32px] h-[60px] items-center px-4 justify-between">
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : ''}`}>
           <Image 
             src={mainLogo} 

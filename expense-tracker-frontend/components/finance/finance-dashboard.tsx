@@ -145,7 +145,7 @@ export function FinanceDashboard() {
             isSidebarCollapsed={isSidebarCollapsed}
             setIsSidebarCollapsed={setIsSidebarCollapsed}
           />
-          <main className="p-4 md:p-6 w-full mt-[100px]">{renderView()}</main>
+          <main className="p-4 md:p-6 w-full mt-[80px]">{renderView()}</main>
         </div>
       </div>
     </SidebarProvider>
