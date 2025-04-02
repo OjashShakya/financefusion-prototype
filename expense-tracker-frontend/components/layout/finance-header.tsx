@@ -1,8 +1,7 @@
 "use client"
 
-import { PiggyBank, Settings } from "lucide-react"
+import { PiggyBank, Settings, Menu } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/ui/mode-toggle"
 import { useAuth } from "@/app/context/AuthContext"
 import { Button } from "@/components/ui/button"
@@ -17,15 +16,17 @@ import {
 
 interface FinanceHeaderProps {
   activeView: string
+  isSidebarCollapsed: boolean
+  setIsSidebarCollapsed: (collapsed: boolean) => void
 }
 
-export function FinanceHeader({ activeView }: FinanceHeaderProps) {
+export function FinanceHeader({ activeView, isSidebarCollapsed, setIsSidebarCollapsed }: FinanceHeaderProps) {
   const { user, logout } = useAuth()
 
   const getTitle = () => {
     switch (activeView) {
       case "dashboard":
-        return "  Dashboard"
+        return "Dashboard"
       case "expenses":
         return "Expense Management"
       case "income":
@@ -40,8 +41,15 @@ export function FinanceHeader({ activeView }: FinanceHeaderProps) {
   }
 
   return (
-    <header className="w-full sticky top-0 z-10 flex h-[100px] items-center gap-4 border-b bg-background/95 px-4 sm:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <SidebarTrigger className="md:hidden" />
+    <header className={`fixed top-0 right-0 z-10 flex h-[100px] items-center gap-4 border-b bg-[#f9f9f9] px-4 sm:px-6 transition-all duration-300 ${isSidebarCollapsed ? 'left-[80px]' : 'left-[320px]'}`}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="md:hidden"
+        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      >
+        <Menu className="h-6 w-6" />
+      </Button>
       <div className="md:hidden flex items-center gap-2">
         <PiggyBank className="h-6 w-6" />
         <span className="font-semibold">FinanceTracker</span>
@@ -54,14 +62,16 @@ export function FinanceHeader({ activeView }: FinanceHeaderProps) {
           <ModeToggle />
         </div>
         <h1 className="text-[20px] font-400 tracking-tight">
-             {user?.fullname || "Username"}
-          </h1>
+          {user?.fullname || "Username"}
+        </h1>
         <DropdownMenu>
           <DropdownMenuTrigger asChild> 
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="/placeholder.svg?height=32&width=32" alt={user?.fullname || "User"} />
-                <AvatarFallback>{user?.fullname?.charAt(0) || "U"}</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {user?.fullname?.split(" ").map((n) => n[0]).join("") || "U"}
+                </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>

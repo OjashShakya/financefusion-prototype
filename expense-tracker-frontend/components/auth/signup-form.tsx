@@ -95,6 +95,7 @@
 //                 id="password"
 //                 type={showPassword ? "text" : "password"}
 //                 placeholder="••••••••"
+//                 className="pr-10"
 //                 {...register("password", {
 //                   required: "Password is required",
 //                   minLength: {
@@ -107,7 +108,7 @@
 //                 type="button"
 //                 variant="ghost"
 //                 size="icon"
-//                 className="absolute right-0 top-0 h-full px-3"
+//                 className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
 //                 onClick={() => setShowPassword(!showPassword)}
 //               >
 //                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

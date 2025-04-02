@@ -43,6 +43,7 @@ export type SavingsGoal = {
 
 export function FinanceDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -109,10 +110,19 @@ export function FinanceDashboard() {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
-        <FinanceSidebar activeView={activeView} setActiveView={setActiveView} />
-        <div className="flex-1 min-w-0">
-          <FinanceHeader activeView={activeView} />
-          <main className=" p-6 w-full">{renderView()}</main>
+        <FinanceSidebar 
+          activeView={activeView} 
+          setActiveView={setActiveView}
+          isCollapsed={isSidebarCollapsed}
+          setIsCollapsed={setIsSidebarCollapsed}
+        />
+        <div className={`flex-1 min-w-0 transition-all duration-300 ${isSidebarCollapsed ? 'ml-[80px]' : 'ml-[320px]'}`}>
+          <FinanceHeader 
+            activeView={activeView} 
+            isSidebarCollapsed={isSidebarCollapsed}
+            setIsSidebarCollapsed={setIsSidebarCollapsed}
+          />
+          <main className="p-4 md:p-6 w-full mt-[100px]">{renderView()}</main>
         </div>
       </div>
     </SidebarProvider>
