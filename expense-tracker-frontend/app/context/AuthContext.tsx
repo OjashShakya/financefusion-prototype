@@ -15,7 +15,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signup: (fullname: string, email: string, password: string) => Promise<void>;
-  login: (fullname: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   verifyOTP: (otp: string, email: string) => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
@@ -36,9 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const userData = await authAPI.getCurrentUser();
-          console.log(token)
-          setUser(userData);
+          const response = await authAPI.getCurrentUser();
+          setUser(response.user);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -70,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (fullname: string, email: string, password: string) => {
+  const login = async (email: string, password: string) => {
     try {
       const response = await authAPI.login(email, password);
       console.log('Login response:', response);

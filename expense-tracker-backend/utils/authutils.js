@@ -13,7 +13,7 @@ const comparePassword = async (plainPassword, hashedPassword) => {
 const generateToken = (user) => {
   const payload = {
     userId: user._id,
-    name: user.fullName,
+    name: user.fullname,
     email: user.email,
     // profile: user.profilePicture,
   };
