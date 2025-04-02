@@ -9,37 +9,7 @@ import { IncomeView } from '@/components/finance/income/income-view';
 import { BudgetView } from '@/components/finance/budget/budget-view';
 import { SavingsView } from '@/components/finance/savings/savings-view';
 import { SidebarProvider } from '@/components/ui/sidebar';
-
-export type Expense = {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  date: Date;
-};
-
-export type Income = {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  date: Date;
-};
-
-export type Budget = {
-  id: string;
-  category: string;
-  amount: number;
-  spent: number;
-};
-
-export type SavingsGoal = {
-  id: string;
-  name: string;
-  targetAmount: number;
-  currentAmount: number;
-  deadline: Date;
-};
+import type { Expense, Income, Budget, SavingsGoal } from '@/types/finance';
 
 export function FinanceDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -57,12 +27,46 @@ export function FinanceDashboard() {
     setExpenses([...expenses, newExpense]);
   };
 
+  const deleteExpense = (id: string) => {
+    setExpenses(expenses.filter(expense => expense.id !== id));
+  };
+
   const addIncome = (income: Omit<Income, 'id'>) => {
     const newIncome = {
       ...income,
       id: Math.random().toString(36).substr(2, 9),
+      source: income.category, // Using category as source for now
     };
     setIncomes([...incomes, newIncome]);
+  };
+
+  const deleteIncome = (id: string) => {
+    setIncomes(incomes.filter(income => income.id !== id));
+  };
+
+  const addBudget = (budget: Omit<Budget, 'id' | 'spent'>) => {
+    const newBudget = {
+      ...budget,
+      id: Math.random().toString(36).substr(2, 9),
+      spent: 0,
+    };
+    setBudgets([...budgets, newBudget]);
+  };
+
+  const deleteBudget = (id: string) => {
+    setBudgets(budgets.filter(budget => budget.id !== id));
+  };
+
+  const addSavingsGoal = (goal: Omit<SavingsGoal, 'id'>) => {
+    const newGoal = {
+      ...goal,
+      id: Math.random().toString(36).substr(2, 9),
+    };
+    setSavingsGoals([...savingsGoals, newGoal]);
+  };
+
+  const deleteSavingsGoal = (id: string) => {
+    setSavingsGoals(savingsGoals.filter(goal => goal.id !== id));
   };
 
   const updateSavingsGoal = (id: string, amount: number) => {
@@ -89,17 +93,36 @@ export function FinanceDashboard() {
           />
         );
       case 'expenses':
-        return <ExpensesView expenses={expenses} addExpense={addExpense} />;
+        return (
+          <ExpensesView 
+            expenses={expenses} 
+            onAdd={addExpense}
+            onDelete={deleteExpense}
+          />
+        );
       case 'income':
-        return <IncomeView incomes={incomes} addIncome={addIncome} />;
+        return (
+          <IncomeView 
+            incomes={incomes} 
+            onAdd={addIncome}
+            onDelete={deleteIncome}
+          />
+        );
       case 'budgeting':
-        return <BudgetView budgets={budgets} setActiveView={setActiveView} />;
+        return (
+          <BudgetView 
+            budgets={budgets} 
+            onAdd={addBudget}
+            onDelete={deleteBudget}
+          />
+        );
       case 'savings':
         return (
           <SavingsView
             goals={savingsGoals}
-            updateSavingsGoal={updateSavingsGoal}
-            setActiveView={setActiveView}
+            onAdd={addSavingsGoal}
+            onUpdate={updateSavingsGoal}
+            onDelete={deleteSavingsGoal}
           />
         );
       default:

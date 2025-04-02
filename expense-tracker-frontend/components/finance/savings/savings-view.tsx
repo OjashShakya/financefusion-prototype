@@ -1,7 +1,7 @@
 "use client"
 
 import { SavingsGoals } from "./savings-goals"
-import type { SavingsGoal } from "@/components/finance-dashboard"
+import type { SavingsGoal } from "@/types/finance"
 
 interface SavingsViewProps {
   goals: SavingsGoal[]
