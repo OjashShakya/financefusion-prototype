@@ -74,7 +74,7 @@ const Login: React.FC = () => {
             </span>
           </div>
 
-          <div className="relative">
+          <div className="relative max-w-[510px]">
             <input
               type={showPassword ? "text" : "password"}
               value={password}
@@ -86,7 +86,8 @@ const Login: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -95,10 +96,18 @@ const Login: React.FC = () => {
           <div className="flex mt-[25px] gap-5">
             <button 
               type="submit" 
-              className="w-[246.5px] h-[50px] px-[15px] py-[6px] border-none rounded-lg cursor-pointer text-[20px] font-medium bg-[#27AE60] text-white hover:bg-[#2ECC71] disabled:opacity-50"
+              className="w-[246.5px] h-[50px] px-[15px] py-[6px] border-none rounded-lg cursor-pointer text-[20px] font-medium bg-[#27AE60] text-white hover:bg-[#2ECC71] disabled:opacity-50 relative overflow-hidden group"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  <span>Signing in...</span>
+                </div>
+              ) : (
+                <span className="relative z-10">Sign in</span>
+              )}
+              <div className="absolute inset-0 bg-[#2ECC71] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
             </button>
             <button
               type="button"

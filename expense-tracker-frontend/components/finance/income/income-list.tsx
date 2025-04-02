@@ -34,7 +34,7 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
       if (sortBy === "date") {
         return sortOrder === "asc" ? a.date.getTime() - b.date.getTime() : b.date.getTime() - a.date.getTime()
       } else {
-        return sortOrder === "asc" ? a.amount - b.amount : b.amount - a.amount
+        return sortOrder === "asc" ? Number(a.amount) - Number(b.amount) : Number(b.amount) - Number(a.amount)
       }
     })
 
@@ -117,7 +117,7 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
                   </TableCell>
                   <TableCell className="flex items-center gap-1">
                     <DollarSign className="h-3 w-3 text-muted-foreground" />
-                    {income.amount.toFixed(2)}
+                    {Number(income.amount).toFixed(2)}
                   </TableCell>
                   <TableCell>
                     <Button

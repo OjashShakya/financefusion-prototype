@@ -26,15 +26,15 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
   const filteredExpenses = expenses
     .filter(
       (expense) =>
-        expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        expense.category.toLowerCase().includes(searchTerm.toLowerCase()),
+        (expense.description?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+        (expense.category?.toLowerCase() || "").includes(searchTerm.toLowerCase()),
     )
     .filter((expense) => (categoryFilter === "all" ? true : expense.category === categoryFilter))
     .sort((a, b) => {
       if (sortBy === "date") {
         return sortOrder === "asc" ? a.date.getTime() - b.date.getTime() : b.date.getTime() - a.date.getTime()
       } else {
-        return sortOrder === "asc" ? a.amount - b.amount : b.amount - a.amount
+        return sortOrder === "asc" ? Number(a.amount) - Number(b.amount) : Number(b.amount) - Number(a.amount)
       }
     })
 
@@ -117,7 +117,7 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
                   </TableCell>
                   <TableCell className="flex items-center gap-1">
                     <DollarSign className="h-3 w-3 text-muted-foreground" />
-                    {expense.amount.toFixed(2)}
+                    {Number(expense.amount).toFixed(2)}
                   </TableCell>
                   <TableCell>
                     <Button

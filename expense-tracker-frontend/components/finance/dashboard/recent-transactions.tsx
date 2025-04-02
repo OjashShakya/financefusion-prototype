@@ -1,88 +1,70 @@
 "use client"
 
-import { useMemo } from "react"
-import { format } from "date-fns"
 import { ArrowDown, ArrowUp } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import type { Expense, Income } from "@/components/finance-dashboard"
+import { Badge } from "@/components/ui/badge"
+import { format } from "date-fns"
 
 interface RecentTransactionsProps {
   expenses: Expense[]
   incomes: Income[]
 }
 
-type Transaction = {
-  id: string
-  type: "expense" | "income"
-  description: string
-  amount: number
-  category: string
-  date: Date
-}
-
 export function RecentTransactions({ expenses, incomes }: RecentTransactionsProps) {
-  // Combine and sort transactions
-  const recentTransactions = useMemo(() => {
-    const expenseTransactions: Transaction[] = expenses.map((expense) => ({
-      id: expense.id,
-      type: "expense",
-      description: expense.description,
-      amount: expense.amount,
-      category: expense.category,
-      date: expense.date,
-    }))
+  // Combine and sort transactions by date
+  const transactions = [
+    ...expenses.map((expense) => ({
+      ...expense,
+      type: "expense" as const,
+      amount: Number(expense.amount),
+      title: expense.description,
+    })),
+    ...incomes.map((income) => ({
+      ...income,
+      type: "income" as const,
+      amount: Number(income.amount),
+      title: income.source,
+    })),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime())
 
-    const incomeTransactions: Transaction[] = incomes.map((income) => ({
-      id: income.id,
-      type: "income",
-      description: income.source,
-      amount: income.amount,
-      category: income.category,
-      date: income.date,
-    }))
-
-    return [...expenseTransactions, ...incomeTransactions]
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
-      .slice(0, 5)
-  }, [expenses, incomes])
-
-  if (recentTransactions.length === 0) {
-    return (
-      <div className="flex h-[200px] items-center justify-center rounded-md border border-dashed">
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground">No transactions yet</p>
-          <p className="text-xs text-muted-foreground mt-1">Add an expense or income to get started</p>
-        </div>
-      </div>
-    )
-  }
+  // Take only the most recent 4 transactions
+  const recentTransactions = transactions.slice(0, 4)
 
   return (
     <div className="space-y-4">
       {recentTransactions.map((transaction) => (
-        <div key={transaction.id} className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className={`flex h-9 w-9 items-center justify-center rounded-full ${
-                transaction.type === "income" ? "bg-green-100" : "bg-red-100"
-              }`}
-            >
+        <div
+          key={transaction.id}
+          className="flex items-center justify-between gap-4"
+        >
+          <div className="flex items-center gap-4">
+            <div className={`rounded-full p-2 ${
+              transaction.type === "income" 
+                ? "bg-green-100 text-green-600 dark:bg-green-900/20" 
+                : "bg-red-100 text-red-600 dark:bg-red-900/20"
+            }`}>
               {transaction.type === "income" ? (
-                <ArrowUp className="h-5 w-5 text-green-600" />
+                <ArrowUp className="h-4 w-4" />
               ) : (
-                <ArrowDown className="h-5 w-5 text-red-600" />
+                <ArrowDown className="h-4 w-4" />
               )}
             </div>
             <div>
-              <p className="text-sm font-medium">{transaction.description}</p>
-              <p className="text-xs text-muted-foreground">{format(transaction.date, "MMM d, yyyy")}</p>
+              <p className="font-medium">{transaction.title}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {format(transaction.date, "MMM dd, yyyy")}
+              </p>
             </div>
           </div>
-          <div className="text-right">
-            <p className={`text-sm font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}>
-              {transaction.type === "income" ? "+" : "-"}${transaction.amount.toFixed(2)}
+          <div className="flex items-center gap-2">
+            <p className={`font-medium ${
+              transaction.type === "income" 
+                ? "text-green-600" 
+                : "text-red-600"
+            }`}>
+              {transaction.type === "income" ? "+" : "-"} Rs. {transaction.amount.toFixed(2)}
             </p>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800">
               {transaction.category}
             </Badge>
           </div>

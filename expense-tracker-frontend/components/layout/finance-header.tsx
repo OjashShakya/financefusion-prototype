@@ -50,12 +50,8 @@ export function FinanceHeader({ activeView, isSidebarCollapsed, setIsSidebarColl
       >
         <Menu className="h-6 w-6" />
       </Button>
-      <div className="md:hidden flex items-center gap-2">
-        <PiggyBank className="h-6 w-6" />
-        <span className="font-semibold">FinanceTracker</span>
-      </div>
       <div className="hidden md:block">
-        <h1 className="text-[28px] font-semibold">{getTitle()}</h1>
+        <h1 className="ml-[24px] text-[28px] font-medium">{getTitle()}</h1>
       </div>
       <div className="ml-auto flex items-center gap-4">
         <div className="rounded-[16px] border border-[1.5px] p-[12px] flex items-center gap-[12px] h-[56px] w-[56px]">
