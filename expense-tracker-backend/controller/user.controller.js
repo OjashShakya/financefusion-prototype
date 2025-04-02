@@ -138,6 +138,11 @@ const loginUser = async (req, res) => {
       success: true,
       message: "User Logged In Successfully",
       token,
+      user: {
+        id: user._id,
+        fullname: user.fullname,
+        email: user.email
+      }
     });
 
   } catch (error) {
@@ -212,60 +217,6 @@ const resetPassword = async (req, res) => {
     });
   }
 };
-
-
-
-
-
-// const updateProfile = async (req, res, next) => {
-//   const userId = req.params.id;
-//   const updatedData = req.body;
-
-//   try {
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return res.status(StatusCodes.NOT_FOUND).json({
-//         success: false,
-//         message: "User not found",
-//       });
-//     }
-
-//     console.log("Uploaded File:", req.file); // Check the uploaded file
-
-//     let avatar = user.profilePicture;
-//     const profileLocalPath = req.file?.path; // Access the uploaded file's path here
-
-//     if (profileLocalPath) {
-//       console.log("New profile picture path: ", profileLocalPath);
-//       const cloudinaryResponse = await uploadOnCloudinary(profileLocalPath);
-//       avatar = cloudinaryResponse?.secure_url || user.profilePicture;
-//       if (!avatar) {
-//         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//           success: false,
-//           message: "Failed to upload profile picture",
-//         });
-//       }
-//     }
-
-//     const updatedUser = await User.findByIdAndUpdate(
-//       userId,
-//       { ...updatedData, profilePicture: avatar },
-//       {
-//         new: true,
-//         runValidators: true,
-//       }
-//     );
-
-//     res.status(StatusCodes.OK).json({
-//       success: true,
-//       message: "User updated successfully",
-//       user: updatedUser,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     next(error);
-//   }
-// };
 
 const getAllUser = async (req, res) => {
   try {
@@ -343,4 +294,5 @@ module.exports = {
   requestPasswordReset,
   resetPassword,
   // getProfile,
+  getCurrentUser
 };

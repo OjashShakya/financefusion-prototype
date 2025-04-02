@@ -51,10 +51,10 @@ export function DashboardView({
   }, [])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       {/* Welcome Message */}
       <div>
-        <h1 className="text-[32px] font-semibold tracking-tight">
+        <h1 className="text-2xl md:text-[32px] font-semibold tracking-tight">
           {greeting}, {user?.fullname || "Username"}!
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -63,7 +63,7 @@ export function DashboardView({
       </div>
 
       {/* Summary Cards and Quick Actions */}
-      <div>
+      <div className="space-y-6">
         <DashboardSummary 
           expenses={expenses} 
           incomes={incomes} 
@@ -78,15 +78,14 @@ export function DashboardView({
       </div>
 
       {/* Cash Flow Chart and Recent Transactions */}
-      <div className="grid gap-6 md:grid-cols-[2fr,1fr]">
-
-        <Card>
+      <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+        <Card className="w-full">
           <CardHeader>
             <CardTitle>Cash Flow Trends</CardTitle>
             <CardDescription>Your income, expenses, and balance over time</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[350px]">
+            <div className="h-[300px] md:h-[350px]">
               <CashFlowChart
                 data={Array.from({ length: 6 }, (_, i) => {
                   const date = new Date()
@@ -121,19 +120,15 @@ export function DashboardView({
           </CardContent>
         </Card>
 
-     
-      
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Your latest expenses and income</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RecentTransactions expenses={expenses} incomes={incomes} />
-            </CardContent>
-          </Card>
-
-       
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>Recent Transactions</CardTitle>
+            <CardDescription>Your latest expenses and income</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RecentTransactions expenses={expenses} incomes={incomes} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

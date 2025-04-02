@@ -6,7 +6,7 @@ const {
   getAllUser,
   getUserById,
   requestPasswordReset,
-  resetPassword
+  resetPassword,
   // updateProfile,
   // getProfile,
 } = require("../controller/user.controller");
