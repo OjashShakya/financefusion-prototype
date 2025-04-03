@@ -37,9 +37,8 @@ export type Budget = {
 export type SavingsGoal = {
   id: string;
   name: string;
-  targetAmount: number;
-  currentAmount: number;
-  deadline: Date;
-  targetDate: Date;
+  target_amount: number;
+  initial_amount: number;
+  date: Date;
   color: string;
 }; 

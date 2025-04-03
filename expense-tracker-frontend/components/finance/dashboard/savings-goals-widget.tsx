@@ -18,52 +18,26 @@ export function SavingsGoalsWidget({ goals, updateSavingsGoal, setActiveView }: 
   const [contributions, setContributions] = useState<Record<string, string>>({})
   const { toast } = useToast()
 
-  const handleContribution = (goalId: string) => {
+  const handleContribution = async (goalId: string) => {
     const amount = contributions[goalId]
-    if (!amount) {
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid amount to contribute",
+        title: "Error",
+        description: "Please enter a valid amount greater than 0",
         variant: "destructive",
       })
       return
     }
 
-    const goal = goals.find((g) => g.id === goalId)
-    if (!goal) return
-
-    const contributionAmount = Number.parseFloat(amount)
-    if (isNaN(contributionAmount) || contributionAmount <= 0) {
-      toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid positive amount",
-        variant: "destructive",
-      })
-      return
+    try {
+      await updateSavingsGoal(goalId, Number(amount))
+      setContributions(prev => ({
+        ...prev,
+        [goalId]: ""
+      }))
+    } catch (error) {
+      console.error('Error adding contribution:', error)
     }
-
-    const newAmount = goal.currentAmount + contributionAmount
-    if (newAmount > goal.targetAmount) {
-      toast({
-        title: "Amount Exceeds Goal",
-        description: `Maximum contribution allowed is $${(goal.targetAmount - goal.currentAmount).toFixed(2)}`,
-        variant: "destructive",
-      })
-      return
-    }
-
-    updateSavingsGoal(goalId, contributionAmount)
-
-    // Clear input
-    setContributions({
-      ...contributions,
-      [goalId]: "",
-    })
-
-    toast({
-      title: "Contribution Added",
-      description: `Added $${contributionAmount.toFixed(2)} to ${goal.name}`,
-    })
   }
 
   if (goals.length === 0) {
@@ -82,9 +56,9 @@ export function SavingsGoalsWidget({ goals, updateSavingsGoal, setActiveView }: 
   return (
     <div className="space-y-6">
       {goals.map((goal) => {
-        const percentage = (goal.currentAmount / goal.targetAmount) * 100
-        const remaining = goal.targetAmount - goal.currentAmount
-        const targetDate = format(goal.targetDate, "MMM d, yyyy")
+        const percentage = (goal.initial_amount / goal.target_amount) * 100
+        const remaining = goal.target_amount - goal.initial_amount
+        const targetDate = format(goal.date, "MMM d, yyyy")
 
         return (
           <div key={goal.id} className="space-y-2">
@@ -92,11 +66,11 @@ export function SavingsGoalsWidget({ goals, updateSavingsGoal, setActiveView }: 
               <div>
                 <h4 className="font-medium">{goal.name}</h4>
                 <p className="text-xs text-muted-foreground">
-                  Target: ${goal.targetAmount.toFixed(2)} by {targetDate}
+                  Target: ${goal.target_amount.toFixed(2)} by {targetDate}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-medium">${goal.currentAmount.toFixed(2)}</p>
+                <p className="font-medium">${goal.initial_amount.toFixed(2)}</p>
                 <p className="text-xs text-muted-foreground">${remaining.toFixed(2)} remaining</p>
               </div>
             </div>

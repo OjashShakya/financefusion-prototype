@@ -11,6 +11,7 @@ import { SavingsView } from '@/components/finance/savings/savings-view';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import type { Expense, Income, Budget, SavingsGoal } from '@/types/finance';
 import { getIncomes, createIncome, deleteIncome } from '@/lib/api/income';
+import { savingsApi } from '@/lib/api/savings';
 import { useAuth } from '@/app/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 
@@ -27,6 +28,7 @@ export function FinanceDashboard() {
   useEffect(() => {
     if (user) {
       fetchIncomes();
+      fetchSavingsGoals();
     }
   }, [user]);
 
@@ -40,6 +42,23 @@ export function FinanceDashboard() {
       toast({
         title: "Error",
         description: "Failed to load incomes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchSavingsGoals = async () => {
+    try {
+      setIsLoading(true);
+      const data = await savingsApi.getAllSavings();
+      setSavingsGoals(data);
+    } catch (error: any) {
+      console.error('Error fetching savings goals:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load savings goals. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -108,24 +127,149 @@ export function FinanceDashboard() {
     setBudgets(budgets.filter(budget => budget.id !== id));
   };
 
-  const addSavingsGoal = (goal: Omit<SavingsGoal, 'id'>) => {
-    const newGoal = {
-      ...goal,
-      id: Math.random().toString(36).substr(2, 9),
-    };
-    setSavingsGoals([...savingsGoals, newGoal]);
+  const addSavingsGoal = async (goal: Omit<SavingsGoal, "id">) => {
+    try {
+      console.log('Adding savings goal:', goal);
+
+      // Validate required fields
+      if (!goal.name?.trim()) {
+        toast({
+          title: "Error",
+          description: "Goal name is required",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (isNaN(goal.target_amount) || goal.target_amount <= 0) {
+        toast({
+          title: "Error",
+          description: "Target amount must be greater than 0",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (isNaN(goal.initial_amount) || goal.initial_amount < 0) {
+        toast({
+          title: "Error",
+          description: "Initial amount cannot be negative",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check for duplicate names
+      if (savingsGoals.some(g => g.name.toLowerCase() === goal.name.toLowerCase())) {
+        toast({
+          title: "Error",
+          description: "A goal with this name already exists",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate initial amount is less than target amount
+      if (goal.initial_amount >= goal.target_amount) {
+        toast({
+          title: "Error",
+          description: "Initial amount must be less than target amount",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate date is in the future
+      if (goal.date <= new Date()) {
+        toast({
+          title: "Error",
+          description: "Target date must be in the future",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const newGoal = await savingsApi.createSavings({
+        name: goal.name.trim(),
+        target_amount: Number(goal.target_amount),
+        initial_amount: Number(goal.initial_amount),
+        date: goal.date.toISOString(),
+        color: goal.color || "#0088FE"
+      });
+
+      console.log('Created new savings goal:', newGoal);
+      setSavingsGoals(prev => [...prev, newGoal]);
+      toast({
+        title: "Success",
+        description: "Savings goal created successfully",
+      });
+    } catch (error: any) {
+      console.error('Error creating savings goal:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create savings goal. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const deleteSavingsGoal = (id: string) => {
-    setSavingsGoals(savingsGoals.filter(goal => goal.id !== id));
+  const deleteSavingsGoal = async (id: string) => {
+    try {
+      await savingsApi.deleteSavings(id);
+      setSavingsGoals(prev => prev.filter(goal => goal.id !== id));
+      toast({
+        title: "Success",
+        description: "Savings goal deleted successfully",
+      });
+    } catch (error: any) {
+      console.error('Error deleting savings goal:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete savings goal. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const updateSavingsGoal = (id: string, amount: number) => {
-    setSavingsGoals(
-      savingsGoals.map((goal) =>
-        goal.id === id ? { ...goal, currentAmount: amount } : goal
-      )
-    );
+  const updateSavingsGoal = async (id: string, amount: number) => {
+    try {
+      if (!id) {
+        throw new Error('Savings goal ID is required');
+      }
+
+      if (!amount || amount <= 0) {
+        toast({
+          title: "Error",
+          description: "Please enter a valid amount greater than 0",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const updatedGoal = await savingsApi.updateSavings(id, {
+        amount,
+        date: new Date().toISOString()
+      });
+
+      setSavingsGoals(prev => prev.map(goal => 
+        goal.id === id 
+          ? {
+              ...goal,
+              initial_amount: updatedGoal.initial_amount
+            }
+          : goal
+      ));
+
+      toast({
+        title: "Success",
+        description: `$${amount.toFixed(2)} added to ${updatedGoal.name}`,
+      });
+    } catch (error: any) {
+      console.error('Error updating savings goal:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update savings goal. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderView = () => {
@@ -180,6 +324,14 @@ export function FinanceDashboard() {
         return null;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
