@@ -5,6 +5,7 @@ import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
+import { useToast } from "@/components/ui/use-toast"
 import type { SavingsGoal } from "@/components/finance-dashboard"
 
 interface SavingsGoalsWidgetProps {
@@ -15,23 +16,53 @@ interface SavingsGoalsWidgetProps {
 
 export function SavingsGoalsWidget({ goals, updateSavingsGoal, setActiveView }: SavingsGoalsWidgetProps) {
   const [contributions, setContributions] = useState<Record<string, string>>({})
+  const { toast } = useToast()
 
   const handleContribution = (goalId: string) => {
     const amount = contributions[goalId]
-    if (!amount) return
+    if (!amount) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid amount to contribute",
+        variant: "destructive",
+      })
+      return
+    }
 
     const goal = goals.find((g) => g.id === goalId)
     if (!goal) return
 
-    const newAmount = goal.currentAmount + Number.parseFloat(amount)
-    if (isNaN(newAmount)) return
+    const contributionAmount = Number.parseFloat(amount)
+    if (isNaN(contributionAmount) || contributionAmount <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid positive amount",
+        variant: "destructive",
+      })
+      return
+    }
 
-    updateSavingsGoal(goalId, Math.min(newAmount, goal.targetAmount))
+    const newAmount = goal.currentAmount + contributionAmount
+    if (newAmount > goal.targetAmount) {
+      toast({
+        title: "Amount Exceeds Goal",
+        description: `Maximum contribution allowed is $${(goal.targetAmount - goal.currentAmount).toFixed(2)}`,
+        variant: "destructive",
+      })
+      return
+    }
+
+    updateSavingsGoal(goalId, contributionAmount)
 
     // Clear input
     setContributions({
       ...contributions,
       [goalId]: "",
+    })
+
+    toast({
+      title: "Contribution Added",
+      description: `Added $${contributionAmount.toFixed(2)} to ${goal.name}`,
     })
   }
 
@@ -69,7 +100,14 @@ export function SavingsGoalsWidget({ goals, updateSavingsGoal, setActiveView }: 
                 <p className="text-xs text-muted-foreground">${remaining.toFixed(2)} remaining</p>
               </div>
             </div>
-            <Progress value={percentage} className="h-2" indicatorClassName={`bg-[${goal.color}]`} />
+            <Progress 
+              value={percentage} 
+              className="h-2" 
+              style={{ 
+                "--progress-background": `${goal.color}20`,
+                "--progress-foreground": goal.color,
+              } as React.CSSProperties}
+            />
             <div className="flex items-center gap-2 pt-1">
               <Input
                 type="number"
@@ -82,8 +120,17 @@ export function SavingsGoalsWidget({ goals, updateSavingsGoal, setActiveView }: 
                     [goal.id]: e.target.value,
                   })
                 }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleContribution(goal.id)
+                  }
+                }}
               />
-              <Button size="sm" onClick={() => handleContribution(goal.id)}>
+              <Button 
+                size="sm" 
+                onClick={() => handleContribution(goal.id)}
+                disabled={!contributions[goal.id] || Number(contributions[goal.id]) <= 0}
+              >
                 Add
               </Button>
             </div>

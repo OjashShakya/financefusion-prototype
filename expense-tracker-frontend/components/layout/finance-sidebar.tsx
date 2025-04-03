@@ -1,6 +1,6 @@
 "use client"
 
-import { BarChart, Wallet, Banknote, Home, PiggyBank, PanelLeft, ChartPie, Settings, ChevronLeft, ChevronRight } from "lucide-react"
+import { BarChart, Wallet, Banknote, Home, PiggyBank, PanelLeft, ChartPie, Settings, PanelRightClose, PanelRightOpen} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/app/context/AuthContext"
@@ -35,7 +35,7 @@ export function FinanceSidebar({ activeView, setActiveView, isCollapsed, setIsCo
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          {isCollapsed ? <PanelRightClose size={24} /> : <PanelRightOpen size={24} />}
         </button>
       </div>
 

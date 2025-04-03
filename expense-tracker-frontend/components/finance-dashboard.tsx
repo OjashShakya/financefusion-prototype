@@ -10,6 +10,7 @@ import { BudgetView } from "@/components/finance/budget/budget-view"
 import { SavingsView } from "@/components/finance/savings/savings-view"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { useAuth } from "@/app/context/AuthContext"
+import { useToast } from "@/components/ui/use-toast"
 
 export type Expense = {
   id: string
@@ -25,6 +26,7 @@ export type Income = {
   amount: number
   category: string
   date: Date
+  description: string
 }
 
 export type Budget = {
@@ -42,10 +44,12 @@ export type SavingsGoal = {
   currentAmount: number
   targetDate: Date
   color: string
+  deadline: Date
 }
 
 export function FinanceDashboard() {
   const { user, loading } = useAuth()
+  const { toast } = useToast()
 
   if (loading) {
     return (
@@ -64,6 +68,7 @@ export function FinanceDashboard() {
   const [incomes, setIncomes] = useState<Income[]>([])
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([])
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const addExpense = (expense: Omit<Expense, "id">) => {
     const newExpense = {
@@ -79,7 +84,22 @@ export function FinanceDashboard() {
         budget.id === matchingBudget.id ? { ...budget, spent: budget.spent + expense.amount } : budget,
       )
       setBudgets(updatedBudgets)
+
+      // Check if budget is exceeded
+      const updatedBudget = updatedBudgets.find(b => b.id === matchingBudget.id)
+      if (updatedBudget && updatedBudget.spent > updatedBudget.amount) {
+        toast({
+          title: "Budget Alert",
+          description: `You've exceeded your ${updatedBudget.category} budget by $${(updatedBudget.spent - updatedBudget.amount).toFixed(2)}`,
+          variant: "destructive",
+        })
+      }
     }
+
+    toast({
+      title: "Expense Added",
+      description: `Added ${expense.description} for $${expense.amount}`,
+    })
   }
 
   const deleteExpense = (id: string) => {
@@ -97,6 +117,10 @@ export function FinanceDashboard() {
       }
     }
     setExpenses(expenses.filter((expense) => expense.id !== id))
+    toast({
+      title: "Expense Deleted",
+      description: "The expense has been removed",
+    })
   }
 
   const addIncome = (income: Omit<Income, "id">) => {
@@ -105,10 +129,18 @@ export function FinanceDashboard() {
       id: Math.random().toString(36).substring(2, 9),
     }
     setIncomes([newIncome, ...incomes])
+    toast({
+      title: "Income Added",
+      description: `Added ${income.source} income of $${income.amount}`,
+    })
   }
 
   const deleteIncome = (id: string) => {
     setIncomes(incomes.filter((income) => income.id !== id))
+    toast({
+      title: "Income Deleted",
+      description: "The income has been removed",
+    })
   }
 
   const addBudget = (budget: Omit<Budget, "id" | "spent">) => {
@@ -118,10 +150,18 @@ export function FinanceDashboard() {
       spent: 0,
     }
     setBudgets([...budgets, newBudget])
+    toast({
+      title: "Budget Added",
+      description: `Added ${budget.category} budget of $${budget.amount} (${budget.period})`,
+    })
   }
 
   const deleteBudget = (id: string) => {
     setBudgets(budgets.filter((budget) => budget.id !== id))
+    toast({
+      title: "Budget Deleted",
+      description: "The budget has been removed",
+    })
   }
 
   const addSavingsGoal = (goal: Omit<SavingsGoal, "id">) => {
@@ -130,18 +170,43 @@ export function FinanceDashboard() {
       id: Math.random().toString(36).substring(2, 9),
     }
     setSavingsGoals([...savingsGoals, newGoal])
+    toast({
+      title: "Savings Goal Added",
+      description: `Added ${goal.name} goal of $${goal.targetAmount}`,
+    })
   }
 
   const updateSavingsGoal = (id: string, amount: number) => {
+    const goal = savingsGoals.find(g => g.id === id)
+    if (!goal) return
+
+    const newAmount = goal.currentAmount + amount
+    if (newAmount >= goal.targetAmount) {
+      toast({
+        title: "Congratulations! 🎉",
+        description: `You've reached your ${goal.name} savings goal!`,
+        variant: "default",
+      })
+    }
+
     setSavingsGoals(
-      savingsGoals.map((goal) =>
-        goal.id === id ? { ...goal, currentAmount: goal.currentAmount + amount } : goal,
+      savingsGoals.map((g) =>
+        g.id === id ? { ...g, currentAmount: Math.min(newAmount, g.targetAmount) } : g,
       ),
     )
+
+    toast({
+      title: "Savings Updated",
+      description: `Added $${amount} to ${goal.name}`,
+    })
   }
 
   const deleteSavingsGoal = (id: string) => {
     setSavingsGoals(savingsGoals.filter((goal) => goal.id !== id))
+    toast({
+      title: "Savings Goal Deleted",
+      description: "The savings goal has been removed",
+    })
   }
 
   const renderContent = () => {
@@ -200,9 +265,18 @@ export function FinanceDashboard() {
   return (
     <SidebarProvider>
       <div className="flex h-screen">
-        <FinanceSidebar activeView={activeView} setActiveView={setActiveView} />
+        <FinanceSidebar 
+          activeView={activeView} 
+          setActiveView={setActiveView} 
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+        />
         <div className="flex-1 flex flex-col">
-          <FinanceHeader activeView={activeView} />
+          <FinanceHeader 
+            activeView={activeView} 
+            isSidebarCollapsed={isCollapsed}
+            setIsSidebarCollapsed={setIsCollapsed}
+          />
           <main className="flex-1 overflow-auto p-6">{renderContent()}</main>
         </div>
       </div>

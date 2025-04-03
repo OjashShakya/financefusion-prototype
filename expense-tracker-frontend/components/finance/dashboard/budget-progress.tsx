@@ -1,0 +1,82 @@
+"use client"
+
+import { format } from "date-fns"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import type { Budget, Expense } from "@/types/finance"
+
+interface BudgetProgressProps {
+  budgets: Budget[]
+  expenses: Expense[]
+}
+
+export function BudgetProgress({ budgets, expenses }: BudgetProgressProps) {
+  if (budgets.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <p className="text-sm text-muted-foreground">No budgets set up yet</p>
+        <Button 
+          variant="outline" 
+          className="mt-2" 
+          onClick={() => window.location.href = "/budget"}
+        >
+          Create Budget
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {budgets.map((budget) => {
+        const spent = expenses
+          .filter(expense => expense.category === budget.category)
+          .reduce((sum, expense) => sum + (expense.amount || 0), 0)
+        
+        const percentage = (spent / budget.amount) * 100
+        const remaining = budget.amount - spent
+
+        return (
+          <div key={budget.id} className="space-y-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{budget.category}</span>
+                <span className="text-xs text-muted-foreground">
+                  ${spent.toFixed(2)} of ${budget.amount.toFixed(2)}
+                </span>
+              </div>
+              <span
+                className={`text-xs font-medium ${
+                  percentage > 90
+                    ? "text-destructive"
+                    : percentage > 75
+                      ? "text-amber-500"
+                      : "text-green-500"
+                }`}
+              >
+                {percentage.toFixed(0)}%
+              </span>
+            </div>
+            <Progress
+              value={percentage}
+              className={`h-2 ${
+                percentage > 90
+                  ? "bg-destructive/20"
+                  : percentage > 75
+                    ? "bg-amber-500/20"
+                    : "bg-green-500/20"
+              }`}
+              indicatorClassName={`${
+                percentage > 90
+                  ? "bg-destructive"
+                  : percentage > 75
+                    ? "bg-amber-500"
+                    : "bg-green-500"
+              }`}
+            />
+          </div>
+        )
+      })}
+    </div>
+  )
+} 

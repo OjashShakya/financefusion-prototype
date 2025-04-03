@@ -29,7 +29,7 @@ import { toast } from "@/components/ui/use-toast"
 import type { Income } from "@/components/finance-dashboard"
 
 const incomeFormSchema = z.object({
-  source: z.string().min(1, "Source is required"),
+  source: z.string().min(1, "Source is required").max(100, "Source must be less than 100 characters"),
   amount: z.string().min(1, "Amount is required"),
   category: z.string().min(1, "Category is required"),
   date: z.date(),
@@ -55,18 +55,49 @@ export function IncomeForm({ onSubmit }: { onSubmit: (data: any) => void }) {
     },
   })
 
-  function handleSubmit(data: Income) {
-    onSubmit(data)
-    toast({
-      title: "Income added",
-      description: `$${data.amount} from ${data.source}`,
-    })
-    form.reset({
-      source: "",
-      amount: "",
-      category: "",
-      date: new Date(),
-    })
+  function handleSubmit(data: z.infer<typeof incomeFormSchema>) {
+    try {
+      // Convert amount to number
+      const amount = parseFloat(data.amount)
+      if (isNaN(amount) || amount <= 0) {
+        toast({
+          title: "Invalid amount",
+          description: "Please enter a valid amount greater than 0",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Create income object
+      const income: Omit<Income, "id"> = {
+        source: data.source,
+        amount: amount,
+        category: data.category,
+        date: data.date,
+        description: data.source, // Using source as description for now
+      }
+
+      onSubmit(income)
+      
+      toast({
+        title: "Income added",
+        description: `$${amount.toFixed(2)} from ${data.source}`,
+      })
+      
+      // Reset form
+      form.reset({
+        source: "",
+        amount: "",
+        category: "",
+        date: new Date(),
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add income. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -82,6 +113,7 @@ export function IncomeForm({ onSubmit }: { onSubmit: (data: any) => void }) {
                 <Input 
                   placeholder="Salary, Freelance, etc" 
                   {...field} 
+                  maxLength={100}
                   className="h-12 rounded-xl border-gray-200 bg-white dark:border-gray-800 dark:bg-[#1c1c1c]"
                 />
               </FormControl>
@@ -100,6 +132,8 @@ export function IncomeForm({ onSubmit }: { onSubmit: (data: any) => void }) {
                 <Input 
                   type="number" 
                   placeholder="0" 
+                  min="0.01"
+                  step="0.01"
                   {...field} 
                   className="h-12 rounded-xl border-gray-200 bg-white dark:border-gray-800 dark:bg-[#1c1c1c]"
                 />
