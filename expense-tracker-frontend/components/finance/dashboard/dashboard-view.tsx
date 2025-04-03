@@ -193,8 +193,8 @@ export function DashboardView({
                     </DialogDescription>
                   </div>
                   <IncomeForm
-                    onSubmit={(data) => {
-                      addIncome(data)
+                    onSubmit={async (data) => {
+                      await addIncome(data)
                       setIncomeDialogOpen(false)
                     }}
                   />

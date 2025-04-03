@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FinanceSidebar } from '@/components/layout/finance-sidebar';
 import { FinanceHeader } from '@/components/layout/finance-header';
 import { DashboardView } from '@/components/finance/dashboard/dashboard-view';
@@ -10,6 +10,9 @@ import { BudgetView } from '@/components/finance/budget/budget-view';
 import { SavingsView } from '@/components/finance/savings/savings-view';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import type { Expense, Income, Budget, SavingsGoal } from '@/types/finance';
+import { getIncomes, createIncome, deleteIncome } from '@/lib/api/income';
+import { useAuth } from '@/app/context/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 
 export function FinanceDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -18,6 +21,31 @@ export function FinanceDashboard() {
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      fetchIncomes();
+    }
+  }, [user]);
+
+  const fetchIncomes = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getIncomes();
+      setIncomes(data);
+    } catch (error: any) {
+      console.error('Error fetching incomes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load incomes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const addExpense = (expense: Omit<Expense, 'id'>) => {
     const newExpense = {
@@ -31,17 +59,40 @@ export function FinanceDashboard() {
     setExpenses(expenses.filter(expense => expense.id !== id));
   };
 
-  const addIncome = (income: Omit<Income, 'id'>) => {
-    const newIncome = {
-      ...income,
-      id: Math.random().toString(36).substr(2, 9),
-      source: income.category, // Using category as source for now
-    };
-    setIncomes([...incomes, newIncome]);
+  const addIncome = async (income: Omit<Income, 'id'>) => {
+    try {
+      const newIncome = await createIncome(income);
+      setIncomes(prev => [newIncome, ...prev]);
+      toast({
+        title: "Success",
+        description: "Income added successfully",
+      });
+    } catch (error: any) {
+      console.error('Error adding income:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add income. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const deleteIncome = (id: string) => {
-    setIncomes(incomes.filter(income => income.id !== id));
+  const handleDeleteIncome = async (id: string) => {
+    try {
+      await deleteIncome(id);
+      setIncomes(prev => prev.filter(income => income.id !== id));
+      toast({
+        title: "Success",
+        description: "Income deleted successfully",
+      });
+    } catch (error: any) {
+      console.error('Error deleting income:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete income. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const addBudget = (budget: Omit<Budget, 'id' | 'spent'>) => {
@@ -105,7 +156,7 @@ export function FinanceDashboard() {
           <IncomeView 
             incomes={incomes} 
             onAdd={addIncome}
-            onDelete={deleteIncome}
+            onDelete={handleDeleteIncome}
           />
         );
       case 'budgeting':

@@ -6,13 +6,24 @@ export type Expense = {
   date: Date;
 };
 
+export enum IncomeCategory {
+  SALARY = "Salary",
+  BUSINESS = "Business",
+  INVESTMENTS = "Investments",
+  FREELANCING = "Freelancing",
+  RENTAL = "Rental",
+  DIVIDENDS = "Dividends",
+  INTEREST = "Interest",
+  GIFTS = "Gifts",
+  OTHER = "Other"
+}
+
 export type Income = {
   id: string;
   description: string;
   amount: number;
-  category: string;
+  category: IncomeCategory;
   date: Date;
-  source: string;
 };
 
 export type Budget = {

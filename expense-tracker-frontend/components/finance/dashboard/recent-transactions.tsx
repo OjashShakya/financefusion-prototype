@@ -1,7 +1,7 @@
 "use client"
 
 import { ArrowDown, ArrowUp } from "lucide-react"
-import type { Expense, Income } from "@/components/finance-dashboard"
+import type { Expense, Income } from "@/types/finance"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 
@@ -23,7 +23,7 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
       ...income,
       type: "income" as const,
       amount: Number(income.amount),
-      title: income.source,
+      title: income.description,
     })),
   ].sort((a, b) => b.date.getTime() - a.date.getTime())
 

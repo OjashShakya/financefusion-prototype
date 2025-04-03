@@ -5,38 +5,37 @@ const { StatusCodes } = require("http-status-codes");
 // Create a new income
 const createIncome = async (req, res) => {
   try {
-    const { amount, source, description, date } = req.body;
+    const { amount, category, description, date } = req.body;
+    const userId = req.user.id;
+
+    // Convert date string to Date object if provided
+    const incomeDate = date ? new Date(date) : new Date();
 
     const newIncome = new Income({
-      user: req.user.id, // assumes user is added to req by auth middleware
-      amount,
-      source,
+      user: userId,
+      amount: Number(amount),
+      category,
       description,
-      date,
+      date: incomeDate
     });
 
-    const savedIncome = await newIncome.save();
-    res.status(StatusCodes.CREATED).json(savedIncome);
-  } catch (err) {
-    console.error("Error creating income:", err);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error creating income",
-      error: err.message,
-    });
+    await newIncome.save();
+    res.status(StatusCodes.CREATED).json(newIncome);
+  } catch (error) {
+    console.error('Error creating income:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error creating income', error: error.message });
   }
 };
 
 // Get all incomes for the logged-in user
 const getIncomes = async (req, res) => {
   try {
-    const incomes = await Income.find({ user: req.user.id }).sort({ date: -1 });
+    const userId = req.user.id;
+    const incomes = await Income.find({ user: userId }).sort({ date: -1 });
     res.status(StatusCodes.OK).json(incomes);
-  } catch (err) {
-    console.error("Error fetching incomes:", err);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error fetching incomes",
-      error: err.message,
-    });
+  } catch (error) {
+    console.error('Error fetching incomes:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching incomes', error: error.message });
   }
 };
 
@@ -58,12 +57,9 @@ const getIncomeById = async (req, res) => {
     }
 
     res.status(StatusCodes.OK).json(income);
-  } catch (err) {
-    console.error("Error fetching income:", err);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error fetching income",
-      error: err.message,
-    });
+  } catch (error) {
+    console.error('Error fetching income:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching income', error: error.message });
   }
 };
 
@@ -78,20 +74,32 @@ const deleteIncome = async (req, res) => {
 
     const income = await Income.findById(id);
 
-    if (!income) return res.status(StatusCodes.NOT_FOUND).json({ message: "Income not found" });
+    if (!income) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "Income not found" });
+    }
 
-    if (income.user.toString() !== req.user.id) {
-      return res.status(StatusCodes.FORBIDDEN).json({ message: "Not authorized to delete this income" });
+    // Convert both IDs to strings for comparison
+    const incomeUserId = income.user.toString();
+    const currentUserId = req.user.id.toString();
+
+    if (incomeUserId !== currentUserId) {
+      console.log("User ID mismatch:", {
+        incomeUserId,
+        currentUserId,
+        incomeUser: income.user,
+        currentUser: req.user.id
+      });
+      return res.status(StatusCodes.FORBIDDEN).json({ 
+        message: "Not authorized to delete this income",
+        details: "User ID mismatch"
+      });
     }
 
     await income.deleteOne();
     res.status(StatusCodes.OK).json({ message: "Income deleted successfully" });
-  } catch (err) {
-    console.error("Error deleting income:", err);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error deleting income",
-      error: err.message,
-    });
+  } catch (error) {
+    console.error('Error deleting income:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error deleting income', error: error.message });
   }
 };
 
