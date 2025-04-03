@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { toast } from "@/components/ui/use-toast"
 import type { Income } from "./finance-dashboard"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 const categories = [
   { label: "Employment", value: "Employment" },
@@ -25,7 +27,16 @@ const categories = [
   { label: "Other", value: "Other" },
 ]
 
-type IncomeFormValues = Omit<Income, "id">
+const incomeFormSchema = z.object({
+  source: z.string().min(1, "Source is required").max(100, "Source is too long"),
+  amount: z.number().min(0.01, "Amount must be greater than 0").max(1000000, "Amount is too large"),
+  category: z.string().min(1, "Category is required"),
+  date: z.date({
+    required_error: "Date is required",
+  }),
+})
+
+type IncomeFormValues = z.infer<typeof incomeFormSchema>
 
 interface IncomeFormProps {
   onSubmit: (data: IncomeFormValues) => void
@@ -35,6 +46,7 @@ export function IncomeForm({ onSubmit }: IncomeFormProps) {
   const [open, setOpen] = useState(false)
 
   const form = useForm<IncomeFormValues>({
+    resolver: zodResolver(incomeFormSchema),
     defaultValues: {
       source: "",
       amount: 0,
@@ -44,17 +56,44 @@ export function IncomeForm({ onSubmit }: IncomeFormProps) {
   })
 
   function handleSubmit(data: IncomeFormValues) {
-    onSubmit(data)
-    toast({
-      title: "Income added",
-      description: `$${data.amount.toFixed(2)} from ${data.source}`,
-    })
-    form.reset({
-      source: "",
-      amount: 0,
-      category: "Employment",
-      date: new Date(),
-    })
+    try {
+      // Validate the data
+      const validatedData = incomeFormSchema.parse(data)
+      
+      // Submit the data
+      onSubmit(validatedData)
+      
+      // Show success toast
+      toast({
+        title: "Income Added",
+        description: `Added $${data.amount.toFixed(2)} from ${data.source}`,
+      })
+
+      // Reset form
+      form.reset({
+        source: "",
+        amount: 0,
+        category: "Employment",
+        date: new Date(),
+      })
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Show validation errors
+        const errors = error.errors.map(err => err.message).join(", ")
+        toast({
+          title: "Validation Error",
+          description: errors,
+          variant: "destructive",
+        })
+      } else {
+        // Show generic error
+        toast({
+          title: "Error",
+          description: "Failed to add income. Please try again.",
+          variant: "destructive",
+        })
+      }
+    }
   }
 
   return (
@@ -68,7 +107,11 @@ export function IncomeForm({ onSubmit }: IncomeFormProps) {
               <FormItem>
                 <FormLabel>Source</FormLabel>
                 <FormControl>
-                  <Input placeholder="Salary, freelance work, etc." {...field} />
+                  <Input 
+                    placeholder="Salary, freelance work, etc." 
+                    {...field} 
+                    maxLength={100}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -85,10 +128,16 @@ export function IncomeForm({ onSubmit }: IncomeFormProps) {
                   <Input
                     type="number"
                     step="0.01"
-                    min="0"
+                    min="0.01"
+                    max="1000000"
                     placeholder="0.00"
                     {...field}
-                    onChange={(e) => field.onChange(Number.parseFloat(e.target.value))}
+                    onChange={(e) => {
+                      const value = Number.parseFloat(e.target.value)
+                      if (!isNaN(value)) {
+                        field.onChange(value)
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -107,7 +156,13 @@ export function IncomeForm({ onSubmit }: IncomeFormProps) {
                 <Popover open={open} onOpenChange={setOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
-                      <Button variant="outline" role="combobox" aria-expanded={open} className="justify-between">
+                      <Button 
+                        variant="outline" 
+                        role="combobox" 
+                        aria-expanded={open} 
+                        className="justify-between"
+                        type="button"
+                      >
                         {field.value
                           ? categories.find((category) => category.value === field.value)?.label
                           : "Select category"}
@@ -160,7 +215,11 @@ export function IncomeForm({ onSubmit }: IncomeFormProps) {
                     <FormControl>
                       <Button
                         variant={"outline"}
-                        className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                        className={cn(
+                          "pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                        type="button"
                       >
                         {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -168,7 +227,13 @@ export function IncomeForm({ onSubmit }: IncomeFormProps) {
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                    <Calendar 
+                      mode="single" 
+                      selected={field.value} 
+                      onSelect={field.onChange} 
+                      initialFocus
+                      disabled={(date) => date > new Date()}
+                    />
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
@@ -177,8 +242,12 @@ export function IncomeForm({ onSubmit }: IncomeFormProps) {
           />
         </div>
 
-        <Button type="submit" className="w-full">
-          Add Income
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? "Adding..." : "Add Income"}
         </Button>
       </form>
     </Form>

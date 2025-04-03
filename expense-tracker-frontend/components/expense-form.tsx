@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { toast } from "@/components/ui/use-toast"
 import type { Expense } from "./expense-tracker"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 const categories = [
   { label: "Food", value: "Food" },
@@ -27,7 +29,16 @@ const categories = [
   { label: "Other", value: "Other" },
 ]
 
-type ExpenseFormValues = Omit<Expense, "id">
+const expenseFormSchema = z.object({
+  description: z.string().min(1, "Description is required").max(100, "Description is too long"),
+  amount: z.number().min(0.01, "Amount must be greater than 0").max(1000000, "Amount is too large"),
+  category: z.string().min(1, "Category is required"),
+  date: z.date({
+    required_error: "Date is required",
+  }),
+})
+
+type ExpenseFormValues = z.infer<typeof expenseFormSchema>
 
 interface ExpenseFormProps {
   onSubmit: (data: ExpenseFormValues) => void
@@ -37,6 +48,7 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
   const [open, setOpen] = useState(false)
 
   const form = useForm<ExpenseFormValues>({
+    resolver: zodResolver(expenseFormSchema),
     defaultValues: {
       description: "",
       amount: 0,
@@ -46,17 +58,44 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
   })
 
   function handleSubmit(data: ExpenseFormValues) {
-    onSubmit(data)
-    toast({
-      title: "Expense added",
-      description: `$${data.amount.toFixed(2)} for ${data.description}`,
-    })
-    form.reset({
-      description: "",
-      amount: 0,
-      category: "Food",
-      date: new Date(),
-    })
+    try {
+      // Validate the data
+      const validatedData = expenseFormSchema.parse(data)
+      
+      // Submit the data
+      onSubmit(validatedData)
+      
+      // Show success toast
+      toast({
+        title: "Expense Added",
+        description: `Added $${data.amount.toFixed(2)} for ${data.description}`,
+      })
+
+      // Reset form
+      form.reset({
+        description: "",
+        amount: 0,
+        category: "Food",
+        date: new Date(),
+      })
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Show validation errors
+        const errors = error.errors.map(err => err.message).join(", ")
+        toast({
+          title: "Validation Error",
+          description: errors,
+          variant: "destructive",
+        })
+      } else {
+        // Show generic error
+        toast({
+          title: "Error",
+          description: "Failed to add expense. Please try again.",
+          variant: "destructive",
+        })
+      }
+    }
   }
 
   return (
@@ -70,7 +109,11 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Input placeholder="Lunch, groceries, etc." {...field} />
+                  <Input 
+                    placeholder="Lunch, groceries, etc." 
+                    {...field} 
+                    maxLength={100}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -87,10 +130,16 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
                   <Input
                     type="number"
                     step="0.01"
-                    min="0"
+                    min="0.01"
+                    max="1000000"
                     placeholder="0.00"
                     {...field}
-                    onChange={(e) => field.onChange(Number.parseFloat(e.target.value))}
+                    onChange={(e) => {
+                      const value = Number.parseFloat(e.target.value)
+                      if (!isNaN(value)) {
+                        field.onChange(value)
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -109,7 +158,13 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
                 <Popover open={open} onOpenChange={setOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
-                      <Button variant="outline" role="combobox" aria-expanded={open} className="justify-between">
+                      <Button 
+                        variant="outline" 
+                        role="combobox" 
+                        aria-expanded={open} 
+                        className="justify-between"
+                        type="button"
+                      >
                         {field.value
                           ? categories.find((category) => category.value === field.value)?.label
                           : "Select category"}
@@ -162,7 +217,11 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
                     <FormControl>
                       <Button
                         variant={"outline"}
-                        className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                        className={cn(
+                          "pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                        type="button"
                       >
                         {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -170,7 +229,13 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                    <Calendar 
+                      mode="single" 
+                      selected={field.value} 
+                      onSelect={field.onChange} 
+                      initialFocus
+                      disabled={(date) => date > new Date()}
+                    />
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
@@ -179,8 +244,12 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
           />
         </div>
 
-        <Button type="submit" className="w-full">
-          Add Expense
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? "Adding..." : "Add Expense"}
         </Button>
       </form>
     </Form>

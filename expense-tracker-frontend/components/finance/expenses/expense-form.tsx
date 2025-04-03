@@ -25,9 +25,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
+import type { Expense } from "@/components/finance-dashboard"
 
 const expenseFormSchema = z.object({
-  source: z.string().min(1, "Source is required"),
+  description: z.string().min(1, "Description is required").max(100, "Description must be less than 100 characters"),
   amount: z.string().min(1, "Amount is required"),
   category: z.string().min(1, "Category is required"),
   date: z.date(),
@@ -48,26 +50,71 @@ export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
   const form = useForm<z.infer<typeof expenseFormSchema>>({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: {
-      source: "",
+      description: "",
       amount: "",
       category: "",
       date: new Date(),
     },
   })
 
+  function handleSubmit(data: z.infer<typeof expenseFormSchema>) {
+    try {
+      // Convert amount to number
+      const amount = parseFloat(data.amount)
+      if (isNaN(amount) || amount <= 0) {
+        toast({
+          title: "Invalid amount",
+          description: "Please enter a valid amount greater than 0",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Create expense object
+      const expense: Omit<Expense, "id"> = {
+        description: data.description,
+        amount: amount,
+        category: data.category,
+        date: data.date,
+      }
+
+      onSubmit(expense)
+      
+      toast({
+        title: "Expense added",
+        description: `$${amount.toFixed(2)} for ${data.description}`,
+      })
+      
+      // Reset form
+      form.reset({
+        description: "",
+        amount: "",
+        category: "",
+        date: new Date(),
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add expense. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="source"
+          name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base">Source</FormLabel>
+              <FormLabel className="text-base">Description</FormLabel>
               <FormControl>
                 <Input 
                   placeholder="Lunch, Groceries, etc" 
                   {...field} 
+                  maxLength={100}
                   className="h-12 rounded-xl border-gray-200 bg-white dark:border-gray-800 dark:bg-[#1c1c1c]"
                 />
               </FormControl>
@@ -86,6 +133,8 @@ export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
                 <Input 
                   type="number" 
                   placeholder="0" 
+                  min="0.01"
+                  step="0.01"
                   {...field} 
                   className="h-12 rounded-xl border-gray-200 bg-white dark:border-gray-800 dark:bg-[#1c1c1c]"
                 />

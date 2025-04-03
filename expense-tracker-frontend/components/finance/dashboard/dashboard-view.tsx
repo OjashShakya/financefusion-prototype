@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { RecentTransactions } from "./recent-transactions"
-import { Card, CardContent } from "@/components/ui/card"
-import type { Expense, Income, Budget, SavingsGoal } from "@/components/finance-dashboard"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import type { Expense, Income, Budget, SavingsGoal } from "@/types/finance"
 import { CashFlowChart } from "./charts/cash-flow-chart"
 import { useAuth } from "@/app/context/AuthContext"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,14 @@ import { ExpenseForm } from "@/components/finance/expenses/expense-form"
 import { IncomeForm } from "@/components/finance/income/income-form"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { ExpenseDistributionChart } from "./charts/expense-distribution-chart"
+import { IncomeSourcesChart } from "./charts/income-sources-chart"
+import { MonthlyComparisonChart } from "./charts/monthly-comparison-chart"
+import { Progress } from "@/components/ui/progress"
+import { Input } from "@/components/ui/input"
+import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns"
+import { SavingsGoalsList } from "./savings-goals-list"
+import { BudgetProgress } from "./budget-progress"
 
 interface DashboardViewProps {
   expenses: Expense[]
@@ -30,6 +38,29 @@ interface DashboardViewProps {
   setActiveView: (view: string) => void
   addExpense: (expense: Omit<Expense, "id">) => void
   addIncome: (income: Omit<Income, "id">) => void
+}
+
+interface CashFlowData {
+  name: string
+  income: number
+  expenses: number
+  balance: number
+}
+
+interface MonthlyData {
+  name: string
+  income: number
+  expenses: number
+}
+
+interface IncomeData {
+  name: string
+  value: number
+}
+
+interface ExpenseData {
+  name: string
+  value: number
 }
 
 export function DashboardView({
@@ -48,10 +79,66 @@ export function DashboardView({
   const [incomeDialogOpen, setIncomeDialogOpen] = useState(false)
 
   // Calculate totals
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
-  const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0)
+  const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
+  const totalIncome = incomes.reduce((sum, income) => sum + (income.amount || 0), 0)
   const netIncome = totalIncome - totalExpenses
-  const savingsRate = totalIncome === 0 ? 0 : ((netIncome / totalIncome) * 100)
+  const savingsRate = totalIncome > 0 ? (netIncome / totalIncome) * 100 : 0
+
+  // Get current month's data
+  const today = new Date()
+  const startOfCurrentMonth = startOfMonth(today)
+  const endOfCurrentMonth = endOfMonth(today)
+  const daysInMonth = eachDayOfInterval({ start: startOfCurrentMonth, end: endOfCurrentMonth })
+
+  // Process data for charts
+  const cashFlowData: CashFlowData[] = daysInMonth.map(day => {
+    const dayExpenses = expenses.filter(expense => 
+      expense.date && format(new Date(expense.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+    ).reduce((sum, expense) => sum + (expense.amount || 0), 0)
+
+    const dayIncomes = incomes.filter(income => 
+      income.date && format(new Date(income.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+    ).reduce((sum, income) => sum + (income.amount || 0), 0)
+
+    return {
+      name: format(day, 'MMM dd'),
+      expenses: dayExpenses,
+      income: dayIncomes,
+      balance: dayIncomes - dayExpenses
+    }
+  })
+
+  const monthlyComparisonData: MonthlyData[] = daysInMonth.map(day => {
+    const dayExpenses = expenses.filter(expense => 
+      expense.date && format(new Date(expense.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+    ).reduce((sum, expense) => sum + (expense.amount || 0), 0)
+
+    const dayIncomes = incomes.filter(income => 
+      income.date && format(new Date(income.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+    ).reduce((sum, income) => sum + (income.amount || 0), 0)
+
+    return {
+      name: format(day, 'MMM dd'),
+      expenses: dayExpenses,
+      income: dayIncomes
+    }
+  })
+
+  const expenseDistributionData: ExpenseData[] = Object.entries(
+    expenses.reduce((acc, expense) => {
+      if (!expense.category) return acc
+      acc[expense.category] = (acc[expense.category] || 0) + (expense.amount || 0)
+      return acc
+    }, {} as Record<string, number>)
+  ).map(([name, value]) => ({ name, value }))
+
+  const incomeSourcesData: IncomeData[] = Object.entries(
+    incomes.reduce((acc, income) => {
+      if (!income.category) return acc
+      acc[income.category] = (acc[income.category] || 0) + (income.amount || 0)
+      return acc
+    }, {} as Record<string, number>)
+  ).map(([name, value]) => ({ name, value }))
 
   // Update greeting based on time of day
   useEffect(() => {
@@ -216,55 +303,86 @@ export function DashboardView({
       </div>
 
       {/* Charts Section */}
-      <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
+      <div className="space-y-6">
+        {/* Section 1: Cash Flow Chart and Recent Transactions side by side */}
+        <div className="grid gap-6 md:grid-cols-[2fr,1fr]">
+          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+            <CardHeader>
+              <CardTitle>Cash Flow</CardTitle>
+              <CardDescription>Your daily income and expenses</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CashFlowChart data={cashFlowData} />
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+              <CardDescription>Your latest financial activities</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RecentTransactions expenses={expenses} incomes={incomes} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Section 2: Monthly Comparison */}
         <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-medium dark:text-white">Cash Flow Trends</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Your income, expenses, and balance over time</p>
-            <div className="mt-4 h-[300px]">
-              <CashFlowChart
-                data={Array.from({ length: 6 }, (_, i) => {
-                  const date = new Date()
-                  date.setMonth(date.getMonth() - i)
-                  const month = date.toLocaleString("default", { month: "short" })
-                  
-                  const monthExpenses = expenses
-                    .filter((expense) => {
-                      const expenseMonth = expense.date.getMonth()
-                      const expenseYear = expense.date.getFullYear()
-                      return expenseMonth === date.getMonth() && expenseYear === date.getFullYear()
-                    })
-                    .reduce((sum, expense) => sum + expense.amount, 0)
-                  
-                  const monthIncome = incomes
-                    .filter((income) => {
-                      const incomeMonth = income.date.getMonth()
-                      const incomeYear = income.date.getFullYear()
-                      return incomeMonth === date.getMonth() && incomeYear === date.getFullYear()
-                    })
-                    .reduce((sum, income) => sum + income.amount, 0)
-                  
-                  return {
-                    name: month,
-                    income: monthIncome,
-                    expenses: monthExpenses,
-                    balance: monthIncome - monthExpenses,
-                  }
-                }).reverse()}
-              />
-            </div>
+          <CardHeader>
+            <CardTitle>Monthly Comparison</CardTitle>
+            <CardDescription>Compare your income and expenses this month</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MonthlyComparisonChart data={monthlyComparisonData} />
           </CardContent>
         </Card>
 
-        <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-medium dark:text-white">Recent Transactions</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Your latest expenses and income</p>
-            <div className="mt-4">
-              <RecentTransactions expenses={expenses} incomes={incomes} />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Section 3: Income Sources and Expense Distribution side by side */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+            <CardHeader>
+              <CardTitle>Income Sources</CardTitle>
+              <CardDescription>Breakdown of your income by category</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <IncomeSourcesChart data={incomeSourcesData} />
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+            <CardHeader>
+              <CardTitle>Expense Distribution</CardTitle>
+              <CardDescription>Breakdown of your expenses by category</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ExpenseDistributionChart data={expenseDistributionData} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Section 4: Savings Goals and Budget Progress side by side */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+            <CardHeader>
+              <CardTitle>Savings Goals</CardTitle>
+              <CardDescription>Track your progress towards financial goals</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SavingsGoalsList goals={savingsGoals} />
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+            <CardHeader>
+              <CardTitle>Budget Progress</CardTitle>
+              <CardDescription>Monitor your spending against budgets</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BudgetProgress budgets={budgets} expenses={expenses} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )
