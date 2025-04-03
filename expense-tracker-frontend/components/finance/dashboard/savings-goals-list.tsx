@@ -5,12 +5,40 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import type { SavingsGoal } from "@/types/finance"
+import { useState } from "react"
+import { useToast } from "@/components/ui/use-toast"
 
 interface SavingsGoalsListProps {
   goals: SavingsGoal[]
+  updateSavingsGoal: (id: string, amount: number) => Promise<void>
 }
 
-export function SavingsGoalsList({ goals }: SavingsGoalsListProps) {
+export function SavingsGoalsList({ goals, updateSavingsGoal }: SavingsGoalsListProps) {
+  const [contributions, setContributions] = useState<Record<string, string>>({})
+  const { toast } = useToast()
+
+  const handleContribution = async (goalId: string) => {
+    const amount = contributions[goalId]
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid amount greater than 0",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      await updateSavingsGoal(goalId, Number(amount))
+      setContributions(prev => ({
+        ...prev,
+        [goalId]: ""
+      }))
+    } catch (error) {
+      console.error('Error adding contribution:', error)
+    }
+  }
+
   if (goals.length === 0) {
     return (
       <div className="text-center py-4">
@@ -29,9 +57,9 @@ export function SavingsGoalsList({ goals }: SavingsGoalsListProps) {
   return (
     <div className="space-y-4">
       {goals.map((goal) => {
-        const percentage = (goal.currentAmount / goal.targetAmount) * 100
-        const remaining = goal.targetAmount - goal.currentAmount
-        const targetDate = format(new Date(goal.deadline), "MMM d, yyyy")
+        const percentage = (goal.initial_amount / goal.target_amount) * 100
+        const remaining = goal.target_amount - goal.initial_amount
+        const targetDate = format(goal.date, "MMM d, yyyy")
 
         return (
           <div key={goal.id} className="space-y-2">
@@ -39,11 +67,11 @@ export function SavingsGoalsList({ goals }: SavingsGoalsListProps) {
               <div>
                 <h4 className="font-medium">{goal.name}</h4>
                 <p className="text-xs text-muted-foreground">
-                  Target: ${goal.targetAmount.toFixed(2)} by {targetDate}
+                  Target: ${goal.target_amount.toFixed(2)} by {targetDate}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-medium">${goal.currentAmount.toFixed(2)}</p>
+                <p className="font-medium">${goal.initial_amount.toFixed(2)}</p>
                 <p className="text-xs text-muted-foreground">${remaining.toFixed(2)} remaining</p>
               </div>
             </div>
@@ -53,27 +81,23 @@ export function SavingsGoalsList({ goals }: SavingsGoalsListProps) {
                 type="number"
                 placeholder="Amount"
                 className="h-8"
-                onChange={(e) => {
-                  const input = e.target as HTMLInputElement
-                  const amount = parseFloat(input.value)
-                  if (!isNaN(amount) && amount > 0) {
-                    // TODO: Implement updateSavingsGoal function
-                    input.value = ""
+                value={contributions[goal.id] || ""}
+                onChange={(e) =>
+                  setContributions({
+                    ...contributions,
+                    [goal.id]: e.target.value,
+                  })
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleContribution(goal.id)
                   }
                 }}
               />
-              <Button
-                size="sm"
-                onClick={() => {
-                  const input = document.querySelector(`input[placeholder="Amount"]`) as HTMLInputElement
-                  if (input) {
-                    const amount = parseFloat(input.value)
-                    if (!isNaN(amount) && amount > 0) {
-                      // TODO: Implement updateSavingsGoal function
-                      input.value = ""
-                    }
-                  }
-                }}
+              <Button 
+                size="sm" 
+                onClick={() => handleContribution(goal.id)}
+                disabled={!contributions[goal.id] || Number(contributions[goal.id]) <= 0}
               >
                 Add
               </Button>

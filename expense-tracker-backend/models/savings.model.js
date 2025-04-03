@@ -21,8 +21,12 @@ const savingSchema = new mongoose.Schema(
     },
     date: {
       type: Date,
-      default: Date.now,
+      required: true,
     },
+    color: {
+      type: String,
+      default: "#0088FE",
+    }
   },
   { timestamps: true }
 );

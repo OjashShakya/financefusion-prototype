@@ -13,7 +13,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/components/ui/use-toast"
-import type { SavingsGoal } from "@/components/finance-dashboard"
+import type { SavingsGoal } from "@/types/finance"
+import { SAVINGS_COLORS } from "@/lib/constants"
 
 interface SavingsGoalsProps {
   goals: SavingsGoal[]
@@ -22,31 +23,88 @@ interface SavingsGoalsProps {
   onDelete: (id: string) => void
 }
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A569BD", "#5DADE2", "#48C9B0", "#F4D03F", "#EC7063"]
-
 export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsProps) {
   const form = useForm<Omit<SavingsGoal, "id">>({
     defaultValues: {
       name: "",
-      targetAmount: 0,
-      currentAmount: 0,
-      targetDate: new Date(),
-      color: COLORS[0],
+      target_amount: 0,
+      initial_amount: 0,
+      date: new Date(),
+      color: SAVINGS_COLORS[0],
     },
+    mode: "onChange",
   })
 
   function handleSubmit(data: Omit<SavingsGoal, "id">) {
+    // Validate name
+    if (!data.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Goal name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check for duplicate names
+    if (goals.some(goal => goal.name.toLowerCase() === data.name.toLowerCase())) {
+      toast({
+        title: "Error",
+        description: "A goal with this name already exists",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate numbers
+    if (isNaN(data.target_amount) || data.target_amount <= 0) {
+      toast({
+        title: "Error",
+        description: "Target amount must be greater than 0",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (isNaN(data.initial_amount) || data.initial_amount < 0) {
+      toast({
+        title: "Error",
+        description: "Initial amount cannot be negative",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate initial amount is less than target amount
+    if (data.initial_amount >= data.target_amount) {
+      toast({
+        title: "Error",
+        description: "Initial amount must be less than target amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate date is in the future
+    if (data.date <= new Date()) {
+      toast({
+        title: "Error",
+        description: "Target date must be in the future",
+        variant: "destructive",
+      });
+      return;
+    }
+
     onAdd(data)
     toast({
       title: "Savings goal created",
-      description: `${data.name}: $${data.targetAmount.toFixed(2)} by ${format(data.targetDate, "MMM d, yyyy")}`,
+      description: `${data.name}: $${data.target_amount.toFixed(2)} by ${format(data.date, "MMM d, yyyy")}`,
     })
     form.reset({
       name: "",
-      targetAmount: 0,
-      currentAmount: 0,
-      targetDate: new Date(),
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      target_amount: 0,
+      initial_amount: 0,
+      date: new Date(),
+      color: SAVINGS_COLORS[Math.floor(Math.random() * SAVINGS_COLORS.length)],
     })
   }
 
@@ -54,10 +112,10 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     const goal = goals.find((g) => g.id === goalId)
     if (!goal) return
 
-    const newAmount = goal.currentAmount + Number.parseFloat(amount || "0")
+    const newAmount = Number.parseFloat(amount || "0")
     if (isNaN(newAmount)) return
 
-    onUpdate(goalId, Math.min(newAmount, goal.targetAmount))
+    onUpdate(goalId, Math.min(newAmount, goal.target_amount))
 
     const input = document.getElementById(`contribution-${goalId}`) as HTMLInputElement
     if (input) input.value = ""
@@ -79,9 +137,14 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
         {goals.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {goals.map((goal) => {
-              const percentage = (goal.currentAmount / goal.targetAmount) * 100
-              const remaining = goal.targetAmount - goal.currentAmount
-              const targetDate = format(goal.targetDate, "MMM d, yyyy")
+              if (!goal || typeof goal.initial_amount !== 'number' || typeof goal.target_amount !== 'number') {
+                console.error('Invalid goal data:', goal);
+                return null;
+              }
+
+              const percentage = (goal.initial_amount / goal.target_amount) * 100;
+              const remaining = goal.target_amount - goal.initial_amount;
+              const targetDate = format(goal.date, "MMM d, yyyy");
 
               return (
                 <Card key={goal.id}>
@@ -90,7 +153,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                       <div>
                         <CardTitle>{goal.name}</CardTitle>
                         <CardDescription>
-                          Target: ${goal.targetAmount.toFixed(2)} by {targetDate}
+                          Target: ${goal.target_amount.toFixed(2)} by {targetDate}
                         </CardDescription>
                       </div>
                       <Button
@@ -107,7 +170,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">${goal.currentAmount.toFixed(2)} saved</span>
+                        <span className="text-sm font-medium">${goal.initial_amount.toFixed(2)} saved</span>
                         <span className="text-sm font-medium">{percentage.toFixed(0)}%</span>
                       </div>
                       <Progress 
@@ -173,7 +236,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="targetAmount"
+                    name="target_amount"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Target Amount ($)</FormLabel>
@@ -184,7 +247,10 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             min="0"
                             placeholder="0.00"
                             {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value))}
+                            onChange={(e) => {
+                              const value = e.target.value === "" ? 0 : Number(e.target.value);
+                              field.onChange(value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -194,7 +260,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
 
                   <FormField
                     control={form.control}
-                    name="currentAmount"
+                    name="initial_amount"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Initial Amount ($)</FormLabel>
@@ -205,7 +271,10 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             min="0"
                             placeholder="0.00"
                             {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value))}
+                            onChange={(e) => {
+                              const value = e.target.value === "" ? 0 : Number(e.target.value);
+                              field.onChange(value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -217,7 +286,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="targetDate"
+                    name="date"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>Target Date</FormLabel>
@@ -226,9 +295,16 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             <FormControl>
                               <Button
                                 variant={"outline"}
-                                className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
                               >
-                                {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                               </Button>
                             </FormControl>
@@ -238,8 +314,10 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                               mode="single"
                               selected={field.value}
                               onSelect={field.onChange}
+                              disabled={(date) =>
+                                date < new Date()
+                              }
                               initialFocus
-                              disabled={(date) => date < new Date()}
                             />
                           </PopoverContent>
                         </Popover>
@@ -255,7 +333,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                       <FormItem>
                         <FormLabel>Color</FormLabel>
                         <div className="flex flex-wrap gap-2">
-                          {COLORS.map((color) => (
+                          {SAVINGS_COLORS.map((color) => (
                             <Button
                               key={color}
                               type="button"

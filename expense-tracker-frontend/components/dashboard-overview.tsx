@@ -146,10 +146,10 @@ export function DashboardOverview({
     const goal = savingsGoals.find((g) => g.id === goalId)
     if (!goal) return
 
-    const newAmount = goal.currentAmount + Number.parseFloat(amount || "0")
+    const newAmount = goal.initial_amount + Number.parseFloat(amount || "0")
     if (isNaN(newAmount)) return
 
-    updateSavingsGoal(goalId, Math.min(newAmount, goal.targetAmount))
+    updateSavingsGoal(goalId, Math.min(newAmount, goal.target_amount))
   }
 
   return (
@@ -386,9 +386,14 @@ export function DashboardOverview({
           <div className="space-y-6">
             {savingsGoals.length > 0 ? (
               savingsGoals.map((goal) => {
-                const percentage = (goal.currentAmount / goal.targetAmount) * 100
-                const remaining = goal.targetAmount - goal.currentAmount
-                const targetDate = format(goal.targetDate, "MMM d, yyyy")
+                if (!goal || typeof goal.initial_amount !== 'number' || typeof goal.target_amount !== 'number') {
+                  console.error('Invalid goal data:', goal);
+                  return null;
+                }
+
+                const percentage = (goal.initial_amount / goal.target_amount) * 100;
+                const remaining = goal.target_amount - goal.initial_amount;
+                const targetDate = format(goal.date, "MMM d, yyyy");
 
                 return (
                   <div key={goal.id} className="space-y-2">
@@ -396,16 +401,16 @@ export function DashboardOverview({
                       <div>
                         <h4 className="font-medium">{goal.name}</h4>
                         <p className="text-xs text-muted-foreground">
-                          Target: ${goal.targetAmount.toFixed(2)} by {targetDate}
+                          Target: ${goal.target_amount.toFixed(2)} by {targetDate}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">${goal.currentAmount.toFixed(2)}</p>
+                        <p className="font-medium">${goal.initial_amount.toFixed(2)}</p>
                         <p className="text-xs text-muted-foreground">${remaining.toFixed(2)} remaining</p>
                       </div>
                     </div>
                     <Progress value={percentage} className="h-2" indicatorClassName={`bg-[${goal.color}]`} />
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-2">
                       <Input type="number" placeholder="Amount" className="h-8" id={`contribution-${goal.id}`} />
                       <Button
                         size="sm"

@@ -1,6 +1,6 @@
 import { Income, IncomeCategory } from "@/types/finance";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Helper function to get headers with auth token
 const getHeaders = () => {

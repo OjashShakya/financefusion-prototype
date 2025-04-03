@@ -5,10 +5,24 @@ const { StatusCodes } = require("http-status-codes");
 // Create a new Savings
 const createSavings = async (req, res) => {
     try {
-      const { name, target_amount, initial_amount, date } = req.body;
+      const { name, target_amount, initial_amount, date, color } = req.body;
+      
+      console.log('Received savings creation request:', {
+        name,
+        target_amount,
+        initial_amount,
+        date,
+        color,
+        user: req.user.id
+      });
   
       // Validate required fields
       if (!name || !target_amount || !initial_amount) {
+        console.log('Missing required fields:', {
+          hasName: !!name,
+          hasTargetAmount: !!target_amount,
+          hasInitialAmount: !!initial_amount
+        });
         return res.status(StatusCodes.BAD_REQUEST).json({
           message: "Name, target amount, and initial amount are required",
         });
@@ -29,9 +43,11 @@ const createSavings = async (req, res) => {
         target_amount,
         initial_amount,
         date: date || Date.now(),
+        color: color || "#0088FE"
       });
   
       const savedSavings = await newSavings.save();
+      console.log('Successfully created savings goal:', savedSavings);
       res.status(StatusCodes.CREATED).json(savedSavings);
     } catch (err) {
       console.error("Error creating Savings:", err);
@@ -70,12 +86,21 @@ const updateSavings = async (req, res) => {
         });
       }
       
-    //   console.log("Saving user:",savings.user)
-    //     console.log("Logged-in user:",req.user.id)
+      // Convert both IDs to strings for comparison
+      const savingsUserId = savings.user.toString();
+      const currentUserId = req.user.id.toString();
+
       // Ensure the logged-in user owns this savings entry
-      if (savings.user.toString() === req.user.id) {
+      if (savingsUserId !== currentUserId) {
+        console.log("User ID mismatch:", {
+          savingsUserId,
+          currentUserId,
+          savingsUser: savings.user,
+          currentUser: req.user.id
+        });
         return res.status(StatusCodes.FORBIDDEN).json({
           message: "Not authorized to update this savings",
+          details: "User ID mismatch"
         });
       }
   
@@ -93,10 +118,8 @@ const updateSavings = async (req, res) => {
       savings.date = date || Date.now(); // Update last modified date
       await savings.save();
   
-      res.status(StatusCodes.OK).json({
-        message: "Amount added successfully",
-        savings,
-      });
+      // Return the complete savings goal object
+      res.status(StatusCodes.OK).json(savings);
     } catch (err) {
       console.error("Error updating Savings:", err);
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -111,7 +134,7 @@ const updateSavings = async (req, res) => {
 // Get all savings for the logged-in user
 const getsavings = async (req, res) => {
   try {
-    const savings = await Savings.find({ user: req.user.id }).sort({ date: -1 });
+    const savings = await Savings.find({ user: req.user.id }).sort({ createdAt: -1 });
     res.status(StatusCodes.OK).json(savings);
   } catch (err) {
     console.error("Error fetching savings:", err);
@@ -158,15 +181,30 @@ const deleteSavings = async (req, res) => {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid Savings ID" });
     }
 
-    const Savings = await Savings.findById(id);
+    const savings = await Savings.findById(id);
 
-    if (!Savings) return res.status(StatusCodes.NOT_FOUND).json({ message: "Savings not found" });
-
-    if (Savings.user.toString() !== req.user.id) {
-      return res.status(StatusCodes.FORBIDDEN).json({ message: "Not authorized to delete this Savings" });
+    if (!savings) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "Savings not found" });
     }
 
-    await Savings.deleteOne();
+    // Convert both IDs to strings for comparison
+    const savingsUserId = savings.user.toString();
+    const currentUserId = req.user.id.toString();
+
+    if (savingsUserId !== currentUserId) {
+      console.log("User ID mismatch:", {
+        savingsUserId,
+        currentUserId,
+        savingsUser: savings.user,
+        currentUser: req.user.id
+      });
+      return res.status(StatusCodes.FORBIDDEN).json({ 
+        message: "Not authorized to delete this Savings",
+        details: "User ID mismatch"
+      });
+    }
+
+    await savings.deleteOne();
     res.status(StatusCodes.OK).json({ message: "Savings deleted successfully" });
   } catch (err) {
     console.error("Error deleting Savings:", err);
