@@ -28,7 +28,7 @@ async function authenticateUser(req, res, next) {
       id: user._id,
       permissions: user.permissions,
       role: user.role,
-      fullName: user.fullName,
+      fullname: user.fullname,
       email: user.email,
     };
 

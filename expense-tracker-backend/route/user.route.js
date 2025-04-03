@@ -39,6 +39,7 @@ router.get(
   currentUser,
   getUserById
 );
+// router.get("/current-user", verifyToken);
 router.post("/password-reset/request", requestPasswordReset);  // Request password reset (send OTP/link)
 router.post("/password-reset/reset", resetPassword);  // Reset password with token/OTP
 // router.patch(
