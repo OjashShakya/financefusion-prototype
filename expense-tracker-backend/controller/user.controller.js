@@ -294,5 +294,5 @@ module.exports = {
   requestPasswordReset,
   resetPassword,
   // getProfile,
-  getCurrentUser
+  // getCurrentUser
 };
