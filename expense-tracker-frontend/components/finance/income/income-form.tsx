@@ -13,6 +13,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
+import type { Income } from "@/types/finance"
+import { IncomeCategory } from "@/types/finance"
 import {
   Select,
   SelectContent,
@@ -20,42 +28,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
-import type { Income } from "@/components/finance-dashboard"
 
 const incomeFormSchema = z.object({
-  source: z.string().min(1, "Source is required").max(100, "Source must be less than 100 characters"),
+  description: z.string().min(1, "Description is required").max(100, "Description must be less than 100 characters"),
   amount: z.string().min(1, "Amount is required"),
-  category: z.string().min(1, "Category is required"),
+  category: z.nativeEnum(IncomeCategory),
   date: z.date(),
 })
 
-const categories = [
-  "Salary",
-  "Freelance",
-  "Business",
-  "Investments",
-  "Rental",
-  "Others",
-]
-
-export function IncomeForm({ onSubmit }: { onSubmit: (data: any) => void }) {
+export function IncomeForm({ onSubmit }: { onSubmit: (data: Omit<Income, "id">) => Promise<void> }) {
   const form = useForm<z.infer<typeof incomeFormSchema>>({
     resolver: zodResolver(incomeFormSchema),
     defaultValues: {
-      source: "",
+      description: "",
       amount: "",
-      category: "",
+      category: IncomeCategory.SALARY,
       date: new Date(),
     },
   })
 
-  function handleSubmit(data: z.infer<typeof incomeFormSchema>) {
+  async function handleSubmit(data: z.infer<typeof incomeFormSchema>) {
     try {
       // Convert amount to number
       const amount = parseFloat(data.amount)
@@ -70,25 +62,24 @@ export function IncomeForm({ onSubmit }: { onSubmit: (data: any) => void }) {
 
       // Create income object
       const income: Omit<Income, "id"> = {
-        source: data.source,
+        description: data.description,
         amount: amount,
         category: data.category,
         date: data.date,
-        description: data.source, // Using source as description for now
       }
 
-      onSubmit(income)
+      await onSubmit(income)
       
       toast({
         title: "Income added",
-        description: `$${amount.toFixed(2)} from ${data.source}`,
+        description: `$${amount.toFixed(2)} from ${data.category}`,
       })
       
       // Reset form
       form.reset({
-        source: "",
+        description: "",
         amount: "",
-        category: "",
+        category: IncomeCategory.SALARY,
         date: new Date(),
       })
     } catch (error) {
@@ -105,18 +96,47 @@ export function IncomeForm({ onSubmit }: { onSubmit: (data: any) => void }) {
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="source"
+          name="description"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-base">Source</FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="Salary, Freelance, etc" 
+                  placeholder="Add a description" 
                   {...field} 
                   maxLength={100}
                   className="h-12 rounded-xl border-gray-200 bg-white dark:border-gray-800 dark:bg-[#1c1c1c]"
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base">Category</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="h-12 rounded-xl border-gray-200 bg-white dark:border-gray-800 dark:bg-[#1c1c1c]">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="dark:bg-[#1c1c1c]">
+                  {Object.values(IncomeCategory).map((category) => (
+                    <SelectItem 
+                      key={category} 
+                      value={category}
+                      className="dark:focus:bg-gray-800"
+                    >
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -138,35 +158,6 @@ export function IncomeForm({ onSubmit }: { onSubmit: (data: any) => void }) {
                   className="h-12 rounded-xl border-gray-200 bg-white dark:border-gray-800 dark:bg-[#1c1c1c]"
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-base">Categories</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="h-12 rounded-xl border-gray-200 bg-white dark:border-gray-800 dark:bg-[#1c1c1c]">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className="dark:bg-[#1c1c1c]">
-                  {categories.map((category) => (
-                    <SelectItem 
-                      key={category} 
-                      value={category}
-                      className="dark:focus:bg-gray-800"
-                    >
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -197,7 +188,7 @@ export function IncomeForm({ onSubmit }: { onSubmit: (data: any) => void }) {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 dark:bg-[#1c1c1c]" align="start">
                   <Calendar
                     mode="single"
                     selected={field.value}
@@ -206,7 +197,6 @@ export function IncomeForm({ onSubmit }: { onSubmit: (data: any) => void }) {
                       date > new Date() || date < new Date("1900-01-01")
                     }
                     initialFocus
-                    className="dark:bg-[#1c1c1c]"
                   />
                 </PopoverContent>
               </Popover>
@@ -217,7 +207,7 @@ export function IncomeForm({ onSubmit }: { onSubmit: (data: any) => void }) {
 
         <Button 
           type="submit" 
-          className="h-12 w-full rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]"
+          className="w-full h-12 rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]"
         >
           Add Income
         </Button>

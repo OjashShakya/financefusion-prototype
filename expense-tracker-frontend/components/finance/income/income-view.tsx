@@ -7,8 +7,8 @@ import type { Income } from "@/types/finance"
 
 interface IncomeViewProps {
   incomes: Income[]
-  onAdd: (income: Omit<Income, "id">) => void
-  onDelete: (id: string) => void
+  onAdd: (income: Omit<Income, "id">) => Promise<void>
+  onDelete: (id: string) => Promise<void>
 }
 
 export function IncomeView({ incomes, onAdd, onDelete }: IncomeViewProps) {
