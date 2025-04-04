@@ -97,7 +97,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     onAdd(data)
     toast({
       title: "Savings goal created",
-      description: `${data.name}: $${data.target_amount.toFixed(2)} by ${format(data.date, "MMM d, yyyy")}`,
+      description: `${data.name}: Rs. ${data.target_amount.toFixed(2)} by ${format(data.date, "MMM d, yyyy")}`,
     })
     form.reset({
       name: "",
@@ -122,7 +122,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
 
     toast({
       title: "Contribution added",
-      description: `$${amount} added to ${goal.name}`,
+      description: `Rs. ${amount} added to ${goal.name}`,
     })
   }
 
@@ -153,7 +153,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                       <div>
                         <CardTitle>{goal.name}</CardTitle>
                         <CardDescription>
-                          Target: ${goal.target_amount.toFixed(2)} by {targetDate}
+                          Target: Rs. {goal.target_amount.toFixed(2)} by {targetDate}
                         </CardDescription>
                       </div>
                       <Button
@@ -170,7 +170,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">${goal.initial_amount.toFixed(2)} saved</span>
+                        <span className="text-sm font-medium">Rs. {goal.initial_amount.toFixed(2)} saved</span>
                         <span className="text-sm font-medium">{percentage.toFixed(0)}%</span>
                       </div>
                       <Progress 
@@ -179,7 +179,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                         indicatorClassName="transition-all" 
                         style={{ backgroundColor: goal.color }}
                       />
-                      <p className="text-xs text-muted-foreground">${remaining.toFixed(2)} remaining</p>
+                      <p className="text-xs text-muted-foreground">Rs. {remaining.toFixed(2)} remaining</p>
                     </div>
                   </CardContent>
                   <CardFooter>
@@ -240,7 +240,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                     name="target_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Target Amount ($)</FormLabel>
+                        <FormLabel>Target Amount (Rs.)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -264,7 +264,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                     name="initial_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Initial Amount ($)</FormLabel>
+                        <FormLabel>Initial Amount (Rs.)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"

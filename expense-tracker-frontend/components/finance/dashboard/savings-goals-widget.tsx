@@ -66,12 +66,12 @@ export function SavingsGoalsWidget({ goals, updateSavingsGoal, setActiveView }: 
               <div>
                 <h4 className="font-medium">{goal.name}</h4>
                 <p className="text-xs text-muted-foreground">
-                  Target: ${goal.target_amount.toFixed(2)} by {targetDate}
+                  Target: Rs. ${goal.target_amount.toFixed(2)} by {targetDate}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-medium">${goal.initial_amount.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">${remaining.toFixed(2)} remaining</p>
+                <p className="font-medium">Rs. ${goal.initial_amount.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">Rs. ${remaining.toFixed(2)} remaining</p>
               </div>
             </div>
             <Progress 
