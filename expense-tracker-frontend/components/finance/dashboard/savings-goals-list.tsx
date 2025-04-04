@@ -98,6 +98,7 @@ export function SavingsGoalsList({ goals, updateSavingsGoal }: SavingsGoalsListP
                 size="sm" 
                 onClick={() => handleContribution(goal.id)}
                 disabled={!contributions[goal.id] || Number(contributions[goal.id]) <= 0}
+                className="rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]"
               >
                 Add
               </Button>
