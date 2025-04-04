@@ -67,8 +67,6 @@ const getExpenseById = async (req, res) => {
   }
 };
 
-
-
 // Delete an expense
 const deleteExpense = async (req, res) => {
   try {
@@ -82,8 +80,21 @@ const deleteExpense = async (req, res) => {
 
     if (!expense) return res.status(StatusCodes.NOT_FOUND).json({ message: "Expense not found" });
 
-    if (expense.user.toString() !== req.user.id) {
-      return res.status(StatusCodes.FORBIDDEN).json({ message: "Not authorized to delete this expense" });
+    // Convert both IDs to strings for comparison
+    const expenseUserId = expense.user.toString();
+    const currentUserId = req.user.id.toString();
+
+    if (expenseUserId !== currentUserId) {
+      console.log("User ID mismatch:", {
+        expenseUserId,
+        currentUserId,
+        expenseUser: expense.user,
+        currentUser: req.user.id
+      });
+      return res.status(StatusCodes.FORBIDDEN).json({ 
+        message: "Not authorized to delete this expense",
+        details: "User ID mismatch"
+      });
     }
 
     await expense.deleteOne();

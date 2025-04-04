@@ -132,11 +132,21 @@ export function FinanceDashboard() {
       });
     } catch (error: any) {
       console.error('Error deleting expense:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete expense. Please try again.",
-        variant: "destructive",
-      });
+z``      
+      // Provide a more user-friendly message for authorization errors
+      if (error.message && error.message.includes("not authorized")) {
+        toast({
+          title: "Authorization Error",
+          description: "You can only delete expenses that you created. This expense belongs to another user.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to delete expense. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

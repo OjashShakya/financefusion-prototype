@@ -8,6 +8,16 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Income } from "@/types/finance"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface IncomeListProps {
   incomes: Income[]
@@ -20,6 +30,7 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  const [incomeToDelete, setIncomeToDelete] = useState<string | null>(null)
 
   const categories = Array.from(new Set(incomes.map((income) => income.category)))
 
@@ -55,6 +66,7 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
       console.error("Error deleting income:", error)
     } finally {
       setIsDeleting(null)
+      setIncomeToDelete(null)
     }
   }
 
@@ -84,6 +96,26 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
           </SelectContent>
         </Select>
       </div>
+
+      <AlertDialog open={!!incomeToDelete} onOpenChange={(open) => !open && setIncomeToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the income.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => incomeToDelete && handleDelete(incomeToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {filteredIncomes.length > 0 ? (
         <div className="rounded-lg border border-gray-100 bg-white dark:border-gray-800 dark:bg-[#1c1c1c] overflow-hidden">
@@ -143,7 +175,7 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDelete(income.id)}
+                      onClick={() => setIncomeToDelete(income.id)}
                       disabled={isDeleting === income.id}
                       className="h-7 w-7 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 disabled:opacity-50"
                     >

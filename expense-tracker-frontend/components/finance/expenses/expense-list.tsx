@@ -9,6 +9,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import type { Expense } from "@/types/finance"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface ExpenseListProps {
   expenses: Expense[]
@@ -21,6 +31,7 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null)
 
   const categories = Array.from(new Set(expenses.map((expense) => expense.category)))
 
@@ -56,6 +67,7 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
       console.error("Error deleting expense:", error)
     } finally {
       setIsDeleting(null)
+      setExpenseToDelete(null)
     }
   }
 
@@ -85,6 +97,26 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
           </SelectContent>
         </Select>
       </div>
+
+      <AlertDialog open={!!expenseToDelete} onOpenChange={(open) => !open && setExpenseToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the expense.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => expenseToDelete && handleDelete(expenseToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {filteredExpenses.length > 0 ? (
         <div className="rounded-lg border border-gray-100 bg-white dark:border-gray-800 dark:bg-[#1c1c1c] overflow-hidden">
@@ -144,7 +176,7 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDelete(expense.id)}
+                      onClick={() => setExpenseToDelete(expense.id)}
                       disabled={isDeleting === expense.id}
                       className="h-7 w-7 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 disabled:opacity-50"
                     >
