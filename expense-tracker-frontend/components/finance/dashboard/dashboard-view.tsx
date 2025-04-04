@@ -369,7 +369,11 @@ export function DashboardView({
               <CardDescription>Track your progress towards financial goals</CardDescription>
             </CardHeader>
             <CardContent>
-              <SavingsGoalsList goals={savingsGoals} updateSavingsGoal={updateSavingsGoal} />
+              <SavingsGoalsList 
+                goals={savingsGoals} 
+                updateSavingsGoal={updateSavingsGoal} 
+                setActiveView={setActiveView}
+              />
             </CardContent>
           </Card>
 

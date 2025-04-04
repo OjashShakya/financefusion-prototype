@@ -179,7 +179,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                         indicatorClassName="transition-all" 
                         style={{ backgroundColor: goal.color }}
                       />
-                      <p className="text-xs text-muted-foreground">Rs. {remaining.toFixed(2)} remaining</p>
+                      <p className="text-xs text-muted-foreground">Rs. {remaining.toFixed(2)} Remaining</p>
                     </div>
                   </CardContent>
                   <CardFooter>
@@ -248,6 +248,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             min="0"
                             placeholder="0.00"
                             {...field}
+                            value={field.value === 0 ? "" : field.value}
                             onChange={(e) => {
                               const value = e.target.value === "" ? 0 : Number(e.target.value);
                               field.onChange(value);
@@ -272,6 +273,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             min="0"
                             placeholder="0.00"
                             {...field}
+                            value={field.value === 0 ? "" : field.value}
                             onChange={(e) => {
                               const value = e.target.value === "" ? 0 : Number(e.target.value);
                               field.onChange(value);
@@ -314,7 +316,11 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             <Calendar
                               mode="single"
                               selected={field.value}
-                              onSelect={field.onChange}
+                              onSelect={(date) => {
+                                if (date) {
+                                  field.onChange(date);
+                                }
+                              }}
                               disabled={(date) =>
                                 date < new Date()
                               }
