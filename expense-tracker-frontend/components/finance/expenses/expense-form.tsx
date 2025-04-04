@@ -26,7 +26,9 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import type { Expense } from "@/components/finance-dashboard"
+import type { Expense } from "@/types/finance"
+import { ExpenseCategory } from "@/types/finance"
+import { useState } from "react"
 
 const expenseFormSchema = z.object({
   description: z.string().min(1, "Description is required").max(100, "Description must be less than 100 characters"),
@@ -35,25 +37,20 @@ const expenseFormSchema = z.object({
   date: z.date(),
 })
 
-const categories = [
-  "Food",
-  "Transportation",
-  "Housing",
-  "Utilities",
-  "Entertainment",
-  "Healthcare",
-  "Shopping",
-  "Others",
-]
+// Use the ExpenseCategory enum values
+const categories = Object.values(ExpenseCategory)
 
 export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
+  // Create a new Date object for today
+  const today = new Date()
+  
   const form = useForm<z.infer<typeof expenseFormSchema>>({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: {
       description: "",
       amount: "",
       category: "",
-      date: new Date(),
+      date: today,
     },
   })
 
@@ -90,7 +87,7 @@ export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
         description: "",
         amount: "",
         category: "",
-        date: new Date(),
+        date: new Date(), // Reset to today's date
       })
     } catch (error) {
       toast({
@@ -202,7 +199,11 @@ export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    onSelect={(date) => {
+                      if (date) {
+                        field.onChange(date);
+                      }
+                    }}
                     disabled={(date) =>
                       date > new Date() || date < new Date("1900-01-01")
                     }

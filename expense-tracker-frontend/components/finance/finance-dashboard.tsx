@@ -11,6 +11,7 @@ import { SavingsView } from '@/components/finance/savings/savings-view';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import type { Expense, Income, Budget, SavingsGoal } from '@/types/finance';
 import { getIncomes, createIncome, deleteIncome } from '@/lib/api/income';
+import { getExpenses, createExpense, deleteExpense } from '@/lib/api/expense';
 import { savingsApi } from '@/lib/api/savings';
 import { useAuth } from '@/app/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
@@ -27,10 +28,28 @@ export function FinanceDashboard() {
 
   useEffect(() => {
     if (user) {
+      fetchExpenses();
       fetchIncomes();
       fetchSavingsGoals();
     }
   }, [user]);
+
+  const fetchExpenses = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getExpenses();
+      setExpenses(data);
+    } catch (error: any) {
+      console.error('Error fetching expenses:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load expenses. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchIncomes = async () => {
     try {
@@ -66,16 +85,40 @@ export function FinanceDashboard() {
     }
   };
 
-  const addExpense = (expense: Omit<Expense, 'id'>) => {
-    const newExpense = {
-      ...expense,
-      id: Math.random().toString(36).substr(2, 9),
-    };
-    setExpenses([...expenses, newExpense]);
+  const addExpense = async (expense: Omit<Expense, "id">) => {
+    try {
+      const newExpense = await createExpense(expense);
+      setExpenses([...expenses, newExpense]);
+      toast({
+        title: "Success",
+        description: "Expense added successfully",
+      });
+    } catch (error: any) {
+      console.error('Error adding expense:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add expense. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const deleteExpense = (id: string) => {
-    setExpenses(expenses.filter(expense => expense.id !== id));
+  const handleDeleteExpense = async (id: string) => {
+    try {
+      await deleteExpense(id);
+      setExpenses(expenses.filter(expense => expense.id !== id));
+      toast({
+        title: "Success",
+        description: "Expense deleted successfully",
+      });
+    } catch (error: any) {
+      console.error('Error deleting expense:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete expense. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const addIncome = async (income: Omit<Income, 'id'>) => {
@@ -292,7 +335,7 @@ export function FinanceDashboard() {
           <ExpensesView 
             expenses={expenses} 
             onAdd={addExpense}
-            onDelete={deleteExpense}
+            onDelete={handleDeleteExpense}
           />
         );
       case 'income':

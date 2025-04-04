@@ -1,8 +1,20 @@
+export enum ExpenseCategory {
+  FOOD = "Food",
+  TRANSPORT = "Transport",
+  ENTERTAINMENT = "Entertainment",
+  UTILITIES = "Utilities",
+  HOUSING = "Housing",
+  HEALTHCARE = "Healthcare",
+  EDUCATION = "Education",
+  SHOPPING = "Shopping",
+  TRAVEL = "Travel"
+}
+
 export type Expense = {
   id: string;
   description: string;
   amount: number;
-  category: string;
+  category: ExpenseCategory | string;
   date: Date;
 };
 

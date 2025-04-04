@@ -3,7 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ExpenseForm } from "./expense-form"
 import { ExpenseList } from "./expense-list"
-import type { Expense } from "@/components/finance-dashboard"
+import type { Expense } from "@/types/finance"
 
 interface ExpensesViewProps {
   expenses: Expense[]

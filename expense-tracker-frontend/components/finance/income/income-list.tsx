@@ -6,6 +6,7 @@ import { ArrowUpDown, Calendar, DollarSign, Search, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Income } from "@/types/finance"
 
 interface IncomeListProps {
@@ -17,7 +18,10 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<"date" | "amount">("date")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
+
+  const categories = Array.from(new Set(incomes.map((income) => income.category)))
 
   const filteredIncomes = incomes
     .filter(
@@ -25,6 +29,7 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
         income.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         income.category.toLowerCase().includes(searchTerm.toLowerCase()),
     )
+    .filter((income) => (categoryFilter === "all" ? true : income.category === categoryFilter))
     .sort((a, b) => {
       if (sortBy === "date") {
         return sortOrder === "asc" ? a.date.getTime() - b.date.getTime() : b.date.getTime() - a.date.getTime()
@@ -65,6 +70,19 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value)}>
+          <SelectTrigger className="h-10 w-full md:w-[180px] rounded-lg border-gray-200 bg-white dark:border-gray-800 dark:bg-[#1c1c1c]">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {filteredIncomes.length > 0 ? (
@@ -142,7 +160,7 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
         <div className="flex h-[200px] items-center justify-center rounded-lg border border-dashed border-gray-200 dark:border-gray-800">
           <div className="text-center">
             <p className="text-sm text-muted-foreground">No income found</p>
-            {searchTerm && <p className="text-xs text-muted-foreground mt-1">Try adjusting your search</p>}
+            {searchTerm && <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter</p>}
           </div>
         </div>
       )}
