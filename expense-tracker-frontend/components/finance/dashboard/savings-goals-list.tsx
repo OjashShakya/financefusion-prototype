@@ -10,10 +10,11 @@ import { useToast } from "@/components/ui/use-toast"
 
 interface SavingsGoalsListProps {
   goals: SavingsGoal[]
-  updateSavingsGoal: (id: string, amount: number) => Promise<void>
+  updateSavingsGoal: (id: string, amount: number) => void
+  setActiveView: (view: string) => void
 }
 
-export function SavingsGoalsList({ goals, updateSavingsGoal }: SavingsGoalsListProps) {
+export function SavingsGoalsList({ goals, updateSavingsGoal, setActiveView }: SavingsGoalsListProps) {
   const [contributions, setContributions] = useState<Record<string, string>>({})
   const { toast } = useToast()
 
@@ -29,7 +30,7 @@ export function SavingsGoalsList({ goals, updateSavingsGoal }: SavingsGoalsListP
     }
 
     try {
-      await updateSavingsGoal(goalId, Number(amount))
+      updateSavingsGoal(goalId, Number(amount))
       setContributions(prev => ({
         ...prev,
         [goalId]: ""
@@ -46,7 +47,7 @@ export function SavingsGoalsList({ goals, updateSavingsGoal }: SavingsGoalsListP
         <Button 
           variant="outline" 
           className="mt-2" 
-          onClick={() => window.location.href = "/savings"}
+          onClick={() => setActiveView("savings")}
         >
           Create Savings Goal
         </Button>
@@ -67,12 +68,12 @@ export function SavingsGoalsList({ goals, updateSavingsGoal }: SavingsGoalsListP
               <div>
                 <h4 className="font-medium">{goal.name}</h4>
                 <p className="text-xs text-muted-foreground">
-                  Target: ${goal.target_amount.toFixed(2)} by {targetDate}
+                  Target: Rs. {goal.target_amount.toFixed(2)} by {targetDate}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-medium">${goal.initial_amount.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">${remaining.toFixed(2)} remaining</p>
+                <p className="font-medium">Rs. {goal.initial_amount.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">Rs. {remaining.toFixed(2)} Remaining</p>
               </div>
             </div>
             <Progress value={percentage} className="h-2" />
@@ -98,6 +99,7 @@ export function SavingsGoalsList({ goals, updateSavingsGoal }: SavingsGoalsListP
                 size="sm" 
                 onClick={() => handleContribution(goal.id)}
                 disabled={!contributions[goal.id] || Number(contributions[goal.id]) <= 0}
+                className="rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]"
               >
                 Add
               </Button>

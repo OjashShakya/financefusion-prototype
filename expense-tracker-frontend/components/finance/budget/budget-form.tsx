@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import type { Budget } from "@/components/finance-dashboard"
+import type { Budget } from "@/types/finance"
 
 const categories = [
   { label: "Food", value: "Food" },
@@ -116,15 +116,19 @@ export function BudgetForm({ onSubmit }: BudgetFormProps) {
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Budget Amount ($)</FormLabel>
+                <FormLabel>Budget Amount (Rs)</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    {...field}
-                    onChange={(e) => field.onChange(Number.parseFloat(e.target.value))}
+                     type="number"
+                     step="0.01"
+                     min="0"
+                     placeholder="0.00"
+                     {...field}
+                     value={field.value === 0 ? "" : field.value}
+                     onChange={(e) => {
+                       const value = e.target.value === "" ? 0 : Number(e.target.value);
+                       field.onChange(value);
+                     }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -156,7 +160,7 @@ export function BudgetForm({ onSubmit }: BudgetFormProps) {
           />
         </div>
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]">
           Create Budget
         </Button>
       </form>

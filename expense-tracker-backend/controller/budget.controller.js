@@ -52,7 +52,11 @@ const getBudgetById = async (req, res) => {
 
     if (!budget) return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
 
-    if (budget.user.toString() !== req.user.id) {
+    // Convert both to strings for comparison
+    const budgetUserId = budget.user.toString();
+    const requestUserId = req.user.id.toString();
+    
+    if (budgetUserId !== requestUserId) {
       return res.status(StatusCodes.FORBIDDEN).json({ message: "Not authorized to view this budget" });
     }
 
@@ -79,7 +83,11 @@ const deleteBudget = async (req, res) => {
 
     if (!budget) return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
 
-    if (budget.user.toString() !== req.user.id) {
+    // Convert both to strings for comparison
+    const budgetUserId = budget.user.toString();
+    const requestUserId = req.user.id.toString();
+    
+    if (budgetUserId !== requestUserId) {
       return res.status(StatusCodes.FORBIDDEN).json({ message: "Not authorized to delete this budget" });
     }
 

@@ -25,8 +25,8 @@ export function MonthlyComparisonChart({ data }: MonthlyComparisonChartProps) {
           <BarChart data={data} barGap={0} barCategoryGap="20%" margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
             <defs>
               <linearGradient id="colorIncomeBar" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.6} />
+                <stop offset="5%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0.6} />
               </linearGradient>
               <linearGradient id="colorExpensesBar" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.8} />

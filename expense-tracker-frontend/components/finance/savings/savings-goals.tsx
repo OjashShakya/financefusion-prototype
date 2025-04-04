@@ -97,7 +97,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     onAdd(data)
     toast({
       title: "Savings goal created",
-      description: `${data.name}: $${data.target_amount.toFixed(2)} by ${format(data.date, "MMM d, yyyy")}`,
+      description: `${data.name}: Rs. ${data.target_amount.toFixed(2)} by ${format(data.date, "MMM d, yyyy")}`,
     })
     form.reset({
       name: "",
@@ -122,7 +122,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
 
     toast({
       title: "Contribution added",
-      description: `$${amount} added to ${goal.name}`,
+      description: `Rs. ${amount} added to ${goal.name}`,
     })
   }
 
@@ -153,7 +153,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                       <div>
                         <CardTitle>{goal.name}</CardTitle>
                         <CardDescription>
-                          Target: ${goal.target_amount.toFixed(2)} by {targetDate}
+                          Target: Rs. {goal.target_amount.toFixed(2)} by {targetDate}
                         </CardDescription>
                       </div>
                       <Button
@@ -170,7 +170,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">${goal.initial_amount.toFixed(2)} saved</span>
+                        <span className="text-sm font-medium">Rs. {goal.initial_amount.toFixed(2)} saved</span>
                         <span className="text-sm font-medium">{percentage.toFixed(0)}%</span>
                       </div>
                       <Progress 
@@ -179,7 +179,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                         indicatorClassName="transition-all" 
                         style={{ backgroundColor: goal.color }}
                       />
-                      <p className="text-xs text-muted-foreground">${remaining.toFixed(2)} remaining</p>
+                      <p className="text-xs text-muted-foreground">Rs. {remaining.toFixed(2)} Remaining</p>
                     </div>
                   </CardContent>
                   <CardFooter>
@@ -191,6 +191,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                           const input = document.getElementById(`contribution-${goal.id}`) as HTMLInputElement
                           handleContribution(goal.id, input.value)
                         }}
+                        className="rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]"
                       >
                         Add
                       </Button>
@@ -239,7 +240,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                     name="target_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Target Amount ($)</FormLabel>
+                        <FormLabel>Target Amount (Rs.)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -247,6 +248,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             min="0"
                             placeholder="0.00"
                             {...field}
+                            value={field.value === 0 ? "" : field.value}
                             onChange={(e) => {
                               const value = e.target.value === "" ? 0 : Number(e.target.value);
                               field.onChange(value);
@@ -263,7 +265,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                     name="initial_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Initial Amount ($)</FormLabel>
+                        <FormLabel>Initial Amount (Rs.)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -271,6 +273,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             min="0"
                             placeholder="0.00"
                             {...field}
+                            value={field.value === 0 ? "" : field.value}
                             onChange={(e) => {
                               const value = e.target.value === "" ? 0 : Number(e.target.value);
                               field.onChange(value);
@@ -313,7 +316,11 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             <Calendar
                               mode="single"
                               selected={field.value}
-                              onSelect={field.onChange}
+                              onSelect={(date) => {
+                                if (date) {
+                                  field.onChange(date);
+                                }
+                              }}
                               disabled={(date) =>
                                 date < new Date()
                               }
@@ -356,7 +363,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                   />
                 </div>
 
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]">
                   Create Goal
                 </Button>
               </form>

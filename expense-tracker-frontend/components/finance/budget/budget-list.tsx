@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import type { Budget } from "@/components/finance-dashboard"
+import type { Budget } from "@/types/finance"
 
 interface BudgetListProps {
   budgets: Budget[]
