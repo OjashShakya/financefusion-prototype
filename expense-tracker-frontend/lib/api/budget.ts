@@ -36,8 +36,8 @@ export async function getBudgets(): Promise<Budget[]> {
       id: budget._id,
       category: budget.category,
       amount: budget.amount,
-      spent: budget.spent || 0, // Default to 0 if not provided
-      period: budget.period.toLowerCase() as 'weekly' | 'monthly' | 'yearly',
+      period: budget.period,
+      spent: 0, // This will be calculated in the component
     }));
   } catch (error) {
     console.error("Error fetching budgets:", error);
@@ -51,11 +51,7 @@ export async function createBudget(budget: Omit<Budget, "id" | "spent">): Promis
       method: "POST",
       headers: getHeaders(),
       credentials: "include",
-      body: JSON.stringify({
-        category: budget.category,
-        amount: budget.amount,
-        period: budget.period.charAt(0).toUpperCase() + budget.period.slice(1), // Capitalize first letter
-      }),
+      body: JSON.stringify(budget),
     });
     
     if (!response.ok) {
@@ -73,8 +69,8 @@ export async function createBudget(budget: Omit<Budget, "id" | "spent">): Promis
       id: data._id,
       category: data.category,
       amount: data.amount,
-      spent: data.spent || 0, // Default to 0 if not provided
-      period: data.period.toLowerCase() as 'weekly' | 'monthly' | 'yearly',
+      period: data.period,
+      spent: 0, // This will be calculated in the component
     };
   } catch (error) {
     console.error("Error creating budget:", error);

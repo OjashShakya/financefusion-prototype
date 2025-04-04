@@ -1,13 +1,14 @@
 export enum ExpenseCategory {
   FOOD = "Food",
-  TRANSPORT = "Transport",
+  TRANSPORT = "Transportation",
   ENTERTAINMENT = "Entertainment",
   UTILITIES = "Utilities",
   HOUSING = "Housing",
   HEALTHCARE = "Healthcare",
   EDUCATION = "Education",
   SHOPPING = "Shopping",
-  TRAVEL = "Travel"
+  TRAVEL = "Travel",
+  OTHER = "Other"
 }
 
 export type Expense = {

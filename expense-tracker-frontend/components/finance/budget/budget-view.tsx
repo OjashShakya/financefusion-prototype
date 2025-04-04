@@ -3,15 +3,16 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BudgetForm } from "./budget-form"
 import { BudgetList } from "./budget-list"
-import type { Budget } from "@/types/finance"
+import type { Budget, Expense } from "@/types/finance"
 
 interface BudgetViewProps {
   budgets: Budget[]
+  expenses: Expense[]
   onAdd: (budget: Omit<Budget, "id" | "spent">) => void
   onDelete: (id: string) => void
 }
 
-export function BudgetView({ budgets, onAdd, onDelete }: BudgetViewProps) {
+export function BudgetView({ budgets, expenses, onAdd, onDelete }: BudgetViewProps) {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -25,7 +26,7 @@ export function BudgetView({ budgets, onAdd, onDelete }: BudgetViewProps) {
           <TabsTrigger value="add">Create Budget</TabsTrigger>
         </TabsList>
         <TabsContent value="list" className="space-y-4 pt-4">
-          <BudgetList budgets={budgets} onDelete={onDelete} />
+          <BudgetList budgets={budgets} expenses={expenses} onDelete={onDelete} />
         </TabsContent>
         <TabsContent value="add" className="space-y-4 pt-4">
           <BudgetForm onSubmit={onAdd} />

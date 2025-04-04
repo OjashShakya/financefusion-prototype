@@ -132,7 +132,7 @@ export function FinanceDashboard() {
       });
     } catch (error: any) {
       console.error('Error deleting expense:', error);
-z``      
+    
       // Provide a more user-friendly message for authorization errors
       if (error.message && error.message.includes("not authorized")) {
         toast({
@@ -387,7 +387,14 @@ z``
       case 'income':
         return <IncomeView incomes={incomes} onAdd={addIncome} onDelete={handleDeleteIncome} />;
       case 'budgeting':
-        return <BudgetView budgets={budgets} onAdd={addBudget} onDelete={handleDeleteBudget} />;
+        return (
+          <BudgetView
+            budgets={budgets}
+            expenses={expenses}
+            onAdd={addBudget}
+            onDelete={handleDeleteBudget}
+          />
+        );
       case 'savings':
         return (
           <SavingsView

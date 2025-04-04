@@ -8,9 +8,10 @@ import type { Budget, Expense } from "@/types/finance"
 interface BudgetProgressProps {
   budgets: Budget[]
   expenses: Expense[]
+  setActiveView: (view: string) => void
 }
 
-export function BudgetProgress({ budgets, expenses }: BudgetProgressProps) {
+export function BudgetProgress({ budgets, expenses, setActiveView }: BudgetProgressProps) {
   if (budgets.length === 0) {
     return (
       <div className="text-center py-4">
@@ -18,7 +19,7 @@ export function BudgetProgress({ budgets, expenses }: BudgetProgressProps) {
         <Button 
           variant="outline" 
           className="mt-2" 
-          onClick={() => window.location.href = "/budget"}
+          onClick={() => setActiveView("budgeting")}
         >
           Create Budget
         </Button>
