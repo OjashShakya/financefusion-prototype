@@ -13,6 +13,7 @@ import type { Expense, Income, Budget, SavingsGoal } from '@/types/finance';
 import { getIncomes, createIncome, deleteIncome } from '@/lib/api/income';
 import { getExpenses, createExpense, deleteExpense } from '@/lib/api/expense';
 import { savingsApi } from '@/lib/api/savings';
+import { getBudgets, createBudget, deleteBudget } from '@/lib/api/budget';
 import { useAuth } from '@/app/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 
@@ -31,6 +32,7 @@ export function FinanceDashboard() {
       fetchExpenses();
       fetchIncomes();
       fetchSavingsGoals();
+      fetchBudgets();
     }
   }, [user]);
 
@@ -78,6 +80,23 @@ export function FinanceDashboard() {
       toast({
         title: "Error",
         description: error.message || "Failed to load savings goals. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchBudgets = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getBudgets();
+      setBudgets(data);
+    } catch (error: any) {
+      console.error('Error fetching budgets:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load budgets. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -157,17 +176,40 @@ export function FinanceDashboard() {
     }
   };
 
-  const addBudget = (budget: Omit<Budget, 'id' | 'spent'>) => {
-    const newBudget = {
-      ...budget,
-      id: Math.random().toString(36).substr(2, 9),
-      spent: 0,
-    };
-    setBudgets([...budgets, newBudget]);
+  const addBudget = async (budget: Omit<Budget, 'id' | 'spent'>) => {
+    try {
+      const newBudget = await createBudget(budget);
+      setBudgets((prev) => [...prev, newBudget]);
+      toast({
+        title: "Success",
+        description: "Budget created successfully",
+      });
+    } catch (error: any) {
+      console.error('Error creating budget:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create budget. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const deleteBudget = (id: string) => {
-    setBudgets(budgets.filter(budget => budget.id !== id));
+  const handleDeleteBudget = async (id: string) => {
+    try {
+      await deleteBudget(id);
+      setBudgets((prev) => prev.filter((budget) => budget.id !== id));
+      toast({
+        title: "Success",
+        description: "Budget deleted successfully",
+      });
+    } catch (error: any) {
+      console.error('Error deleting budget:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete budget. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const addSavingsGoal = async (goal: Omit<SavingsGoal, "id">) => {
@@ -331,29 +373,11 @@ export function FinanceDashboard() {
           />
         );
       case 'expenses':
-        return (
-          <ExpensesView 
-            expenses={expenses} 
-            onAdd={addExpense}
-            onDelete={handleDeleteExpense}
-          />
-        );
+        return <ExpensesView expenses={expenses} onAdd={addExpense} onDelete={handleDeleteExpense} />;
       case 'income':
-        return (
-          <IncomeView 
-            incomes={incomes} 
-            onAdd={addIncome}
-            onDelete={handleDeleteIncome}
-          />
-        );
+        return <IncomeView incomes={incomes} onAdd={addIncome} onDelete={handleDeleteIncome} />;
       case 'budgeting':
-        return (
-          <BudgetView 
-            budgets={budgets} 
-            onAdd={addBudget}
-            onDelete={deleteBudget}
-          />
-        );
+        return <BudgetView budgets={budgets} onAdd={addBudget} onDelete={handleDeleteBudget} />;
       case 'savings':
         return (
           <SavingsView
@@ -364,7 +388,18 @@ export function FinanceDashboard() {
           />
         );
       default:
-        return null;
+        return (
+          <DashboardView
+            expenses={expenses}
+            incomes={incomes}
+            budgets={budgets}
+            savingsGoals={savingsGoals}
+            updateSavingsGoal={updateSavingsGoal}
+            setActiveView={setActiveView}
+            addExpense={addExpense}
+            addIncome={addIncome}
+          />
+        );
     }
   };
 

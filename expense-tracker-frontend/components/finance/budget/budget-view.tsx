@@ -3,7 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BudgetForm } from "./budget-form"
 import { BudgetList } from "./budget-list"
-import type { Budget } from "@/components/finance-dashboard"
+import type { Budget } from "@/types/finance"
 
 interface BudgetViewProps {
   budgets: Budget[]
