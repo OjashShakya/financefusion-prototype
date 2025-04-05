@@ -57,7 +57,7 @@ export function SavingsGoalsList({ goals, updateSavingsGoal, setActiveView }: Sa
 
   return (
     <div className="space-y-4">
-      {goals.map((goal) => {
+      {goals.slice(0, 4).map((goal) => {
         const percentage = (goal.initial_amount / goal.target_amount) * 100
         const remaining = goal.target_amount - goal.initial_amount
         const targetDate = format(goal.date, "MMM d, yyyy")
@@ -107,6 +107,17 @@ export function SavingsGoalsList({ goals, updateSavingsGoal, setActiveView }: Sa
           </div>
         )
       })}
+      {goals.length > 4 && (
+        <div className="flex justify-center mt-4">
+          <Button
+            variant="outline"
+            onClick={() => setActiveView("savings")}
+            className="w-full"
+          >
+            View More
+          </Button>
+        </div>
+      )}
     </div>
   )
 } 

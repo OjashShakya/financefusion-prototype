@@ -47,11 +47,28 @@ export async function getBudgets(): Promise<Budget[]> {
 
 export async function createBudget(budget: Omit<Budget, "id" | "spent">): Promise<Budget> {
   try {
+    // Ensure the category is one of the allowed values
+    const allowedCategories = ["Housing", "Food", "Transportation", "Entertainment", "Healthcare", "Savings", "Other"];
+    let category = budget.category;
+    
+    // If the category is not in the allowed list, map it to "Other"
+    if (!allowedCategories.includes(category)) {
+      console.warn(`Category "${category}" is not in the allowed list. Mapping to "Other".`);
+      category = "Other";
+    }
+    
+    // Capitalize the first letter of the period
+    const period = budget.period.charAt(0).toUpperCase() + budget.period.slice(1);
+    
     const response = await fetch(`${API_URL}/dashboard/budgets`, {
       method: "POST",
       headers: getHeaders(),
       credentials: "include",
-      body: JSON.stringify(budget),
+      body: JSON.stringify({
+        category,
+        amount: budget.amount,
+        period,
+      }),
     });
     
     if (!response.ok) {
@@ -61,7 +78,10 @@ export async function createBudget(budget: Omit<Budget, "id" | "spent">): Promis
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }
-      throw new Error("Failed to create budget");
+      
+      // Try to get more detailed error information
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to create budget");
     }
     
     const data = await response.json();
@@ -69,8 +89,8 @@ export async function createBudget(budget: Omit<Budget, "id" | "spent">): Promis
       id: data._id,
       category: data.category,
       amount: data.amount,
-      period: data.period,
-      spent: 0, // This will be calculated in the component
+      spent: data.spent || 0, // Default to 0 if not provided
+      period: data.period.toLowerCase() as 'weekly' | 'monthly' | 'yearly',
     };
   } catch (error) {
     console.error("Error creating budget:", error);

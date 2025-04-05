@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast"
 import type { Budget } from "@/types/finance"
 
+// Update categories to match the backend's expected values
 const categories = [
   { label: "Food", value: "Food" },
   { label: "Transportation", value: "Transportation" },
@@ -20,10 +21,10 @@ const categories = [
   { label: "Utilities", value: "Utilities" },
   { label: "Housing", value: "Housing" },
   { label: "Healthcare", value: "Healthcare" },
-  { label: "Shopping", value: "Shopping" },
   { label: "Education", value: "Education" },
+  { label: "Shopping", value: "Shopping" },
   { label: "Travel", value: "Travel" },
-  { label: "Other", value: "Other" },
+  { label: "Other", value: "Other" }
 ]
 
 type BudgetFormValues = Omit<Budget, "id" | "spent">
