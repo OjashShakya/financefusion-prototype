@@ -36,8 +36,8 @@ export async function getBudgets(): Promise<Budget[]> {
       id: budget._id,
       category: budget.category,
       amount: budget.amount,
-      spent: budget.spent || 0, // Default to 0 if not provided
-      period: budget.period.toLowerCase() as 'weekly' | 'monthly' | 'yearly',
+      period: budget.period,
+      spent: 0, // This will be calculated in the component
     }));
   } catch (error) {
     console.error("Error fetching budgets:", error);
@@ -47,14 +47,27 @@ export async function getBudgets(): Promise<Budget[]> {
 
 export async function createBudget(budget: Omit<Budget, "id" | "spent">): Promise<Budget> {
   try {
+    // Ensure the category is one of the allowed values
+    const allowedCategories = ["Housing", "Food", "Transportation", "Entertainment", "Healthcare", "Savings", "Other"];
+    let category = budget.category;
+    
+    // If the category is not in the allowed list, map it to "Other"
+    if (!allowedCategories.includes(category)) {
+      console.warn(`Category "${category}" is not in the allowed list. Mapping to "Other".`);
+      category = "Other";
+    }
+    
+    // Capitalize the first letter of the period
+    const period = budget.period.charAt(0).toUpperCase() + budget.period.slice(1);
+    
     const response = await fetch(`${API_URL}/dashboard/budgets`, {
       method: "POST",
       headers: getHeaders(),
       credentials: "include",
       body: JSON.stringify({
-        category: budget.category,
+        category,
         amount: budget.amount,
-        period: budget.period.charAt(0).toUpperCase() + budget.period.slice(1), // Capitalize first letter
+        period,
       }),
     });
     
@@ -65,7 +78,10 @@ export async function createBudget(budget: Omit<Budget, "id" | "spent">): Promis
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }
-      throw new Error("Failed to create budget");
+      
+      // Try to get more detailed error information
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to create budget");
     }
     
     const data = await response.json();

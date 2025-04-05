@@ -132,11 +132,21 @@ export function FinanceDashboard() {
       });
     } catch (error: any) {
       console.error('Error deleting expense:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete expense. Please try again.",
-        variant: "destructive",
-      });
+    
+      // Provide a more user-friendly message for authorization errors
+      if (error.message && error.message.includes("not authorized")) {
+        toast({
+          title: "Authorization Error",
+          description: "You can only delete expenses that you created. This expense belongs to another user.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to delete expense. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -377,7 +387,14 @@ export function FinanceDashboard() {
       case 'income':
         return <IncomeView incomes={incomes} onAdd={addIncome} onDelete={handleDeleteIncome} />;
       case 'budgeting':
-        return <BudgetView budgets={budgets} onAdd={addBudget} onDelete={handleDeleteBudget} />;
+        return (
+          <BudgetView
+            budgets={budgets}
+            expenses={expenses}
+            onAdd={addBudget}
+            onDelete={handleDeleteBudget}
+          />
+        );
       case 'savings':
         return (
           <SavingsView

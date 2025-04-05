@@ -25,7 +25,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import type { Expense } from "@/types/finance"
 import { ExpenseCategory } from "@/types/finance"
 import { useState } from "react"
@@ -41,6 +41,7 @@ const expenseFormSchema = z.object({
 const categories = Object.values(ExpenseCategory)
 
 export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
+  const { toast } = useToast()
   // Create a new Date object for today
   const today = new Date()
   
@@ -63,6 +64,7 @@ export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
           title: "Invalid amount",
           description: "Please enter a valid amount greater than 0",
           variant: "destructive",
+          duration: 3000,
         })
         return
       }
@@ -79,14 +81,16 @@ export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
       
       toast({
         title: "Expense added",
-        description: `$${amount.toFixed(2)} for ${data.description}`,
+        description: `Rs. ${amount.toFixed(2)} for ${data.description}`,
+        variant: "success",
+        duration: 3000,
       })
       
       // Reset form
       form.reset({
         description: "",
         amount: "",
-        category: "",
+        category: categories[0], // Reset to first category
         date: new Date(), // Reset to today's date
       })
     } catch (error) {
@@ -94,6 +98,7 @@ export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
         title: "Error",
         description: "Failed to add expense. Please try again.",
         variant: "destructive",
+        duration: 3000,
       })
     }
   }

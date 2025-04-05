@@ -98,7 +98,9 @@ export async function deleteExpense(id: string): Promise<void> {
         throw new Error("Session expired. Please log in again.");
       }
       if (response.status === 403) {
-        throw new Error("You are not authorized to delete this expense");
+        // Get the detailed error message from the response
+        const errorData = await response.json();
+        throw new Error(errorData.message || "You are not authorized to delete this expense");
       }
       throw new Error("Failed to delete expense");
     }

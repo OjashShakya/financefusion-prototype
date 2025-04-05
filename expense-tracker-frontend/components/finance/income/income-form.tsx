@@ -18,7 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import type { Income } from "@/types/finance"
 import { IncomeCategory } from "@/types/finance"
 import {
@@ -37,6 +37,7 @@ const incomeFormSchema = z.object({
 })
 
 export function IncomeForm({ onSubmit }: { onSubmit: (data: Omit<Income, "id">) => Promise<void> }) {
+  const { toast } = useToast()
   const form = useForm<z.infer<typeof incomeFormSchema>>({
     resolver: zodResolver(incomeFormSchema),
     defaultValues: {
@@ -72,7 +73,9 @@ export function IncomeForm({ onSubmit }: { onSubmit: (data: Omit<Income, "id">) 
       
       toast({
         title: "Income added",
-        description: `$${amount.toFixed(2)} from ${data.category}`,
+        description: `Rs. ${amount.toFixed(2)} from ${data.category}`,
+        variant: "success",
+        duration: 3000,
       })
       
       // Reset form

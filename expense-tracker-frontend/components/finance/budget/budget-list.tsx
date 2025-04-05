@@ -7,21 +7,28 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import type { Budget } from "@/types/finance"
+import type { Budget, Expense } from "@/types/finance"
 
 interface BudgetListProps {
   budgets: Budget[]
+  expenses: Expense[]
   onDelete: (id: string) => void
 }
 
-export function BudgetList({ budgets, onDelete }: BudgetListProps) {
+export function BudgetList({ budgets, expenses, onDelete }: BudgetListProps) {
   const [searchTerm, setSearchTerm] = useState("")
 
   const filteredBudgets = budgets
     .filter((budget) => budget.category.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
-      const aPercentage = (a.spent / a.amount) * 100
-      const bPercentage = (b.spent / b.amount) * 100
+      const aSpent = expenses
+        .filter(expense => expense.category === a.category)
+        .reduce((sum, expense) => sum + (expense.amount || 0), 0)
+      const bSpent = expenses
+        .filter(expense => expense.category === b.category)
+        .reduce((sum, expense) => sum + (expense.amount || 0), 0)
+      const aPercentage = (aSpent / a.amount) * 100
+      const bPercentage = (bSpent / b.amount) * 100
       return bPercentage - aPercentage
     })
 
@@ -34,8 +41,11 @@ export function BudgetList({ budgets, onDelete }: BudgetListProps) {
       {filteredBudgets.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredBudgets.map((budget) => {
-            const percentage = (budget.spent / budget.amount) * 100
-            const remaining = budget.amount - budget.spent
+            const spent = expenses
+              .filter(expense => expense.category === budget.category)
+              .reduce((sum, expense) => sum + (expense.amount || 0), 0)
+            const percentage = (spent / budget.amount) * 100
+            const remaining = budget.amount - spent
 
             return (
               <Card key={budget.id}>
@@ -62,7 +72,7 @@ export function BudgetList({ budgets, onDelete }: BudgetListProps) {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">
-                        ${budget.spent.toFixed(2)} of ${budget.amount.toFixed(2)}
+                        ${spent.toFixed(2)} of ${budget.amount.toFixed(2)}
                       </span>
                       <Badge variant={percentage > 90 ? "destructive" : percentage > 75 ? "outline" : "secondary"}>
                         {percentage.toFixed(0)}%

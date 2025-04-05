@@ -383,7 +383,7 @@ export function DashboardView({
               <CardDescription>Monitor your spending against budgets</CardDescription>
             </CardHeader>
             <CardContent>
-              <BudgetProgress budgets={budgets} expenses={expenses} />
+              <BudgetProgress budgets={budgets} expenses={expenses} setActiveView={setActiveView} />
             </CardContent>
           </Card>
         </div>
