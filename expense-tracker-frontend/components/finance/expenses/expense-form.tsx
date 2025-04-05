@@ -82,7 +82,7 @@ export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
       toast({
         title: "Expense added",
         description: `Rs. ${amount.toFixed(2)} for ${data.description}`,
-        variant: "destructive",
+        variant: "success",
         duration: 3000,
       })
       

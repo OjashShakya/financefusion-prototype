@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import type { SavingsGoal } from "@/types/finance"
 import { SAVINGS_COLORS } from "@/lib/constants"
 
@@ -24,6 +24,7 @@ interface SavingsGoalsProps {
 }
 
 export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsProps) {
+  const { toast } = useToast()
   const form = useForm<Omit<SavingsGoal, "id">>({
     defaultValues: {
       name: "",
@@ -98,6 +99,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     toast({
       title: "Savings goal created",
       description: `${data.name}: Rs. ${data.target_amount.toFixed(2)} by ${format(data.date, "MMM d, yyyy")}`,
+      variant: "success",
     })
     form.reset({
       name: "",
