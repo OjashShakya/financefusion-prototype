@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import type { Budget } from "@/types/finance"
 
 // Update categories to match the backend's expected values
@@ -35,25 +35,36 @@ interface BudgetFormProps {
 
 export function BudgetForm({ onSubmit }: BudgetFormProps) {
   const [open, setOpen] = useState(false)
+  const { toast } = useToast()
 
   const form = useForm<BudgetFormValues>({
     defaultValues: {
       category: "",
       amount: 0,
-      period: "monthly",
+      period: "weekly",
     },
   })
 
   function handleSubmit(data: BudgetFormValues) {
+    if (!data.period) {
+      toast({
+        title: "Error",
+        description: "Please select a period",
+        variant: "destructive",
+      })
+      return
+    }
     onSubmit(data)
     toast({
       title: "Budget created",
-      description: `$${data.amount.toFixed(2)} for ${data.category} (${data.period})`,
+      description: `Rs. ${data.amount.toFixed(2)} for ${data.category} (${data.period})`,
+      variant: "success",
     })
+    // Reset the form with default values
     form.reset({
       category: "",
       amount: 0,
-      period: "monthly",
+      period: "weekly",
     })
   }
 
@@ -143,7 +154,11 @@ export function BudgetForm({ onSubmit }: BudgetFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Period</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={field.value}
+                  defaultValue="weekly"
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select period" />

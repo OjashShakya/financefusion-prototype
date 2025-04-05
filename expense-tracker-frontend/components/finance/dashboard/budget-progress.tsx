@@ -62,17 +62,17 @@ export function BudgetProgress({ budgets, expenses, setActiveView }: BudgetProgr
               value={percentage}
               className={`h-2 ${
                 percentage > 90
-                  ? "bg-destructive/20"
+                  ? "!bg-red-100"
                   : percentage > 75
-                    ? "bg-amber-500/20"
-                    : "bg-green-500/20"
+                    ? "!bg-amber-500/20"
+                    : "!bg-[#e8f5e9]"
               }`}
               indicatorClassName={`${
                 percentage > 90
-                  ? "bg-destructive"
+                  ? "!bg-red-500"
                   : percentage > 75
-                    ? "bg-amber-500"
-                    : "bg-green-500"
+                    ? "!bg-amber-500"
+                    : "!bg-[#27ae60]"
               }`}
             />
           </div>

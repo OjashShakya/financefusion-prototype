@@ -76,7 +76,10 @@ export function SavingsGoalsList({ goals, updateSavingsGoal, setActiveView }: Sa
                 <p className="text-xs text-muted-foreground">Rs. {remaining.toFixed(2)} Remaining</p>
               </div>
             </div>
-            <Progress value={percentage} className="h-2" />
+            <Progress 
+              value={percentage} 
+              className="h-2 bg-[#e8f5e9] [&>div]:!bg-[#27ae60]" 
+            />
             <div className="flex items-center gap-2">
               <Input
                 type="number"
