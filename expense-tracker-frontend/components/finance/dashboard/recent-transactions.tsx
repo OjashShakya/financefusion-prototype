@@ -1,16 +1,17 @@
 "use client"
 
-import { ArrowDown, ArrowUp } from "lucide-react"
-import type { Expense, Income } from "@/types/finance"
+import { ArrowDown, ArrowUp, PiggyBank } from "lucide-react"
+import type { Expense, Income, SavingsTransaction } from "@/types/finance"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 
 interface RecentTransactionsProps {
   expenses: Expense[]
   incomes: Income[]
+  savingsTransactions: SavingsTransaction[]
 }
 
-export function RecentTransactions({ expenses, incomes }: RecentTransactionsProps) {
+export function RecentTransactions({ expenses, incomes, savingsTransactions }: RecentTransactionsProps) {
   // Combine and sort transactions by date
   const transactions = [
     ...expenses.map((expense) => ({
@@ -24,6 +25,12 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
       type: "income" as const,
       amount: Number(income.amount),
       title: income.description,
+    })),
+    ...savingsTransactions.map((saving) => ({
+      ...saving,
+      type: "savings" as const,
+      amount: Number(saving.amount),
+      title: `Saved to ${saving.goalName}`,
     })),
   ].sort((a, b) => b.date.getTime() - a.date.getTime())
 
@@ -41,10 +48,14 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
             <div className={`rounded-full p-2 ${
               transaction.type === "income" 
                 ? "bg-green-100 text-green-600 dark:bg-green-900/20" 
+                : transaction.type === "savings"
+                ? "bg-blue-100 text-blue-600 dark:bg-blue-900/20"
                 : "bg-red-100 text-red-600 dark:bg-red-900/20"
             }`}>
               {transaction.type === "income" ? (
                 <ArrowUp className="h-4 w-4" />
+              ) : transaction.type === "savings" ? (
+                <PiggyBank className="h-4 w-4" />
               ) : (
                 <ArrowDown className="h-4 w-4" />
               )}
@@ -60,12 +71,14 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
             <p className={`font-medium ${
               transaction.type === "income" 
                 ? "text-green-600" 
+                : transaction.type === "savings"
+                ? "text-blue-600"
                 : "text-red-600"
             }`}>
-              {transaction.type === "income" ? "+" : "-"} Rs. {transaction.amount.toFixed(2)}
+              {transaction.type === "income" ? "+" : transaction.type === "savings" ? "→" : "-"} Rs. {transaction.amount.toFixed(2)}
             </p>
             <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800">
-              {transaction.category}
+              {transaction.type === "savings" ? "Savings" : transaction.category}
             </Badge>
           </div>
         </div>

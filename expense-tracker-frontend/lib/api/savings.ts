@@ -147,7 +147,7 @@ export const savingsApi = {
   },
 
   // Update a savings goal (add money)
-  updateSavings: async (id: string, data: UpdateSavingsGoalData): Promise<SavingsGoal> => {
+  updateSavings: async (id: string, data: { amount: number; date?: Date }): Promise<SavingsGoal> => {
     try {
       const response = await fetch(`${API_URL}/dashboard/savings/${id}`, {
         method: "PATCH",

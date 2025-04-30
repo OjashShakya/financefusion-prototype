@@ -9,7 +9,7 @@ import { IncomeView } from '@/components/finance/income/income-view';
 import { BudgetView } from '@/components/finance/budget/budget-view';
 import { SavingsView } from '@/components/finance/savings/savings-view';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import type { Expense, Income, Budget, SavingsGoal } from '@/types/finance';
+import type { Expense, Income, Budget, SavingsGoal, SavingsTransaction } from '@/types/finance';
 import { getIncomes, createIncome, deleteIncome } from '@/lib/api/income';
 import { getExpenses, createExpense, deleteExpense } from '@/lib/api/expense';
 import { savingsApi } from '@/lib/api/savings';
@@ -24,6 +24,7 @@ export function FinanceDashboard() {
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
+  const [savingsTransactions, setSavingsTransactions] = useState<SavingsTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
@@ -326,42 +327,54 @@ export function FinanceDashboard() {
 
   const updateSavingsGoal = async (id: string, amount: number) => {
     try {
-      if (!id) {
-        throw new Error('Savings goal ID is required');
-      }
+      const goal = savingsGoals.find(g => g.id === id);
+      if (!goal) return;
 
-      if (!amount || amount <= 0) {
+      // Validate the amount
+      if (amount <= 0) {
         toast({
           title: "Error",
-          description: "Please enter a valid amount greater than 0",
+          description: "Amount must be greater than 0",
           variant: "destructive",
         });
         return;
       }
 
-      const updatedGoal = await savingsApi.updateSavings(id, {
-        amount,
-        date: new Date().toISOString()
-      });
+      const newAmount = goal.initial_amount + amount;
+      if (newAmount > goal.target_amount) {
+        toast({
+          title: "Error",
+          description: "Amount exceeds target amount",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      setSavingsGoals(prev => prev.map(goal => 
-        goal.id === id 
-          ? {
-              ...goal,
-              initial_amount: updatedGoal.initial_amount
-            }
-          : goal
-      ));
+      // Update the savings goal with the new total amount
+      await savingsApi.updateSavings(id, { amount: newAmount });
+      
+      // Create a new savings transaction with just the contribution amount
+      const newTransaction: SavingsTransaction = {
+        id: crypto.randomUUID(),
+        goalId: id,
+        goalName: goal.name,
+        amount: amount, // This is the contribution amount, not the total
+        date: new Date(),
+        type: 'savings'
+      };
+
+      setSavingsTransactions(prev => [newTransaction, ...prev]);
+      await fetchSavingsGoals();
 
       toast({
         title: "Success",
-        description: `$${amount.toFixed(2)} added to ${updatedGoal.name}`,
+        description: `Added Rs. ${amount.toFixed(2)} to ${goal.name}`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating savings goal:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to update savings goal. Please try again.",
+        description: "Failed to update savings goal. Please try again.",
         variant: "destructive",
       });
     }
@@ -376,6 +389,7 @@ export function FinanceDashboard() {
             incomes={incomes}
             budgets={budgets}
             savingsGoals={savingsGoals}
+            savingsTransactions={savingsTransactions}
             updateSavingsGoal={updateSavingsGoal}
             setActiveView={setActiveView}
             addExpense={addExpense}
@@ -411,6 +425,7 @@ export function FinanceDashboard() {
             incomes={incomes}
             budgets={budgets}
             savingsGoals={savingsGoals}
+            savingsTransactions={savingsTransactions}
             updateSavingsGoal={updateSavingsGoal}
             setActiveView={setActiveView}
             addExpense={addExpense}

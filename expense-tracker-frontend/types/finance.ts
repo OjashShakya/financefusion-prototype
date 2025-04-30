@@ -54,4 +54,13 @@ export type SavingsGoal = {
   initial_amount: number;
   date: Date;
   color: string;
+};
+
+export type SavingsTransaction = {
+  id: string;
+  goalId: string;
+  goalName: string;
+  amount: number;
+  date: Date;
+  type: 'savings';
 }; 

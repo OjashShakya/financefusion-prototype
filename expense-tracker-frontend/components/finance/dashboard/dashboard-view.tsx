@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { RecentTransactions } from "./recent-transactions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import type { Expense, Income, Budget, SavingsGoal } from "@/types/finance"
+import type { Expense, Income, Budget, SavingsGoal, SavingsTransaction } from "@/types/finance"
 import { CashFlowChart } from "./charts/cash-flow-chart"
 import { useAuth } from "@/app/context/AuthContext"
 import { Button } from "@/components/ui/button"
@@ -34,6 +34,7 @@ interface DashboardViewProps {
   incomes: Income[]
   budgets: Budget[]
   savingsGoals: SavingsGoal[]
+  savingsTransactions: SavingsTransaction[]
   updateSavingsGoal: (id: string, amount: number) => void
   setActiveView: (view: string) => void
   addExpense: (expense: Omit<Expense, "id">) => void
@@ -68,6 +69,7 @@ export function DashboardView({
   incomes,
   budgets,
   savingsGoals,
+  savingsTransactions,
   updateSavingsGoal,
   setActiveView,
   addExpense,
@@ -79,10 +81,12 @@ export function DashboardView({
   const [incomeDialogOpen, setIncomeDialogOpen] = useState(false)
 
   // Calculate totals
+  const totalSavings = savingsGoals.reduce((sum, goal) => sum + (goal.initial_amount || 0), 0)
   const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
   const totalIncome = incomes.reduce((sum, income) => sum + (income.amount || 0), 0)
+  const availableIncome = totalIncome - totalSavings
   const netIncome = totalIncome - totalExpenses
-  const savingsRate = totalIncome > 0 ? (netIncome / totalIncome) * 100 : 0
+  const savingsRate = totalIncome > 0 ? ((totalSavings ) / totalIncome) * 100 : 0
 
   // Get current month's data
   const today = new Date()
@@ -168,8 +172,8 @@ export function DashboardView({
         {/* Income Card */}
         <Card className="overflow-hidden rounded-[16px] border bg-[#F9F9F9] shadow-sm dark:border-gray-800 dark:bg-[#1c1c1c]">
           <div className="p-6">
-            <h3 className="text-base font-medium text-gray-600">Total Income</h3>
-            <p className="mt-2 text-3xl font-bold">Rs. {totalIncome}</p>
+            <h3 className="text-base font-medium text-gray-600">Available Income</h3>
+            <p className="mt-2 text-3xl font-bold">Rs. {availableIncome}</p>
             <p className="mt-1 text-sm text-gray-500">{incomes.length} income sources</p>
           </div>
           <div className="border-t bg-[#F9F9F9] px-4 py-4">
@@ -290,7 +294,7 @@ export function DashboardView({
               <Wallet className="h-5 w-5" />
               Savings Goals
             </h4>
-            <p className="mt-1 text-sm text-gray-500">Record a new expense</p>
+            <p className="mt-1 text-sm text-gray-500">Track your savings goals</p>
             <Button 
               variant="outline" 
               className="mt-3 bg-[#F9F9F9] w-full gap-2" 
@@ -322,7 +326,11 @@ export function DashboardView({
               <CardDescription>Your latest financial activities</CardDescription>
             </CardHeader>
             <CardContent>
-              <RecentTransactions expenses={expenses} incomes={incomes} />
+              <RecentTransactions 
+                expenses={expenses} 
+                incomes={incomes} 
+                savingsTransactions={savingsTransactions}
+              />
             </CardContent>
           </Card>
         </div>
