@@ -7,7 +7,7 @@ import type { Expense, Income, Budget, SavingsGoal, SavingsTransaction } from "@
 import { CashFlowChart } from "./charts/cash-flow-chart"
 import { useAuth } from "@/app/context/AuthContext"
 import { Button } from "@/components/ui/button"
-import { Plus, BarChart, Banknote, ChartPie, Wallet, Sun } from "lucide-react"
+import { Plus, BarChart, Banknote, ChartPie, Wallet, Sun, Repeat2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -79,6 +79,8 @@ export function DashboardView({
   const [greeting, setGreeting] = useState("Good morning")
   const [expenseDialogOpen, setExpenseDialogOpen] = useState(false)
   const [incomeDialogOpen, setIncomeDialogOpen] = useState(false)
+  const [showTotalIncome, setShowTotalIncome] = useState(false)
+  const [showTotalSavings, setShowTotalSavings] = useState(false)
 
   // Calculate totals
   const totalSavings = savingsGoals.reduce((sum, goal) => sum + (goal.initial_amount || 0), 0)
@@ -172,9 +174,26 @@ export function DashboardView({
         {/* Income Card */}
         <Card className="overflow-hidden rounded-[16px] border bg-[#F9F9F9] shadow-sm dark:border-gray-800 dark:bg-[#1c1c1c]">
           <div className="p-6">
-            <h3 className="text-base font-medium text-gray-600">Available Income</h3>
-            <p className="mt-2 text-3xl font-bold">Rs. {availableIncome}</p>
-            <p className="mt-1 text-sm text-gray-500">{incomes.length} income sources</p>
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-medium text-gray-600">
+                {showTotalIncome ? "Total Income" : "Available Income"}
+              </h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowTotalIncome(!showTotalIncome)}
+                className="h-8 w-8 text-muted-foreground hover:text-primary"
+              >
+                <Repeat2 className="h-4 w-4" />
+                <span className="sr-only">Toggle view</span>
+              </Button>
+            </div>
+            <p className="mt-2 text-3xl font-bold">
+              Rs. {showTotalIncome ? totalIncome : availableIncome}
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              {showTotalIncome ? "Total earnings" : `${incomes.length} income sources`}
+            </p>
           </div>
           <div className="border-t bg-[#F9F9F9] px-4 py-4">
             <h4 className="flex items-center gap-2 text-base font-medium">
@@ -280,14 +299,38 @@ export function DashboardView({
         {/* Savings Card */}
         <Card className="overflow-hidden rounded-[16px] border bg-[#F9F9F9] shadow-sm dark:border-gray-800 dark:bg-[#1c1c1c]">
           <div className="p-6">
-            <h3 className="text-base font-medium text-gray-600">Saving Rate</h3>
-            <p className="mt-2 text-3xl font-bold">{savingsRate.toFixed(1)}%</p>
-            <p className="mt-1 text-sm text-gray-500">
-              {savingsRate >= 20 ? "Excellent saving habits" : 
-               savingsRate >= 10 ? "Good saving habits" :
-               savingsRate >= 0 ? "Could save more" :
-               "Spending more than earning"}
-            </p>
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-medium text-gray-600">
+                {showTotalSavings ? "Total Savings" : "Saving Rate"}
+              </h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowTotalSavings(!showTotalSavings)}
+                className="h-8 w-8 text-muted-foreground hover:text-primary"
+              >
+                <Repeat2 className="h-4 w-4" />
+                <span className="sr-only">Toggle view</span>
+              </Button>
+            </div>
+            {showTotalSavings ? (
+              <>
+                <p className="mt-2 text-3xl font-bold">Rs. {totalSavings}</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  {savingsGoals.length} savings goals
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="mt-2 text-3xl font-bold">{savingsRate.toFixed(1)}%</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  {savingsRate >= 20 ? "Excellent saving habits" : 
+                   savingsRate >= 10 ? "Good saving habits" :
+                   savingsRate >= 0 ? "Could save more" :
+                   "Spending more than earning"}
+                </p>
+              </>
+            )}
           </div>
           <div className="border-t bg-[#F9F9F9] px-4 py-4">
             <h4 className="flex items-center gap-2 text-base font-medium">
