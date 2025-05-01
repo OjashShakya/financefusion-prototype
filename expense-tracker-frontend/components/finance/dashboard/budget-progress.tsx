@@ -34,7 +34,9 @@ export function BudgetProgress({ budgets, expenses, setActiveView }: BudgetProgr
           .filter(expense => expense.category === budget.category)
           .reduce((sum, expense) => sum + (expense.amount || 0), 0)
         
-        const percentage = (spent / budget.amount) * 100
+        const percentage = spent > budget.amount 
+          ? -((spent - budget.amount) / budget.amount) * 100 
+          : (spent / budget.amount) * 100
         const remaining = budget.amount - spent
 
         return (
@@ -48,7 +50,7 @@ export function BudgetProgress({ budgets, expenses, setActiveView }: BudgetProgr
               </div>
               <span
                 className={`text-xs font-medium ${
-                  percentage > 90
+                  percentage < 0 || percentage > 90
                     ? "text-destructive"
                     : percentage > 75
                       ? "text-amber-500"
@@ -59,20 +61,24 @@ export function BudgetProgress({ budgets, expenses, setActiveView }: BudgetProgr
               </span>
             </div>
             <Progress
-              value={percentage}
+              value={Math.abs(percentage)}
               className={`h-2 ${
-                percentage > 90
-                  ? "!bg-red-100"
-                  : percentage > 75
-                    ? "!bg-amber-500/20"
-                    : "!bg-[#e8f5e9]"
+                percentage < 0
+                  ? "!bg-red-500"
+                  : percentage > 90
+                    ? "!bg-red-100"
+                    : percentage > 75
+                      ? "!bg-amber-500/20"
+                      : "!bg-[#e8f5e9]"
               }`}
               indicatorClassName={`${
-                percentage > 90
-                  ? "!bg-red-500"
-                  : percentage > 75
-                    ? "!bg-amber-500"
-                    : "!bg-[#27ae60]"
+                percentage < 0
+                  ? "!bg-black"
+                  : percentage > 90
+                    ? "!bg-red-500"
+                    : percentage > 75
+                      ? "!bg-amber-500"
+                      : "!bg-[#27ae60]"
               }`}
             />
           </div>

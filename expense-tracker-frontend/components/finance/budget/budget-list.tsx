@@ -44,7 +44,9 @@ export function BudgetList({ budgets, expenses, onDelete }: BudgetListProps) {
             const spent = expenses
               .filter(expense => expense.category === budget.category)
               .reduce((sum, expense) => sum + (expense.amount || 0), 0)
-            const percentage = (spent / budget.amount) * 100
+            const percentage = spent > budget.amount 
+              ? -((spent - budget.amount) / budget.amount) * 100 
+              : (spent / budget.amount) * 100
             const remaining = budget.amount - spent
 
             return (
@@ -74,17 +76,29 @@ export function BudgetList({ budgets, expenses, onDelete }: BudgetListProps) {
                       <span className="text-sm font-medium">
                         ${spent.toFixed(2)} of ${budget.amount.toFixed(2)}
                       </span>
-                      <Badge variant={percentage > 90 ? "destructive" : percentage > 75 ? "outline" : "secondary"}>
+                      <Badge variant={percentage < 0 || percentage > 90 ? "destructive" : percentage > 75 ? "outline" : "secondary"}>
                         {percentage.toFixed(0)}%
                       </Badge>
                     </div>
                     <Progress
-                      value={percentage}
+                      value={Math.abs(percentage)}
                       className={`h-2 ${
-                        percentage > 90 ? "bg-destructive/20" : percentage > 75 ? "bg-amber-500/20" : "bg-green-500/20"
+                        percentage < 0
+                          ? "!bg-red-500"
+                          : percentage > 90
+                            ? "!bg-red-100"
+                            : percentage > 75
+                              ? "!bg-amber-500/20"
+                              : "!bg-[#e8f5e9]"
                       }`}
                       indicatorClassName={`${
-                        percentage > 90 ? "bg-destructive" : percentage > 75 ? "bg-amber-500" : "bg-green-500"
+                        percentage < 0
+                          ? "!bg-black"
+                          : percentage > 90
+                            ? "!bg-red-500"
+                            : percentage > 75
+                              ? "!bg-amber-500"
+                              : "!bg-[#27ae60]"
                       }`}
                     />
                     <p className="text-xs text-muted-foreground">${remaining.toFixed(2)} remaining</p>

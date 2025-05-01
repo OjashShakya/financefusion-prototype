@@ -112,9 +112,16 @@ const updateSavings = async (req, res) => {
           message: "Invalid amount values",
         });
       }
+
+      // Validate that the new amount is greater than the current amount
+      if (newAmount <= currentAmount) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: "New amount must be greater than current amount",
+        });
+      }
   
-      // Update the savings amount
-      savings.initial_amount = currentAmount + newAmount; // Add the new amount to the current amount
+      // Update the savings amount with the new total
+      savings.initial_amount = newAmount; // Use the new amount directly
       savings.date = date || Date.now(); // Update last modified date
       await savings.save();
   
