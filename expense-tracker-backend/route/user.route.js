@@ -3,6 +3,7 @@ const {
   registerUser,
   loginUser,
   verifyOTPUser,
+  verifyLoginOTP,
   getAllUser,
   getUserById,
   requestPasswordReset,
@@ -35,6 +36,12 @@ router.post(
   "/verify-otp",
   verifyOTPUser
 );
+
+router.post(
+  "/verify-login-otp",
+  verifyLoginOTP
+);
+
 
 router.get(
   "/",
