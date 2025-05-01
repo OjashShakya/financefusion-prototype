@@ -117,6 +117,29 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     const newAmount = Number.parseFloat(amount || "0")
     if (isNaN(newAmount)) return
 
+    // Check if user has enough available income
+    const availableIncome = localStorage.getItem('availableIncome')
+    if (!availableIncome || Number(availableIncome) <= 0) {
+      toast({
+        title: "Saving Failed",
+        description: "You don't have enough available income to save. Please add income first.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Check if contribution amount is greater than available income
+    if (newAmount > Number(availableIncome)) {
+      toast({
+        title: "Saving Failed",
+        description: `You can only save up to Rs. ${Number(availableIncome).toFixed(2)}`,
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
     const updatedAmount = Math.min(newAmount, goal.target_amount)
     onUpdate(goalId, updatedAmount)
 
@@ -290,7 +313,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             {...field}
                             value={field.value === 0 ? "" : field.value}
                             onChange={(e) => {
-                              const value = e.target.value === "" ? 0 : Number(e.target.value);
+                              const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
                               field.onChange(value);
                             }}
                           />

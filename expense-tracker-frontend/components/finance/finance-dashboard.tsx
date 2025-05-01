@@ -10,7 +10,7 @@ import { BudgetView } from '@/components/finance/budget/budget-view';
 import { SavingsView } from '@/components/finance/savings/savings-view';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import type { Expense, Income, Budget, SavingsGoal, SavingsTransaction } from '@/types/finance';
-import { getIncomes, createIncome, deleteIncome } from '@/lib/api/income';
+import { getIncomes, createIncome, deleteIncome, deleteAllIncomes } from '@/lib/api/income';
 import { getExpenses, createExpense, deleteExpense } from '@/lib/api/expense';
 import { savingsApi } from '@/lib/api/savings';
 import { getBudgets, createBudget, deleteBudget } from '@/lib/api/budget';
@@ -182,6 +182,24 @@ export function FinanceDashboard() {
       toast({
         title: "Error",
         description: error.message || "Failed to delete income. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteAllIncomes = async () => {
+    try {
+      await deleteAllIncomes();
+      setIncomes([]);
+      toast({
+        title: "Success",
+        description: "All incomes deleted successfully",
+      });
+    } catch (error: any) {
+      console.error('Error deleting all incomes:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete all incomes. Please try again.",
         variant: "destructive",
       });
     }
@@ -397,9 +415,14 @@ export function FinanceDashboard() {
           />
         );
       case 'expenses':
-        return <ExpensesView expenses={expenses} onAdd={addExpense} onDelete={handleDeleteExpense} />;
+        return <ExpensesView 
+          expenses={expenses} 
+          onAdd={addExpense} 
+          onDelete={handleDeleteExpense} 
+          onExpensesChange={fetchExpenses}
+        />;
       case 'income':
-        return <IncomeView incomes={incomes} onAdd={addIncome} onDelete={handleDeleteIncome} />;
+        return <IncomeView incomes={incomes} onAdd={addIncome} onDelete={handleDeleteIncome} onDeleteAll={handleDeleteAllIncomes} />;
       case 'budgeting':
         return (
           <BudgetView

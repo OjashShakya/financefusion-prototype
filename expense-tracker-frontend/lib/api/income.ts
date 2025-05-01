@@ -106,4 +106,27 @@ export async function deleteIncome(id: string): Promise<void> {
     console.error("Error deleting income:", error);
     throw error;
   }
+}
+
+export async function deleteAllIncomes(): Promise<void> {
+  try {
+    const response = await fetch(`${API_URL}/dashboard/incomes`, {
+      method: "DELETE",
+      headers: getHeaders(),
+      credentials: "include",
+    });
+    
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Handle unauthorized error
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        throw new Error("Session expired. Please log in again.");
+      }
+      throw new Error("Failed to delete all incomes");
+    }
+  } catch (error) {
+    console.error("Error deleting all incomes:", error);
+    throw error;
+  }
 } 

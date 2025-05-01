@@ -22,7 +22,7 @@ export function FinanceSidebar({ activeView, setActiveView, isCollapsed, setIsCo
     <div className={`fixed top-0 left-0 h-screen flex flex-col border-r bg-[#f9f9f9] transition-all duration-300 ${isCollapsed ? 'w-[80px]' : 'w-[320px]'}`}>
       {/* Logo */}
       <div className="flex mt-[32px] h-[60px] items-center px-4 justify-between">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : ''}`}>
+        <div className={`flex items-center ${isCollapsed ? 'hidden' : ''}`}>
           <Image 
             src={mainLogo} 
             alt="Finance Fusion Logo" 
@@ -85,8 +85,8 @@ export function FinanceSidebar({ activeView, setActiveView, isCollapsed, setIsCo
 
       {/* User */}
       <div className="border-t p-4 mt-auto">
-        <div className={`flex items-center gap-[12px] bg-gray-50 rounded-[16px] p-[12px] border-[1.5px] ${isCollapsed ? 'justify-center' : ''}`}>
-          <Avatar className="h-[44px] w-[44px]">
+        <div className={`flex items-center gap-[12px] bg-gray-50 rounded-[16px] p-[12px] border-[1.5px] ${isCollapsed ? 'justify-center p-2' : ''}`}>
+          <Avatar className={`${isCollapsed ? 'h-[36px] w-[36px]' : 'h-[44px] w-[44px]'}`}>
             <AvatarFallback className="bg-primary text-primary-foreground">
               {user?.fullname?.split(" ").map((n) => n[0]).join("") || "U"}
             </AvatarFallback>
@@ -101,8 +101,8 @@ export function FinanceSidebar({ activeView, setActiveView, isCollapsed, setIsCo
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="flex items-center justify-center rounded-lg border p-2 hover:bg-gray-100 cursor-pointer">
-                <Settings className="h-5 w-5 text-gray-500" />
+              <div className={`flex items-center justify-center rounded-lg border p-2 hover:bg-gray-100 cursor-pointer ${isCollapsed ? 'p-1.5' : ''}`}>
+                <Settings className={`${isCollapsed ? 'h-4 w-4' : 'h-5 w-5'} text-gray-500`} />
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>

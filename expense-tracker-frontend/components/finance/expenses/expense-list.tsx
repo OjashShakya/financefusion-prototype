@@ -23,15 +23,18 @@ import {
 interface ExpenseListProps {
   expenses: Expense[]
   onDelete: (id: string) => void
+  onDeleteAll: () => void
 }
 
-export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
+export function ExpenseList({ expenses, onDelete, onDeleteAll }: ExpenseListProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<"date" | "amount">("date")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null)
+  const [isDeletingAll, setIsDeletingAll] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
 
   const categories = Array.from(new Set(expenses.map((expense) => expense.category)))
 
@@ -71,6 +74,18 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
     }
   }
 
+  const handleDeleteAll = async () => {
+    try {
+      setIsDeletingAll(true)
+      await onDeleteAll()
+    } catch (error) {
+      console.error("Error deleting all expenses:", error)
+    } finally {
+      setIsDeletingAll(false)
+      setShowDeleteAllDialog(false)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
@@ -96,7 +111,33 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
             ))}
           </SelectContent>
         </Select>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => setShowDeleteAllDialog(true)}
+          disabled={expenses.length === 0 || isDeletingAll}
+          className="h-10"
+        >
+          Delete All
+        </Button>
       </div>
+
+      <AlertDialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will delete all your expenses. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!expenseToDelete} onOpenChange={(open) => !open && setExpenseToDelete(null)}>
         <AlertDialogContent>

@@ -103,9 +103,30 @@ const deleteIncome = async (req, res) => {
   }
 };
 
+// Delete all incomes for the logged-in user
+const deleteAllIncomes = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const result = await Income.deleteMany({ user: userId });
+    
+    res.status(StatusCodes.OK).json({ 
+      message: "All incomes deleted successfully",
+      deletedCount: result.deletedCount 
+    });
+  } catch (error) {
+    console.error('Error deleting all incomes:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+      message: 'Error deleting all incomes', 
+      error: error.message 
+    });
+  }
+};
+
 module.exports = {
   createIncome,
   getIncomes,
   getIncomeById,
   deleteIncome,
+  deleteAllIncomes,
 };

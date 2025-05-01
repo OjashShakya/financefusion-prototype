@@ -3,7 +3,8 @@ const {
     createIncome,
     getIncomes,
     getIncomeById,
-    deleteIncome
+    deleteIncome,
+    deleteAllIncomes
 } = require("../controller/income.controller");
 const authenticateUser  = require("../middlewares/auth.middleware"); // Middleware for user authentication
 
@@ -20,5 +21,8 @@ router.get("/incomes/:id", authenticateUser, getIncomeById);
 
 // Route to delete an income by ID
 router.delete("/incomes/:id", authenticateUser, deleteIncome);
+
+// Route to delete all incomes
+router.delete("/incomes", authenticateUser, deleteAllIncomes);
 
 module.exports = router;
