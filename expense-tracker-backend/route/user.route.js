@@ -14,6 +14,7 @@ const {currentUser} = require("../controller/decodeToken.controller");
 
 const verifyToken = require("../middlewares/auth.middleware");
 const authenticateUser = require("../middlewares/auth.middleware");
+const validatePassword = require("../middlewares/validatePassword");
 // const { profileUpload } = require("../middlewares/fileUpload.middleware");
 
 
@@ -25,6 +26,7 @@ const router = express.Router();
 
 router.post(
   "/register",
+  validatePassword,
   registerUser
 );
 router.post("/login", loginUser);
@@ -41,7 +43,7 @@ router.get(
 );
 // router.get("/current-user", verifyToken);
 router.post("/password-reset/request", requestPasswordReset);  // Request password reset (send OTP/link)
-router.post("/password-reset/reset", resetPassword);  // Reset password with token/OTP
+router.post("/password-reset/reset", validatePassword, resetPassword);  // Reset password with token/OTP
 // router.patch(
 //   "/update/:id",
 //   verifyToken,
