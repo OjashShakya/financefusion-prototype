@@ -117,14 +117,27 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     const newAmount = Number.parseFloat(amount || "0")
     if (isNaN(newAmount)) return
 
-    onUpdate(goalId, Math.min(newAmount, goal.target_amount))
+    const updatedAmount = Math.min(newAmount, goal.target_amount)
+    onUpdate(goalId, updatedAmount)
 
     const input = document.getElementById(`contribution-${goalId}`) as HTMLInputElement
     if (input) input.value = ""
 
+    const newTotal = goal.initial_amount + updatedAmount
+    const newPercentage = (newTotal / goal.target_amount) * 100
+    const remaining = goal.target_amount - newTotal
+
     toast({
-      title: "Contribution added",
-      description: `Rs. ${amount} added to ${goal.name}`,
+      title: "Amount Saved Successfully",
+      description: (
+        <div className="space-y-1">
+          <p className="text-white font-bold">Rs. {updatedAmount.toFixed(2)} added to {goal.name}</p>
+          <p className="text-sm text-muted-foreground text-white font-bold">
+            Progress: {newPercentage.toFixed(0)}% (Rs. {remaining.toFixed(2)} remaining)
+          </p>
+        </div>
+      ),
+      variant: "success",
     })
   }
 
