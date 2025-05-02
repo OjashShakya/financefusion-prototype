@@ -22,6 +22,23 @@ const Signup: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const validatePassword = (password: string) => {
+    const minLength = 8;
+    const hasNumber = /\d/.test(password);
+    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    if (password.length < minLength) {
+      return "Password must be at least 8 characters long";
+    }
+    if (!hasNumber) {
+      return "Password must contain at least one number";
+    }
+    if (!hasSymbol) {
+      return "Password must contain at least one symbol";
+    }
+    return "";
+  };
+
   const handleSignup = async () => {
     setError("");
     if (password !== confirmPassword) {
@@ -30,6 +47,12 @@ const Signup: React.FC = () => {
     }
     if (!termsAccepted) {
       setError("You must accept the terms and policy");
+      return;
+    }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
 

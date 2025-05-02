@@ -108,9 +108,30 @@ const deleteExpense = async (req, res) => {
   }
 };
 
+// Delete all expenses for the logged-in user
+const deleteAllExpenses = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const result = await Expense.deleteMany({ user: userId });
+    
+    res.status(StatusCodes.OK).json({ 
+      message: "All expenses deleted successfully",
+      deletedCount: result.deletedCount 
+    });
+  } catch (error) {
+    console.error('Error deleting all expenses:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+      message: 'Error deleting all expenses', 
+      error: error.message 
+    });
+  }
+};
+
 module.exports = {
   createExpense,
   getExpenses,
   getExpenseById,
   deleteExpense,
+  deleteAllExpenses,
 };

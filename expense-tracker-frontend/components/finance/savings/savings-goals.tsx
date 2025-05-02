@@ -117,14 +117,50 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     const newAmount = Number.parseFloat(amount || "0")
     if (isNaN(newAmount)) return
 
-    onUpdate(goalId, Math.min(newAmount, goal.target_amount))
+    // Check if user has enough available income
+    const availableIncome = localStorage.getItem('availableIncome')
+    if (!availableIncome || Number(availableIncome) <= 0) {
+      toast({
+        title: "Saving Failed",
+        description: "You don't have enough available income to save. Please add income first.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Check if contribution amount is greater than available income
+    if (newAmount > Number(availableIncome)) {
+      toast({
+        title: "Saving Failed",
+        description: `You can only save up to Rs. ${Number(availableIncome).toFixed(2)}`,
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    const updatedAmount = Math.min(newAmount, goal.target_amount)
+    onUpdate(goalId, updatedAmount)
 
     const input = document.getElementById(`contribution-${goalId}`) as HTMLInputElement
     if (input) input.value = ""
 
+    const newTotal = goal.initial_amount + updatedAmount
+    const newPercentage = (newTotal / goal.target_amount) * 100
+    const remaining = goal.target_amount - newTotal
+
     toast({
-      title: "Contribution added",
-      description: `Rs. ${amount} added to ${goal.name}`,
+      title: "Amount Saved Successfully",
+      description: (
+        <div className="space-y-1">
+          <p className="text-white font-bold">Rs. {updatedAmount.toFixed(2)} added to {goal.name}</p>
+          <p className="text-sm text-muted-foreground text-white font-bold">
+            Progress: {newPercentage.toFixed(0)}% (Rs. {remaining.toFixed(2)} remaining)
+          </p>
+        </div>
+      ),
+      variant: "success",
     })
   }
 
@@ -277,7 +313,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                             {...field}
                             value={field.value === 0 ? "" : field.value}
                             onChange={(e) => {
-                              const value = e.target.value === "" ? 0 : Number(e.target.value);
+                              const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
                               field.onChange(value);
                             }}
                           />

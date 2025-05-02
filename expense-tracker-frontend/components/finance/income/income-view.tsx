@@ -9,9 +9,10 @@ interface IncomeViewProps {
   incomes: Income[]
   onAdd: (income: Omit<Income, "id">) => Promise<void>
   onDelete: (id: string) => Promise<void>
+  onDeleteAll: () => Promise<void>
 }
 
-export function IncomeView({ incomes, onAdd, onDelete }: IncomeViewProps) {
+export function IncomeView({ incomes, onAdd, onDelete, onDeleteAll }: IncomeViewProps) {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -25,7 +26,7 @@ export function IncomeView({ incomes, onAdd, onDelete }: IncomeViewProps) {
           <TabsTrigger value="add">Add Income</TabsTrigger>
         </TabsList>
         <TabsContent value="list" className="space-y-4 pt-4">
-          <IncomeList incomes={incomes} onDelete={onDelete} />
+          <IncomeList incomes={incomes} onDelete={onDelete} onDeleteAll={onDeleteAll} />
         </TabsContent>
         <TabsContent value="add" className="space-y-4 pt-4">
           <IncomeForm onSubmit={onAdd} />

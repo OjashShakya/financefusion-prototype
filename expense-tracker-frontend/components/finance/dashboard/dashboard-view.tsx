@@ -86,7 +86,7 @@ export function DashboardView({
   const totalSavings = savingsGoals.reduce((sum, goal) => sum + (goal.initial_amount || 0), 0)
   const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
   const totalIncome = incomes.reduce((sum, income) => sum + (income.amount || 0), 0)
-  const availableIncome = totalIncome - totalSavings
+  const availableIncome = totalIncome - totalSavings -totalExpenses
   const netIncome = totalIncome - totalExpenses
   const savingsRate = totalIncome > 0 ? ((totalSavings ) / totalIncome) * 100 : 0
 

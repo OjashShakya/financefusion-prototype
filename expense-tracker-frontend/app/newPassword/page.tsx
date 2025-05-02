@@ -21,6 +21,23 @@ const NewPassword: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const validatePassword = (password: string) => {
+    const minLength = 8;
+    const hasNumber = /\d/.test(password);
+    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    if (password.length < minLength) {
+      return "Password must be at least 8 characters long";
+    }
+    if (!hasNumber) {
+      return "Password must contain at least one number";
+    }
+    if (!hasSymbol) {
+      return "Password must contain at least one symbol";
+    }
+    return "";
+  };
+
   const handleResetPassword = async () => {
     setError("");
     if (!password || !confirmPassword) {
@@ -32,9 +49,16 @@ const NewPassword: React.FC = () => {
       return;
     }
 
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await resetPassword(password , email);
+      await resetPassword(password, email);
+      router.push("/login");
     } catch (err: any) {
       setError(err.message || "Failed to reset password. Please try again.");
     } finally {

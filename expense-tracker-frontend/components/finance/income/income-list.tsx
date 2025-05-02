@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Income } from "@/types/finance"
+import { useToast } from "@/hooks/use-toast"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,15 +23,19 @@ import {
 interface IncomeListProps {
   incomes: Income[]
   onDelete: (id: string) => Promise<void>
+  onDeleteAll: () => Promise<void>
 }
 
-export function IncomeList({ incomes, onDelete }: IncomeListProps) {
+export function IncomeList({ incomes, onDelete, onDeleteAll }: IncomeListProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<"date" | "amount">("date")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [incomeToDelete, setIncomeToDelete] = useState<string | null>(null)
+  const [isDeletingAll, setIsDeletingAll] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const { toast } = useToast()
 
   const categories = Array.from(new Set(incomes.map((income) => income.category)))
 
@@ -70,6 +75,28 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
     }
   }
 
+  const handleDeleteAll = async () => {
+    try {
+      setIsDeletingAll(true)
+      await onDeleteAll()
+      toast({
+        title: "Success",
+        description: "All incomes have been deleted",
+        variant: "success",
+      })
+    } catch (error) {
+      console.error("Error deleting all incomes:", error)
+      toast({
+        title: "Error",
+        description: "Failed to delete all incomes. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeletingAll(false)
+      setShowDeleteAllDialog(false)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
@@ -95,6 +122,15 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
             ))}
           </SelectContent>
         </Select>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => setShowDeleteAllDialog(true)}
+          disabled={incomes.length === 0 || isDeletingAll}
+          className="h-10"
+        >
+          Delete All
+        </Button>
       </div>
 
       <AlertDialog open={!!incomeToDelete} onOpenChange={(open) => !open && setIncomeToDelete(null)}>
@@ -112,6 +148,27 @@ export function IncomeList({ incomes, onDelete }: IncomeListProps) {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete All Incomes</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete all income records.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteAll}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeletingAll}
+            >
+              {isDeletingAll ? "Deleting..." : "Delete All"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

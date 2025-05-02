@@ -108,4 +108,27 @@ export async function deleteExpense(id: string): Promise<void> {
     console.error("Error deleting expense:", error);
     throw error;
   }
+}
+
+export async function deleteAllExpenses(): Promise<void> {
+  try {
+    const response = await fetch(`${API_URL}/dashboard/expenses`, {
+      method: "DELETE",
+      headers: getHeaders(),
+      credentials: "include",
+    });
+    
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Handle unauthorized error
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        throw new Error("Session expired. Please log in again.");
+      }
+      throw new Error("Failed to delete all expenses");
+    }
+  } catch (error) {
+    console.error("Error deleting all expenses:", error);
+    throw error;
+  }
 } 

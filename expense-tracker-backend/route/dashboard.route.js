@@ -3,7 +3,8 @@ const {
     createExpense,
     getExpenses,
     getExpenseById,
-    deleteExpense
+    deleteExpense,
+    deleteAllExpenses
 } = require("../controller/dashboard.controller");
 const authenticateUser  = require("../middlewares/auth.middleware"); // Middleware for user authentication
 
@@ -19,5 +20,8 @@ router.get("/expenses/:id", authenticateUser, getExpenseById);
 
 // Route to delete an expense by ID
 router.delete("/expenses/:id", authenticateUser, deleteExpense);
+
+// Route to delete all expenses
+router.delete("/expenses", authenticateUser, deleteAllExpenses);
 
 module.exports = router;

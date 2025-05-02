@@ -17,11 +17,11 @@ const createSavings = async (req, res) => {
       });
   
       // Validate required fields
-      if (!name || !target_amount || !initial_amount) {
+      if (!name || target_amount === undefined || target_amount === null || initial_amount === undefined || initial_amount === null) {
         console.log('Missing required fields:', {
           hasName: !!name,
-          hasTargetAmount: !!target_amount,
-          hasInitialAmount: !!initial_amount
+          hasTargetAmount: target_amount !== undefined && target_amount !== null,
+          hasInitialAmount: initial_amount !== undefined && initial_amount !== null
         });
         return res.status(StatusCodes.BAD_REQUEST).json({
           message: "Name, target amount, and initial amount are required",
