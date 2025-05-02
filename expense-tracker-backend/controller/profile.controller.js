@@ -9,6 +9,14 @@ const { generateOTP, sendVerificationEmail } = require("../utils/OTPUtils");
 const updateEmail = async (req, res) => {
   const { newEmail, password } = req.body;
   const userId = req.user.userId;
+  const requestedUserId = req.params.id;
+
+  if (requestedUserId !== userId) {
+    return res.status(StatusCodes.FORBIDDEN).json({
+      success: false,
+      message: "You can only update your own profile"
+    });
+  }
 
   try {
     const user = await User.findById(userId);
@@ -63,6 +71,14 @@ const updateEmail = async (req, res) => {
 const verifyNewEmail = async (req, res) => {
   const { otp } = req.body;
   const userId = req.user.userId;
+  const requestedUserId = req.params.id;
+
+  if (requestedUserId !== userId) {
+    return res.status(StatusCodes.FORBIDDEN).json({
+      success: false,
+      message: "You can only verify your own email"
+    });
+  }
 
   try {
     const user = await User.findById(userId);
@@ -115,6 +131,14 @@ const verifyNewEmail = async (req, res) => {
 const updatePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   const userId = req.user.userId;
+  const requestedUserId = req.params.id;
+
+  if (requestedUserId !== userId) {
+    return res.status(StatusCodes.FORBIDDEN).json({
+      success: false,
+      message: "You can only update your own password"
+    });
+  }
 
   try {
     const user = await User.findById(userId);
@@ -155,6 +179,14 @@ const updatePassword = async (req, res) => {
 // Upload profile picture
 const uploadProfilePicture = async (req, res) => {
   const userId = req.user.userId;
+  const requestedUserId = req.params.id;
+
+  if (requestedUserId !== userId) {
+    return res.status(StatusCodes.FORBIDDEN).json({
+      success: false,
+      message: "You can only update your own profile picture"
+    });
+  }
 
   try {
     if (!req.file) {
