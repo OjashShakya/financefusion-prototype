@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import mainLogo from "../assets/mainLogo.png";
 import Login_icon from "../assets/Login.png";
-import google_icon from "../assets/google.png";
 import { useAuth } from "../context/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -33,17 +32,13 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    alert("Google login feature coming soon!");
-  };
-
   return (
     <form onSubmit={handleLogin} className="w-full min-h-screen bg-[#f9f9f9] flex flex-col items-center">
       <div className="h-[90px] pt-[50px] flex flex-col w-full justify-start max-w-[1200px] max-auto">
         <Image src={mainLogo} alt="Finance Fusion Logo" width={200} height={90} />
       </div>
 
-      <div className="mt-[50px] flex w-full max-w-[1200px] bg-[#f9f9f9] gap-28">
+      <div className="mt-[80px] flex w-full max-w-[1200px] bg-[#f9f9f9] gap-28">
         <div className="flex-1 mt-[120px]">
           <div className="flex">
             <p className="text-[47px] text-black mb-[15px] font-medium">Login to Your</p>
@@ -118,28 +113,6 @@ const Login: React.FC = () => {
               Sign up
             </button>
           </div>
-
-          <div className="flex items-center mt-[25px] max-w-[510px]">
-            <div className="flex-1 border-b border-[#aaa] mx-2.5 max-w-[40%]"></div>
-            <span className="text-[#777] text-sm">Or Continue with</span>
-            <div className="flex-1 border-b border-[#aaa] mx-2.5 max-w-[40%]"></div>
-          </div>
-
-          <button
-            type="button"
-            className="flex justify-center items-center mt-[27px] max-w-[510px] w-full h-[50px] rounded-lg border p-[6px_15px] gap-2.5 text-[15px] font-medium hover:scale-105 transition-transform duration-300 disabled:opacity-50 text-[#777]"
-            onClick={handleGoogleLogin}
-            disabled={isLoading}
-          >
-            <Image 
-              src={google_icon} 
-              alt="Google" 
-              width={20} 
-              height={20}
-              style={{ width: 'auto', height: 'auto' }}
-            />
-            Google
-          </button>
         </div>
 
         <div className="flex-1">
