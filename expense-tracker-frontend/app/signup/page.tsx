@@ -23,18 +23,40 @@ const Signup: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const validatePassword = (password: string) => {
-    const minLength = 8;
+    const minLength = 5;
+    const maxLength = 15;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
     const hasNumber = /\d/.test(password);
-    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const hasSpecialChar = /[\W_]/.test(password);
     
     if (password.length < minLength) {
-      return "Password must be at least 8 characters long";
+      return "Password must be at least 5 characters long";
+    }
+    if (password.length > maxLength) {
+      return "Password must be less than 15 characters";
+    }
+    if (!hasUpperCase) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!hasLowerCase) {
+      return "Password must contain at least one lowercase letter";
     }
     if (!hasNumber) {
       return "Password must contain at least one number";
     }
-    if (!hasSymbol) {
-      return "Password must contain at least one symbol";
+    if (!hasSpecialChar) {
+      return "Password must contain at least one special character";
+    }
+    return "";
+  };
+
+  const validateFullname = (name: string) => {
+    if (name.length < 6) {
+      return "Name must be at least 6 characters";
+    }
+    if (name.length > 50) {
+      return "Name must be less than 50 characters";
     }
     return "";
   };
@@ -47,6 +69,12 @@ const Signup: React.FC = () => {
     }
     if (!termsAccepted) {
       setError("You must accept the terms and policy");
+      return;
+    }
+
+    const fullnameError = validateFullname(fullname);
+    if (fullnameError) {
+      setError(fullnameError);
       return;
     }
 

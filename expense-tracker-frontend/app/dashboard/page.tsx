@@ -25,12 +25,14 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-6">
           <div className="relative">
-            <div className="w-12 h-12 rounded-full absolute border-4 border-solid border-gray-200"></div>
-            <div className="w-12 h-12 rounded-full animate-spin absolute border-4 border-solid border-primary border-t-transparent"></div>
+            <div className="w-16 h-16 rounded-full absolute border-4 border-solid border-gray-200"></div>
+            <div className="w-16 h-16 rounded-full animate-spin absolute border-4 border-solid border-[#27AE60] border-t-transparent"></div>
           </div>
-          <p className="text-lg font-medium text-gray-600">Loading your dashboard...</p>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-xl font-medium text-gray-700 animate-bounce">Loading your dashboard</p>
+          </div>
         </div>
       </div>
     );

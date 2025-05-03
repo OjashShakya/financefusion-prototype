@@ -48,7 +48,18 @@ export async function getBudgets(): Promise<Budget[]> {
 export async function createBudget(budget: Omit<Budget, "id" | "spent">): Promise<Budget> {
   try {
     // Ensure the category is one of the allowed values
-    const allowedCategories = ["Housing", "Food", "Transportation", "Entertainment", "Healthcare", "Savings", "Other"];
+    const allowedCategories = [
+      "Food",
+      "Transportation",
+      "Entertainment",
+      "Utilities",
+      "Housing",
+      "Healthcare",
+      "Education",
+      "Shopping",
+      "Travel",
+      "Other"
+    ];
     let category = budget.category;
     
     // If the category is not in the allowed list, map it to "Other"

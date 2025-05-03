@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { RecentTransactions } from "./recent-transactions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import type { Expense, Income, Budget, SavingsGoal, SavingsTransaction } from "@/types/finance"
@@ -86,9 +86,14 @@ export function DashboardView({
   const totalSavings = savingsGoals.reduce((sum, goal) => sum + (goal.initial_amount || 0), 0)
   const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
   const totalIncome = incomes.reduce((sum, income) => sum + (income.amount || 0), 0)
-  const availableIncome = totalIncome - totalSavings -totalExpenses
+  const availableIncome = totalIncome - totalSavings - totalExpenses
   const netIncome = totalIncome - totalExpenses
   const savingsRate = totalIncome > 0 ? ((totalSavings ) / totalIncome) * 100 : 0
+
+  // Update localStorage with available income
+  useEffect(() => {
+    localStorage.setItem('availableIncome', availableIncome.toString())
+  }, [availableIncome])
 
   // Get current month's data
   const today = new Date()
