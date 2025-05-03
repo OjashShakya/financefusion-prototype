@@ -51,11 +51,11 @@ router.get(
   getAllUser
 );
 
-router.get(
-  "/:id",
-  currentUser,
-  getUserById
-);
+// router.get(
+//   "/:id",
+//   currentUser,
+//   getUserById
+// );
 
 
 

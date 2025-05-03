@@ -27,10 +27,10 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <div className="w-12 h-12 rounded-full absolute border-4 border-solid border-gray-200"></div>
-            <div className="w-12 h-12 rounded-full animate-spin absolute border-4 border-solid border-primary border-t-transparent"></div>
+            <div className="w-16 h-16 rounded-full border-4 border-solid border-gray-200"></div>
+            <div className="w-16 h-16 rounded-full border-4 border-solid border-primary border-t-transparent animate-spin absolute top-0 left-0"></div>
           </div>
-          <p className="text-lg font-medium text-gray-600">Loading your dashboard...</p>
+          <p className="text-lg font-medium text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
     );

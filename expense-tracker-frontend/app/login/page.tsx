@@ -131,13 +131,25 @@ const Login: React.FC = () => {
             onClick={handleGoogleLogin}
             disabled={isLoading}
           >
-            <Image src={google_icon} alt="Google" width={20} height={20} />
+            <Image 
+              src={google_icon} 
+              alt="Google" 
+              width={20} 
+              height={20}
+              style={{ width: 'auto', height: 'auto' }}
+            />
             Google
           </button>
         </div>
 
         <div className="flex-1">
-          <Image src={Login_icon} alt="Login Illustration" width={560} height={700} />
+          <Image 
+            src={Login_icon} 
+            alt="Login Illustration" 
+            width={560} 
+            height={700}
+            style={{ width: 'auto', height: 'auto' }}
+          />
         </div>
       </div>
     </form>
