@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../src/context/AuthContext';
 import { FinanceDashboard } from '@/components/finance/finance-dashboard';
 
 export default function DashboardPage() {
@@ -10,16 +10,13 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      if (!loading) {
-        if (!user) {
-          console.log('No user found, redirecting to login');
-          router.replace('/login');
-        }
+    if (!loading && !user) {
+      const token = localStorage.getItem("token");
+      console.log("Token")
+      if (!token) {
+        router.replace('/login');
       }
-    };
-
-    checkAuth();
+    }
   }, [user, loading, router]);
 
   if (loading) {

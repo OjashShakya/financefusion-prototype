@@ -6,7 +6,7 @@ import { useRouter , useSearchParams } from "next/navigation";
 import mainLogo from "../assets/mainLogo.png";
 import OTP_icon from "../../../assets/otp.png";
 import NewPassword_icon from "../assets/Newpassword.png";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from '../../src/context/AuthContext';
 import { Eye, EyeOff } from "lucide-react";
 
 const NewPassword: React.FC = () => {

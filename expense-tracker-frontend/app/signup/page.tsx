@@ -5,8 +5,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import mainLogo from "../assets/mainLogo.png";
 import Signup_icon from "../assets/signup.png";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../src/context/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
+import { AuthResponse } from "../../src/types/auth";
 
 const Signup: React.FC = () => {
   const router = useRouter();
@@ -85,7 +86,12 @@ const Signup: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await signup(fullname, email, password);
+      const result: AuthResponse = await signup(fullname, email, password);
+      if (result.success && result.requiresOTP) {
+        router.push('/verify-signup');
+      } else if (!result.success) {
+        setError(result.message || "An error occurred during registration. Please try again.");
+      }
     } catch (err: any) {
       setError(err.message || "An error occurred during registration. Please try again.");
     } finally {

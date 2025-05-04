@@ -5,12 +5,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import mainLogo from "../assets/mainLogo.png";
 import Login_icon from "../assets/Login.png";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from '../../src/context/AuthContext';
 import { Eye, EyeOff } from "lucide-react";
+import { AuthResponse } from '../../src/types/auth';
 
 const Login: React.FC = () => {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, error: authError } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
@@ -23,8 +24,12 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      // router.push("/components/dashboard");
+      const result: AuthResponse = await login({ email, password });
+      if (result.success && result.requiresOTP) {
+        router.push('/verify');
+      } else if (!result.success) {
+        setError(result.message || "Login failed. Please try again.");
+      }
     } catch (err: any) {
       setError(err.message || "Login failed. Please try again.");
     } finally {
@@ -45,8 +50,10 @@ const Login: React.FC = () => {
             <p className="text-[47px] text-[#27AE60] mb-[15px] pl-[15px] font-medium">Account</p>
           </div>
 
-          {error && (
-            <p className="text-red-500 text-sm mb-4">{error}</p>
+          {(error || authError) && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative mb-4" role="alert">
+              <span className="block sm:inline">{error || authError}</span>
+            </div>
           )}
 
           <h4 className="text-[20px] font-medium text-[#333] mt-[25px] mb-[5px]">Email</h4>
@@ -100,29 +107,21 @@ const Login: React.FC = () => {
                   <span>Signing in...</span>
                 </div>
               ) : (
-                <span className="relative z-10">Sign in</span>
+                "Sign In"
               )}
-              <div className="absolute inset-0 bg-[#2ECC71] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
             </button>
             <button
               type="button"
-              className="w-[246.5px] h-[50px] px-[15px] py-[6px] border rounded-lg cursor-pointer text-[20px] font-medium bg-white hover:bg-[#e9e7e7] disabled:opacity-50 text-[#777]"
               onClick={() => router.push("/signup")}
-              disabled={isLoading}
+              className="w-[246.5px] h-[50px] px-[15px] py-[6px] border border-[#27AE60] rounded-lg cursor-pointer text-[20px] font-medium bg-transparent text-[#27AE60] hover:bg-[#27AE60] hover:text-white transition-colors duration-200"
             >
-              Sign up
+              Sign Up
             </button>
           </div>
         </div>
 
         <div className="flex-1">
-          <Image 
-            src={Login_icon} 
-            alt="Login Illustration" 
-            width={560} 
-            height={700}
-            style={{ width: 'auto', height: 'auto' }}
-          />
+          <Image src={Login_icon} alt="Login Illustration" width={560} height={700} />
         </div>
       </div>
     </form>

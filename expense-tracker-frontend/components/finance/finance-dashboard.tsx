@@ -14,7 +14,7 @@ import { getIncomes, createIncome, deleteIncome, deleteAllIncomes } from '@/lib/
 import { getExpenses, createExpense, deleteExpense } from '@/lib/api/expense';
 import { savingsApi } from '@/lib/api/savings';
 import { getBudgets, createBudget, deleteBudget } from '@/lib/api/budget';
-import { useAuth } from '@/app/context/AuthContext';
+import { useAuth } from '@/src/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 
 export function FinanceDashboard() {

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import mainLogo from "../assets/mainLogo.png";
 import ResetPassword_icon from "../assets/Resetpassword.png";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from '../../src/context/AuthContext';
 
 const ResetPassword: React.FC = () => {
   const router = useRouter();

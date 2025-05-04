@@ -5,7 +5,7 @@ import { RecentTransactions } from "./recent-transactions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import type { Expense, Income, Budget, SavingsGoal, SavingsTransaction } from "@/types/finance"
 import { CashFlowChart } from "./charts/cash-flow-chart"
-import { useAuth } from "@/app/context/AuthContext"
+import { useAuth } from "@/src/context/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Plus, BarChart, Banknote, ChartPie, Wallet, Sun, Repeat2 } from "lucide-react"
 import {

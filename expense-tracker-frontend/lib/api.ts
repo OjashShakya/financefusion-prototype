@@ -38,108 +38,109 @@ api.interceptors.response.use(
 
 export const authAPI = {
   register: async (fullname: string, email: string, password: string) => {
-    const response = await api.post('/users/register', { fullname, email, password });
-    return response.data;
+    try {
+      const response = await api.post('/users/register', { fullname, email, password });
+      
+      if (response.data.requiresOTP) {
+        return {
+          status: 'otp_required',
+          email: email,
+          message: 'Please verify your email with OTP to complete registration'
+        };
+      }
+
+      return response.data;
+    } catch (error: any) {
+      return {
+        status: 'error',
+        message: error.response?.data?.message || 'Registration failed',
+        error: 'REGISTRATION_FAILED'
+      };
+    }
+  },
+
+  verifySignupOTP: async (otp: string, email: string) => {
+    try {
+      const response = await api.post('/users/verify-signup-otp', { otp, email });
+      
+      if (response.data.token) {
+        return {
+          status: 'success',
+          message: 'Account verified successfully. Please log in.',
+          email: email
+        };
+      }
+
+      return {
+        status: 'error',
+        message: response.data.message || 'Invalid OTP',
+        error: 'INVALID_OTP'
+      };
+    } catch (error: any) {
+      return {
+        status: 'error',
+        message: error.response?.data?.message || 'Verification failed',
+        error: 'VERIFICATION_FAILED'
+      };
+    }
   },
 
   login: async (email: string, password: string) => {
     try {
-      console.log('Making login request to:', `${API_URL}/users/login`);
-      console.log('Request payload:', { email, password });
+      const response = await api.post('/users/login', { email, password });
       
-      const response = await api.post('/users/login', { 
-        email, 
-        password 
-      });
-
-      // Log the entire response object for debugging
-      console.log('Full response object:', {
-        data: response.data,
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers,
-        config: response.config
-      });
-
-      // If response is empty or invalid
-      if (!response || !response.data || Object.keys(response.data).length === 0) {
-        console.error('Empty or invalid response from server');
-        return {
-          status: 'error',
-          message: 'Server returned an empty response',
-          error: 'EMPTY_RESPONSE'
-        };
-      }
-
-      // Check for OTP requirement
-      if (response.data.requiresOTP || response.data.message?.includes('OTP')) {
+      if (response.data.requiresOTP) {
         return {
           status: 'otp_required',
           email: email,
-          message: response.data.message || 'OTP has been sent to your email'
+          message: 'Please verify your login with OTP'
         };
       }
 
-      // Check for successful login
-      if (response.data.token || response.data.accessToken) {
-        const token = response.data.token || response.data.accessToken;
-        
-        // Validate token format
-        if (typeof token !== 'string' || token.length < 10) {
-          console.error('Invalid token format received');
-          return {
-            status: 'error',
-            message: 'Invalid token received from server',
-            error: 'INVALID_TOKEN'
-          };
-        }
-
+      if (response.data.token) {
         return {
           status: 'success',
-          token: token,
-          user: response.data.user || {
-            email: email,
-            id: response.data.userId || response.data.id
-          }
+          token: response.data.token,
+          user: response.data.user
         };
       }
 
-      // If we get here, return the response data as is
-      return {
-        status: 'success',
-        ...response.data
-      };
-
-    } catch (error: any) {
-      console.error('Login API error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        config: error.config
-      });
-
-      // Handle specific error cases
-      if (error.response?.status === 401) {
-        return {
-          status: 'error',
-          message: 'Invalid email or password',
-          error: 'INVALID_CREDENTIALS'
-        };
-      }
-
-      if (error.response?.status === 403) {
-        return {
-          status: 'error',
-          message: 'Access forbidden',
-          error: 'FORBIDDEN'
-        };
-      }
-
-      // Return a structured error response
       return {
         status: 'error',
-        message: error.response?.data?.message || error.message || 'Login failed',
-        error: error.response?.data || 'UNKNOWN_ERROR'
+        message: 'Invalid response from server',
+        error: 'INVALID_RESPONSE'
+      };
+    } catch (error: any) {
+      return {
+        status: 'error',
+        message: error.response?.data?.message || 'Login failed',
+        error: 'LOGIN_FAILED'
+      };
+    }
+  },
+
+  verifyLoginOTP: async (otp: string, email: string) => {
+    try {
+      const response = await api.post('/users/verify-login-otp', { otp, email });
+      
+      if (response.data.token && response.data.user) {
+        return {
+          status: 'success',
+          token: response.data.token,
+          user: response.data.user
+        };
+      }
+
+      return {
+        status: 'error',
+        message: response.data.message || 'Invalid OTP',
+        error: 'INVALID_OTP'
+      };
+    } catch (error: any) {
+      return {
+        status: 'error',
+        message: error.response?.data?.message || 'Verification failed',
+        error: 'VERIFICATION_FAILED'
       };
     }
   },
@@ -237,7 +238,6 @@ export const authAPI = {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.log('No token found in localStorage');
         return {
           status: 'error',
           message: 'No authentication token found',
@@ -245,59 +245,9 @@ export const authAPI = {
         };
       }
 
-      console.log('Fetching current user with token:', token.substring(0, 10) + '...');
+      const response = await api.get('/users/me');
       
-      // Add token to request headers
-      const response = await api.get<{ user: { id: string; email: string; fullname?: string } }>('/current-user', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }).catch(error => {
-        // Log the complete error object for debugging
-        console.error('API Error Details:', {
-          status: error.response?.status,
-          data: error.response?.data,
-          headers: error.response?.headers,
-          message: error.message,
-          config: {
-            url: error.config?.url,
-            method: error.config?.method,
-            headers: error.config?.headers
-          },
-          stack: error.stack
-        });
-
-        // Handle 500 error specifically
-        if (error.response?.status === 500) {
-          console.error('Server error details:', {
-            message: error.response.data?.message || 'Unknown server error',
-            error: error.response.data?.error || 'SERVER_ERROR',
-            details: error.response.data
-          });
-          
-          // Clear invalid token
-          localStorage.removeItem('token');
-          
-          return {
-            status: 'error',
-            message: 'Server error occurred while fetching user data',
-            error: 'SERVER_ERROR',
-            details: error.response.data
-          };
-        }
-
-        throw error;
-      });
-
-      // Type guard to check if response is an error object
-      if (response && 'status' in response && response.status === 'error') {
-        return response;
-      }
-
-      // Type guard to check if response is an AxiosResponse
-      if (!response || !('data' in response) || !response.data) {
-        console.error('Empty response from server');
+      if (!response || !response.data) {
         return {
           status: 'error',
           message: 'Invalid response from server',
@@ -305,77 +255,41 @@ export const authAPI = {
         };
       }
 
-      // Log the response for debugging
-      console.log('Current user response:', response.data);
-
-      // Ensure we have the minimum required user data
-      if (!response.data.user || !response.data.user.email) {
-        console.error('Invalid user data:', response.data);
-        localStorage.removeItem('token');
+      if (response.data.user) {
         return {
-          status: 'error',
-          message: 'Invalid user data received',
-          error: 'INVALID_USER_DATA'
-        };
-      }
-
-      // Validate user data structure
-      const userData = response.data.user;
-      if (!userData.id || !userData.email) {
-        console.error('Missing required user fields:', userData);
-        localStorage.removeItem('token');
-        return {
-          status: 'error',
-          message: 'Invalid user data structure',
-          error: 'INVALID_USER_STRUCTURE'
+          status: 'success',
+          user: response.data.user
         };
       }
 
       return {
-        status: 'success',
-        user: {
-          id: userData.id,
-          email: userData.email,
-          fullname: userData.fullname || ''
-        }
+        status: 'error',
+        message: 'User data not found',
+        error: 'USER_NOT_FOUND'
       };
     } catch (error: any) {
-      console.error('Error fetching current user:', {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data,
-        status: error.response?.status
-      });
+      console.error('Get current user error:', error);
       
       if (error.response) {
         const status = error.response.status;
         const data = error.response.data;
 
-        // Log the error response for debugging
-        console.error('Error response:', {
-          status,
-          data,
-          headers: error.response.headers
-        });
-
-        // Clear token for authentication errors
-        if (status === 401 || status === 403 || status === 500) {
+        if (status === 401 || status === 403) {
           localStorage.removeItem('token');
         }
 
         return {
           status: 'error',
           message: data?.message || 'Authentication failed',
-          error: status === 401 ? 'UNAUTHORIZED' : 
-                 status === 403 ? 'FORBIDDEN' : 
-                 status === 500 ? 'SERVER_ERROR' : 'UNKNOWN_ERROR',
-          details: data
+          error: status === 401 ? 'UNAUTHORIZED' :
+                 status === 403 ? 'FORBIDDEN' :
+                 status === 500 ? 'SERVER_ERROR' : 'UNKNOWN_ERROR'
         };
       }
 
       return {
         status: 'error',
-        message: error.message || 'An unexpected error occurred',
+        message: 'An unexpected error occurred',
         error: 'UNKNOWN_ERROR'
       };
     }
