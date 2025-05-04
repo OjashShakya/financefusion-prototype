@@ -119,7 +119,9 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
 
     // Check if user has enough available income
     const availableIncome = localStorage.getItem('availableIncome')
-    if (!availableIncome || Number(availableIncome) <= 0) {
+    const availableIncomeNum = Number(availableIncome || "0")
+    
+    if (!availableIncome || availableIncomeNum <= 0) {
       toast({
         title: "Saving Failed",
         description: "You don't have enough available income to save. Please add income first.",
@@ -130,10 +132,10 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     }
 
     // Check if contribution amount is greater than available income
-    if (newAmount > Number(availableIncome)) {
+    if (newAmount > availableIncomeNum) {
       toast({
         title: "Saving Failed",
-        description: `You can only save up to Rs. ${Number(availableIncome).toFixed(2)}`,
+        description: `You can only save up to Rs. ${availableIncomeNum.toFixed(2)}`,
         variant: "destructive",
         duration: 3000,
       });
@@ -142,6 +144,10 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
 
     const updatedAmount = Math.min(newAmount, goal.target_amount)
     onUpdate(goalId, updatedAmount)
+
+    // Update available income in localStorage
+    const newAvailableIncome = availableIncomeNum - updatedAmount
+    localStorage.setItem('availableIncome', newAvailableIncome.toString())
 
     const input = document.getElementById(`contribution-${goalId}`) as HTMLInputElement
     if (input) input.value = ""
@@ -153,14 +159,18 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     toast({
       title: "Amount Saved Successfully",
       description: (
-        <div className="space-y-1">
-          <p className="text-white font-bold">Rs. {updatedAmount.toFixed(2)} added to {goal.name}</p>
-          <p className="text-sm text-muted-foreground text-white font-bold">
-            Progress: {newPercentage.toFixed(0)}% (Rs. {remaining.toFixed(2)} remaining)
+        <div className="mt-2">
+          <p>Added Rs. {updatedAmount.toFixed(2)} to {goal.name}</p>
+          <p className="text-sm text-muted-foreground">
+            Progress: {newPercentage.toFixed(1)}% ({newTotal.toFixed(2)} / {goal.target_amount.toFixed(2)})
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Remaining: Rs. {remaining.toFixed(2)}
           </p>
         </div>
       ),
       variant: "success",
+      duration: 5000,
     })
   }
 
