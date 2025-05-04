@@ -131,12 +131,58 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Generate token
-    const token = generateToken(user);
-    console.log("User Logged In Successfully",token);
+    // Generate and send OTP for login verification
+    const otp = generateOTP().otp;
+    user.otp = otp;
+    await user.save();
+
+    // Send OTP via email
+    await sendVerificationEmail(email, user.fullname, otp);
+
     return res.status(StatusCodes.OK).json({
       success: true,
-      message: "User Logged In Successfully",
+      message: "OTP sent to your email for login verification",
+      email: user.email
+    });
+
+  } catch (error) {
+    console.error("Error in login process:", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+const verifyLoginOTP = async (req, res) => {
+  const { email, otp } = req.body;
+  
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    // Clear OTP after successful verification
+    user.otp = null;
+    await user.save();
+
+    // Generate token for the verified user
+    const token = generateToken(user);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Login successful",
       token,
       user: {
         id: user._id,
@@ -144,15 +190,15 @@ const loginUser = async (req, res) => {
         email: user.email
       }
     });
-
   } catch (error) {
-    console.error("Error logging in user:", error);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+    console.error("Error verifying login OTP:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server error",
     });
   }
 };
+
 const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
 
@@ -288,7 +334,7 @@ module.exports = {
   registerUser,
   verifyOTPUser,
   loginUser,
-  // updateProfile,
+  verifyLoginOTP,
   getAllUser,
   getUserById,
   requestPasswordReset,

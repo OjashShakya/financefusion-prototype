@@ -3,53 +3,97 @@ const {
   registerUser,
   loginUser,
   verifyOTPUser,
+  verifyLoginOTP,
   getAllUser,
   getUserById,
   requestPasswordReset,
   resetPassword,
-  // updateProfile,
-  // getProfile,
 } = require("../controller/user.controller");
-const {currentUser} = require("../controller/decodeToken.controller");
-
-const verifyToken = require("../middlewares/auth.middleware");
+const {
+  updateEmail,
+  verifyNewEmail,
+  updatePassword,
+  uploadProfilePicture,
+} = require("../controller/profile.controller");
+const { validate } = require("../middlewares/validation.middleware");
+const { signupSchema } = require("../validations/ZodValidation.user");
+const { currentUser } = require("../controller/decodeToken.controller");
 const authenticateUser = require("../middlewares/auth.middleware");
-const validatePassword = require("../middlewares/validatePassword");
-// const { profileUpload } = require("../middlewares/fileUpload.middleware");
-
-
-
+const upload = require("../middlewares/fileUpload.middleware");
 
 const router = express.Router();
 
-// router.get("/profile",verifyToken, getProfile);
-
 router.post(
   "/register",
-  validatePassword,
+  validate(signupSchema),
   registerUser
 );
-router.post("/login", loginUser);
-router.post("/verify-otp", verifyOTPUser);
+
+router.post(
+  "/login",
+  loginUser
+);
+
+router.post(
+  "/verify-otp",
+  verifyOTPUser
+);
+
+router.post(
+  "/verify-login-otp",
+  verifyLoginOTP
+);
+
+
 router.get(
   "/",
   authenticateUser,
   getAllUser
 );
-router.get(
-  "/:id",
-  currentUser,
-  getUserById
-);
-// router.get("/current-user", verifyToken);
-router.post("/password-reset/request", requestPasswordReset);  // Request password reset (send OTP/link)
-router.post("/password-reset/reset", validatePassword, resetPassword);  // Reset password with token/OTP
-// router.patch(
-//   "/update/:id",
-//   verifyToken,
-//   updateProfile, 
-//   //  profileUpload.single("profilePicture"),
+
+// router.get(
+//   "/:id",
+//   currentUser,
+//   getUserById
 // );
+
+
+
+router.post(
+  "/password-reset/request",
+  requestPasswordReset
+);  
+
+router.post(
+  "/password-reset/reset",
+  resetPassword
+);  
+
+
+router.post(
+  "/profile/:id/update-email",
+  authenticateUser,
+  updateEmail
+);
+
+router.post(
+  "/profile/:id/verify-new-email",
+  authenticateUser,
+  verifyNewEmail
+);
+
+router.post(
+  "/profile/:id/update-password",
+  authenticateUser,
+  updatePassword
+);
+
+router.post(
+  "/profile/:id/upload-picture",
+  authenticateUser,
+  upload.single('profilePicture'),
+  uploadProfilePicture
+);
 
 
 module.exports = router;

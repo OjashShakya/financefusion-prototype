@@ -5,6 +5,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const axiosInstance = axios.create({
   baseURL: API_URL,
   withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // Add a request interceptor
@@ -25,12 +28,10 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Only redirect to login if the token is missing or invalid
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
-    // For 403 errors, let the component handle the error
     return Promise.reject(error);
   }
 );
