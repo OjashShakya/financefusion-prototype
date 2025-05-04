@@ -36,116 +36,111 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          console.log('No token found, redirecting to login');
-          router.push('/login');
+          setLoading(false);
           return;
         }
 
-        console.log('Checking authentication with token:', token.substring(0, 10) + '...');
-        
         const response = await authAPI.getCurrentUser();
-        console.log('Auth check response:', response);
-
-        if ('status' in response && response.status === 'error') {
-          console.error('Auth check failed:', response);
-          
-          if ('error' in response) {
-            if (response.error === 'SERVER_ERROR') {
-              toast({
-                title: "Server Error",
-                description: "Please try again later",
-                variant: "destructive",
-              });
-            } else if (response.error === 'UNAUTHORIZED' || response.error === 'FORBIDDEN') {
-              toast({
-                title: "Session Expired",
-                description: "Please log in again",
-                variant: "destructive",
-              });
-            } else {
-              toast({
-                title: "Authentication Error",
-                description: response.message || "Please log in again",
-                variant: "destructive",
-              });
-            }
-          }
-          
-          localStorage.removeItem('token');
-          setUser(null);
-          router.push('/login');
-          return;
-        }
-
-        if ('status' in response && response.status === 'success' && 'user' in response && response.user) {
-          console.log('Auth check successful, setting user:', response.user);
+        
+        if (response.status === 'success' && response.user) {
           const userData: User = {
             id: response.user.id,
             email: response.user.email,
             fullname: response.user.fullname || ''
           };
           setUser(userData);
-          // Don't redirect if we're already on the dashboard
-          if (window.location.pathname === '/dashboard') {
-            return;
-          }
-          router.push('/dashboard');
         } else {
-          console.error('Invalid auth response:', response);
           localStorage.removeItem('token');
           setUser(null);
-          router.push('/login');
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error('Auth check error:', error);
-        toast({
-          title: "Authentication Error",
-          description: "An unexpected error occurred. Please try again.",
-          variant: "destructive",
-        });
         localStorage.removeItem('token');
         setUser(null);
-        router.push('/login');
+      } finally {
+        setLoading(false);
       }
     };
 
     checkAuth();
-  }, [router]);
+  }, []);
 
   const signup = async (fullname: string, email: string, password: string) => {
     try {
       const response = await authAPI.register(fullname, email, password);
-      console.log('Signup successful, redirecting to login');
-      toast({
-        title: "Registration Successful",
-        description: "Please log in with your credentials.",
-        variant: "success",
-      });
-      router.replace('/login');
+      
+      if (response.status === 'otp_required') {
+        toast({
+          title: "Verification Required",
+          description: "Please verify your email with OTP to complete registration",
+          variant: "default",
+        });
+        router.push(`/verify-signup?email=${encodeURIComponent(email)}`);
+      } else {
+        toast({
+          title: "Registration Successful",
+          description: "Please log in with your credentials",
+          variant: "success",
+        });
+        router.replace('/login');
+      }
     } catch (error: any) {
-      console.error('Signup error:', error);
       toast({
         title: "Registration Failed",
-        description: error.response?.data?.message || "Registration failed. Please try again.",
+        description: error.message || "Registration failed. Please try again.",
         variant: "destructive",
       });
-      throw error;
+    }
+  };
+
+  const verifySignupOTP = async (otp: string, email: string) => {
+    try {
+      const response = await authAPI.verifySignupOTP(otp, email);
+      
+      if (response.status === 'success') {
+        toast({
+          title: "Account Verified",
+          description: "Your account has been verified. Please log in.",
+          variant: "success",
+        });
+        router.replace('/login');
+      } else {
+        toast({
+          title: "Verification Failed",
+          description: response.message || "Invalid OTP",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Verification Failed",
+        description: error.message || "An error occurred during verification",
+        variant: "destructive",
+      });
     }
   };
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('Attempting login for email:', email);
       const response = await authAPI.login(email, password);
-      console.log('Login response:', response);
       
-      if (response.status === 'success' && response.token) {
-        localStorage.setItem('tempToken', response.token);
-        router.push(`/verify?email=${encodeURIComponent(email)}`);
-      } else if (response.status === 'otp_required') {
-        router.push(`/verify?email=${encodeURIComponent(email)}`);
+      if (response.status === 'otp_required') {
+        toast({
+          title: "Verification Required",
+          description: "Please verify your login with OTP",
+          variant: "default",
+        });
+        router.push(`/verify-login?email=${encodeURIComponent(email)}`);
+      } else if (response.status === 'success' && response.token) {
+        localStorage.setItem('token', response.token);
+        const userData: User = {
+          id: response.user.id,
+          email: response.user.email,
+          fullname: response.user.fullname || ''
+        };
+        setUser(userData);
+        router.replace('/dashboard');
       } else {
-        console.error('Login failed:', response);
         toast({
           title: "Login Failed",
           description: response.message || "Invalid credentials",
@@ -153,10 +148,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       }
     } catch (error: any) {
-      console.error('Login error:', error);
       toast({
         title: "Login Failed",
         description: error.message || "An error occurred during login",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const verifyLoginOTP = async (otp: string, email: string) => {
+    try {
+      const response = await authAPI.verifyLoginOTP(otp, email);
+      
+      if (response.status === 'success' && response.token && response.user) {
+        localStorage.setItem('token', response.token);
+        const userData: User = {
+          id: response.user.id,
+          email: response.user.email,
+          fullname: response.user.fullname || ''
+        };
+        setUser(userData);
+        
+        toast({
+          title: "Login Successful",
+          description: "Welcome to your dashboard!",
+          variant: "success",
+        });
+
+        // Wait for state to update before navigation
+        await new Promise(resolve => setTimeout(resolve, 500));
+        router.replace('/dashboard');
+      } else {
+        toast({
+          title: "Verification Failed",
+          description: response.message || "Invalid OTP",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Verification Failed",
+        description: error.message || "An error occurred during verification",
         variant: "destructive",
       });
     }
@@ -185,17 +217,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const verifyOTP = async (otp: string, email: string) => {
     try {
-      console.log('Starting OTP verification for email:', email);
+      console.log('Starting OTP verification');
       const response = await authAPI.verifyOTP(otp, email);
       console.log('OTP verification response:', response);
       
       if (response.status === 'success' && response.token && response.user) {
-        console.log('OTP verification successful, processing response:', {
-          token: response.token.substring(0, 10) + '...',
-          user: response.user
-        });
-
-        // Remove temporary token and set the verified token
+        console.log('OTP verification successful');
         localStorage.removeItem('tempToken');
         localStorage.setItem('token', response.token);
         console.log('Token stored in localStorage');
@@ -206,24 +233,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fullname: response.user.fullname || ''
         };
         
-        // Set user state first
+        console.log('Setting user state:', userData);
         setUser(userData);
-        console.log('User state updated:', userData);
         
         toast({
           title: "Verification Successful",
           description: "Welcome to your dashboard!",
           variant: "success",
         });
-        console.log('Success toast shown');
 
-        // Wait a moment for state to update
-        setTimeout(() => {
-          console.log('Navigating to dashboard...');
-          router.replace('/dashboard');
-        }, 100);
+        // Wait for state to update before navigation
+        console.log('Waiting for state update...');
+        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log('Navigating to dashboard');
+        router.replace('/dashboard');
       } else {
-        console.error('OTP verification failed:', response);
+        console.log('OTP verification failed:', response);
         toast({
           title: "Verification Failed",
           description: response.message || "Invalid OTP",

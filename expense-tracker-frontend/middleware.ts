@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
 
   if (!token && !isAuthPage) {
     console.log('Middleware - Redirecting to login (no token)')
-    return NextResponse.redirect(new URL('/login', request.url))
+    // return NextResponse.redirect(new URL('/login', request.url))
   }
 
   if (token && isAuthPage) {

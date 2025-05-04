@@ -16,9 +16,11 @@ const registerUser = async (req, res) => {
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "User already exists" });
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: 'error',
+        message: "User already exists",
+        error: 'USER_EXISTS'
+      });
     }
 
     const hashedPassword = await hashPassword(password);
@@ -38,23 +40,19 @@ const registerUser = async (req, res) => {
     await sendVerificationEmail(email, fullname, otp);
 
     res.status(StatusCodes.CREATED).json({
-      success: true,
-      message: "User Created Successfully. Please check your email for OTP verification.",
-      data: {
-        id: savedUser._id,
-        fullname: savedUser.fullname,
-        email: savedUser.email
-      },
+      status: 'otp_required',
+      message: "Please verify your email with OTP to complete registration",
+      email: savedUser.email
     });
   } catch (error) {
     console.error("Error during user registration:", error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
+      status: 'error',
       message: "Server error",
+      error: 'SERVER_ERROR'
     });
   }
 };
-
 
 const verifyOTPUser = async (req, res) => {
   const { email, otp } = req.body;
@@ -62,15 +60,17 @@ const verifyOTPUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
+        status: 'error',
         message: "User not found",
+        error: 'USER_NOT_FOUND'
       });
     }
 
     if (user.otp !== otp) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
+        status: 'error',
         message: "Invalid OTP",
+        error: 'INVALID_OTP'
       });
     }
 
@@ -78,24 +78,17 @@ const verifyOTPUser = async (req, res) => {
     user.otp = null;
     await user.save();
 
-    // Generate token for the verified user
-    const token = generateToken(user);
-
     res.status(StatusCodes.OK).json({
-      success: true,
-      message: "OTP verified successfully",
-      user: {
-        id: user._id,
-        fullname: user.fullname,
-        email: user.email
-      },
-      token
+      status: 'success',
+      message: "Account verified successfully. Please log in.",
+      email: user.email
     });
   } catch (error) {
     console.error("Error verifying OTP:", error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
+      status: 'error',
       message: "Server error",
+      error: 'SERVER_ERROR'
     });
   }
 };
@@ -106,50 +99,49 @@ const loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email });
 
-    // If user does not exist
     if (!user) {
       return res.status(StatusCodes.UNAUTHORIZED).json({
-        success: false,
+        status: 'error',
         message: "Invalid credentials",
+        error: 'INVALID_CREDENTIALS'
       });
     }
 
-    // If user has not verified email
     if (!user.isVerified) {
       return res.status(StatusCodes.UNAUTHORIZED).json({
-        success: false,
+        status: 'error',
         message: "Please verify your account before logging in",
+        error: 'UNVERIFIED_ACCOUNT'
       });
     }
 
-    // Compare the password
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
       return res.status(StatusCodes.UNAUTHORIZED).json({
-        success: false,
+        status: 'error',
         message: "Invalid credentials",
+        error: 'INVALID_CREDENTIALS'
       });
     }
 
-    // Generate and send OTP for login verification
     const otp = generateOTP().otp;
     user.otp = otp;
     await user.save();
 
-    // Send OTP via email
     await sendVerificationEmail(email, user.fullname, otp);
 
     return res.status(StatusCodes.OK).json({
-      success: true,
-      message: "OTP sent to your email for login verification",
+      status: 'otp_required',
+      message: "Please verify your login with OTP",
       email: user.email
     });
 
   } catch (error) {
     console.error("Error in login process:", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
+      status: 'error',
       message: "Server error",
+      error: 'SERVER_ERROR'
     });
   }
 };
@@ -161,27 +153,27 @@ const verifyLoginOTP = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
+        status: 'error',
         message: "User not found",
+        error: 'USER_NOT_FOUND'
       });
     }
 
     if (user.otp !== otp) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
+        status: 'error',
         message: "Invalid OTP",
+        error: 'INVALID_OTP'
       });
     }
 
-    // Clear OTP after successful verification
     user.otp = null;
     await user.save();
 
-    // Generate token for the verified user
     const token = generateToken(user);
 
     res.status(StatusCodes.OK).json({
-      success: true,
+      status: 'success',
       message: "Login successful",
       token,
       user: {
@@ -193,8 +185,9 @@ const verifyLoginOTP = async (req, res) => {
   } catch (error) {
     console.error("Error verifying login OTP:", error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
+      status: 'error',
       message: "Server error",
+      error: 'SERVER_ERROR'
     });
   }
 };

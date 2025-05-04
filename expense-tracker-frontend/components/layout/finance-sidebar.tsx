@@ -3,7 +3,7 @@
 import { BarChart, Wallet, Banknote, Home, PiggyBank, PanelLeft, ChartPie, Settings, PanelRightClose, PanelRightOpen} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/app/context/AuthContext"
+import { useAuth } from "@/src/context/AuthContext"
 import Image from "next/image"
 import mainLogo from "../../app/assets/mainLogo.png"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"

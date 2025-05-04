@@ -3,7 +3,7 @@
 import { PiggyBank, Settings, Menu } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ModeToggle } from "@/components/ui/mode-toggle"
-import { useAuth } from "@/app/context/AuthContext"
+import { useAuth } from "@/src/context/AuthContext"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
