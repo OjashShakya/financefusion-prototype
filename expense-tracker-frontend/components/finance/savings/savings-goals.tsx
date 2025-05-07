@@ -15,6 +15,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import type { SavingsGoal } from "@/types/finance"
 import { SAVINGS_COLORS } from "@/lib/constants"
+import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface SavingsGoalsProps {
   goals: SavingsGoal[]
@@ -35,6 +46,8 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     },
     mode: "onChange",
   })
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [goalToDelete, setGoalToDelete] = useState<string | null>(null)
 
   function handleSubmit(data: Omit<SavingsGoal, "id">) {
     // Validate name
@@ -117,6 +130,18 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     const newAmount = Number.parseFloat(amount || "0")
     if (isNaN(newAmount)) return
 
+    // Check if goal is already at 100%
+    const currentPercentage = (goal.initial_amount / goal.target_amount) * 100
+    if (currentPercentage >= 100) {
+      toast({
+        title: "Goal Completed",
+        description: `Congratulations! You have already reached your savings goal for ${goal.name}.`,
+        variant: "success",
+        duration: 5000,
+      })
+      return
+    }
+
     // Check if user has enough available income
     const availableIncome = localStorage.getItem('availableIncome')
     const availableIncomeNum = Number(availableIncome || "0")
@@ -135,43 +160,84 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     if (newAmount > availableIncomeNum) {
       toast({
         title: "Saving Failed",
-        description: `You can only save up to Rs. ${availableIncomeNum.toFixed(2)}`,
+        description: `You can only save up to Rs. ${availableIncomeNum.toFixed(2)} as you cannot save more than your remaining income`,
         variant: "destructive",
         duration: 3000,
       });
       return;
     }
 
-    const updatedAmount = Math.min(newAmount, goal.target_amount)
-    onUpdate(goalId, updatedAmount)
+    // Check if contribution amount exceeds remaining amount
+    const remaining = goal.target_amount - goal.initial_amount;
+    if (newAmount > remaining) {
+      toast({
+        title: "Saving Failed",
+        description: `You cannot add more than the remaining amount (Rs. ${remaining.toFixed(2)}). Please enter a smaller amount.`,
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    onUpdate(goalId, newAmount)
 
     // Update available income in localStorage
-    const newAvailableIncome = availableIncomeNum - updatedAmount
+    const newAvailableIncome = availableIncomeNum - newAmount
     localStorage.setItem('availableIncome', newAvailableIncome.toString())
 
     const input = document.getElementById(`contribution-${goalId}`) as HTMLInputElement
     if (input) input.value = ""
 
-    const newTotal = goal.initial_amount + updatedAmount
+    const newTotal = goal.initial_amount + newAmount
     const newPercentage = (newTotal / goal.target_amount) * 100
-    const remaining = goal.target_amount - newTotal
+    const newRemaining = goal.target_amount - newTotal
 
-    toast({
-      title: "Amount Saved Successfully",
-      description: (
-        <div className="mt-2">
-          <p>Added Rs. {updatedAmount.toFixed(2)} to {goal.name}</p>
-          <p className="text-sm text-muted-foreground">
-            Progress: {newPercentage.toFixed(1)}% ({newTotal.toFixed(2)} / {goal.target_amount.toFixed(2)})
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Remaining: Rs. {remaining.toFixed(2)}
-          </p>
-        </div>
-      ),
-      variant: "success",
-      duration: 5000,
-    })
+    // Check if goal is now complete
+    if (newPercentage >= 100) {
+      toast({
+        title: "Congratulations! 🎉",
+        description: (
+          <div className="mt-2">
+            <p>You have successfully reached your savings goal for {goal.name}!</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Total Saved: Rs. {newTotal.toFixed(2)}
+            </p>
+          </div>
+        ),
+        variant: "success",
+        duration: 7000,
+      })
+    } else {
+      toast({
+        title: "Amount Saved Successfully",
+        description: (
+          <div className="mt-2">
+            <p>Added Rs. {newAmount.toFixed(2)} to {goal.name}</p>
+            <p className="text-sm text-muted-foreground">
+              Progress: {newPercentage.toFixed(1)}% ({newTotal.toFixed(2)} / {goal.target_amount.toFixed(2)})
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Remaining: Rs. {newRemaining.toFixed(2)}
+            </p>
+          </div>
+        ),
+        variant: "success",
+        duration: 5000,
+      })
+    }
+  }
+
+  const handleDeleteClick = (goalId: string) => {
+    setGoalToDelete(goalId)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (goalToDelete) {
+      onDelete(goalToDelete)
+      setDeleteDialogOpen(false)
+      setGoalToDelete(null)
+    }
   }
 
   return (
@@ -193,6 +259,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
               const percentage = (goal.initial_amount / goal.target_amount) * 100;
               const remaining = goal.target_amount - goal.initial_amount;
               const targetDate = format(goal.date, "MMM d, yyyy");
+              const isComplete = percentage >= 100;
 
               return (
                 <Card key={goal.id} className="bg-[#f9f9f9] dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e]">
@@ -207,8 +274,8 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => onDelete(goal.id)}
-                        className="text-gray-500 hover:text-gray-900 dark:text-[#4e4e4e] dark:hover:text-white dark:hover:bg-[#4e4e4e]"
+                        onClick={() => handleDeleteClick(goal.id)}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -235,24 +302,27 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                         <span className="text-gray-500 dark:text-[#4e4e4e]">Target Date</span>
                         <span className="text-gray-900 dark:text-white">{targetDate}</span>
                       </div>
+                      <Progress 
+                        value={percentage} 
+                        className="h-2" 
+                        indicatorClassName="transition-all" 
+                        style={{ backgroundColor: goal.color }}
+                      />
+                      <p className="text-xs text-muted-foreground">Rs. {remaining.toFixed(2)} Remaining</p>
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <div className="flex w-full gap-2">
-                      <Input
-                        id={`contribution-${goal.id}`}
-                        type="number"
-                        placeholder="Enter amount"
-                        className="bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e] text-gray-900 dark:text-white"
-                      />
+                    <div className="flex w-full items-center gap-2">
+                      <Input id={`contribution-${goal.id}`} type="number" placeholder="Amount" className="h-8" />
                       <Button
+                        size="sm"
                         onClick={() => {
                           const input = document.getElementById(`contribution-${goal.id}`) as HTMLInputElement
                           handleContribution(goal.id, input.value)
                         }}
-                        className="bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71] text-white"
+                        className="rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]"
                       >
-                        Save
+                        Add
                       </Button>
                     </div>
                   </CardFooter>
@@ -388,6 +458,27 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
           </CardContent>
         </Card>
       </TabsContent>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your savings goal
+              {goalToDelete && goals.find(g => g.id === goalToDelete) && ` "${goals.find(g => g.id === goalToDelete)?.name}"`}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Tabs>
   )
 }
