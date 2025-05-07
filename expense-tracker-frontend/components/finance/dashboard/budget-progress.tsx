@@ -75,8 +75,8 @@ export function BudgetProgress({ budgets, expenses, setActiveView }: BudgetProgr
           <div key={budget.id} className="space-y-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="font-medium">{budget.category}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="font-medium text-gray-900 dark:text-white">{budget.category}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
                   Rs. {spent.toFixed(2)} of Rs. {budget.amount.toFixed(2)}
                 </span>
               </div>
@@ -109,14 +109,14 @@ export function BudgetProgress({ budgets, expenses, setActiveView }: BudgetProgr
                 percentage < 0
                   ? "!bg-red-500"
                   : percentage > 90
-                    ? "!bg-red-100"
+                    ? "!bg-red-100 dark:!bg-red-900/20"
                     : percentage > 75
-                      ? "!bg-amber-500/20"
-                      : "!bg-[#e8f5e9]"
+                      ? "!bg-amber-500/20 dark:!bg-amber-900/20"
+                      : "!bg-[#e8f5e9] dark:!bg-green-900/20"
               }`}
               indicatorClassName={`${
                 percentage < 0
-                  ? "!bg-black"
+                  ? "!bg-black dark:!bg-white"
                   : percentage > 90
                     ? "!bg-red-500"
                     : percentage > 75

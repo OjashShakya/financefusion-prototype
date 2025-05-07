@@ -21,10 +21,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-[#f9f9f9] dark:bg-[#131313] text-foreground`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-            {children}
+            <main className="min-h-screen bg-[#f9f9f9] dark:bg-[#131313]">
+              {children}
+            </main>
           </AuthProvider>
           <Toaster />
         </ThemeProvider>

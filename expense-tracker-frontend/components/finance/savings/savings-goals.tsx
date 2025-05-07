@@ -26,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 
 interface SavingsGoalsProps {
   goals: SavingsGoal[]
@@ -262,13 +263,13 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
               const isComplete = percentage >= 100;
 
               return (
-                <Card key={goal.id}>
+                <Card key={goal.id} className="bg-[#f9f9f9] dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e]">
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle>{goal.name}</CardTitle>
-                        <CardDescription>
-                          Target: Rs. {goal.target_amount.toFixed(2)} by {targetDate}
+                        <CardTitle className="text-gray-900 dark:text-white">{goal.name}</CardTitle>
+                        <CardDescription className="text-gray-500 dark:text-[#4e4e4e]">
+                          Target: Rs. {goal.target_amount.toFixed(2)}
                         </CardDescription>
                       </div>
                       <Button
@@ -285,40 +286,56 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Rs. {goal.initial_amount.toFixed(2)} saved</span>
-                        <span className="text-sm font-medium">{percentage.toFixed(0)}%</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          Rs. {goal.initial_amount.toFixed(2)} of Rs. {goal.target_amount.toFixed(2)}
+                        </span>
+                        <Badge variant={percentage >= 90 ? "destructive" : percentage >= 75 ? "outline" : "secondary"}>
+                          {percentage.toFixed(0)}%
+                        </Badge>
                       </div>
-                      <Progress 
-                        value={percentage} 
-                        className="h-2" 
-                        indicatorClassName="transition-all" 
-                        style={{ backgroundColor: goal.color }}
+                      <Progress
+                        value={percentage}
+                        className={`h-2 ${
+                          percentage >= 90
+                            ? "!bg-red-100 dark:!bg-red-900/20"
+                            : percentage >= 75
+                              ? "!bg-amber-500/20 dark:!bg-amber-900/20"
+                              : "!bg-[#e8f5e9] dark:!bg-green-900/20"
+                        }`}
+                        indicatorClassName={`${
+                          percentage >= 90
+                            ? "!bg-red-500"
+                            : percentage >= 75
+                              ? "!bg-amber-500"
+                              : "!bg-[#27ae60]"
+                        }`}
                       />
-                      <p className="text-xs text-muted-foreground">
-                        {isComplete ? "Goal Completed! 🎉" : `Rs. ${remaining.toFixed(2)} Remaining`}
-                      </p>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500 dark:text-[#4e4e4e]">Remaining</span>
+                        <span className="text-gray-900 dark:text-white">Rs. {remaining.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500 dark:text-[#4e4e4e]">Target Date</span>
+                        <span className="text-gray-900 dark:text-white">{targetDate}</span>
+                      </div>
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <div className="flex w-full items-center gap-2">
-                      <Input 
-                        id={`contribution-${goal.id}`} 
-                        type="number" 
-                        placeholder={isComplete ? "Goal Completed" : "Amount"} 
-                        className="h-8"
-                        disabled={isComplete}
+                    <div className="flex w-full gap-2">
+                      <Input
+                        id={`contribution-${goal.id}`}
+                        type="number"
+                        placeholder="Enter amount"
+                        className="bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e] text-gray-900 dark:text-white"
                       />
                       <Button
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
+                        onClick={() => {
                           const input = document.getElementById(`contribution-${goal.id}`) as HTMLInputElement
                           handleContribution(goal.id, input.value)
                         }}
-                        disabled={isComplete}
-                        className="rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]"
+                        className="bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71] text-white"
                       >
-                        {isComplete ? "Completed" : "Add"}
+                        Add
                       </Button>
                     </div>
                   </CardFooter>
@@ -337,72 +354,64 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
       </TabsContent>
 
       <TabsContent value="add" className="space-y-4 pt-4">
-        <Card>
+        <Card className="bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e]">
           <CardHeader>
-            <CardTitle>Create a Savings Goal</CardTitle>
-            <CardDescription>Set a target amount and date to track your progress</CardDescription>
+            <CardTitle className="text-gray-900 dark:text-white">Create New Savings Goal</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-[#4e4e4e]">
+              Set a target amount and date for your savings goal
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Goal Name</FormLabel>
+                      <FormLabel className="text-gray-900 dark:text-white">Goal Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Vacation, Emergency Fund, etc." {...field} />
+                        <Input 
+                          placeholder="e.g., New Car" 
+                          {...field} 
+                          className="bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e] text-gray-900 dark:text-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="target_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Target Amount (Rs.)</FormLabel>
+                        <FormLabel className="text-gray-900 dark:text-white">Target Amount</FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
-                            {...field}
-                            value={field.value === 0 ? "" : field.value}
-                            onChange={(e) => {
-                              const value = e.target.value === "" ? 0 : Number(e.target.value);
-                              field.onChange(value);
-                            }}
+                          <Input 
+                            type="number" 
+                            placeholder="0.00" 
+                            {...field} 
+                            className="bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e] text-gray-900 dark:text-white"
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="initial_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Initial Amount (Rs.)</FormLabel>
+                        <FormLabel className="text-gray-900 dark:text-white">Initial Amount</FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
-                            {...field}
-                            value={field.value === 0 ? "" : field.value}
-                            onChange={(e) => {
-                              const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
-                              field.onChange(value);
-                            }}
+                          <Input 
+                            type="number" 
+                            placeholder="0.00" 
+                            {...field} 
+                            className="bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e] text-gray-900 dark:text-white"
                           />
                         </FormControl>
                         <FormMessage />
@@ -410,85 +419,51 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                     )}
                   />
                 </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Target Date</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "PPP")
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={(date) => {
-                                if (date) {
-                                  field.onChange(date);
-                                }
-                              }}
-                              disabled={(date) =>
-                                date < new Date()
-                              }
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="color"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color</FormLabel>
-                        <div className="flex flex-wrap gap-2">
-                          {SAVINGS_COLORS.map((color) => (
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-gray-900 dark:text-white">Target Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
                             <Button
-                              key={color}
-                              type="button"
-                              variant="outline"
+                              variant={"outline"}
                               className={cn(
-                                "h-8 w-8 rounded-full p-0",
-                                field.value === color && "ring-2 ring-primary ring-offset-2",
+                                "w-full pl-3 text-left font-normal bg-[#f9f9f9] dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e] text-gray-900 dark:text-white",
+                                !field.value && "text-gray-500 dark:text-[#4e4e4e]"
                               )}
-                              style={{ backgroundColor: color }}
-                              onClick={() => form.setValue("color", color)}
                             >
-                              {field.value === color && <Check className="h-4 w-4 text-white" />}
-                              <span className="sr-only">Select color</span>
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
-                          ))}
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <Button type="submit" className="w-full rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]">
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date < new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button 
+                  type="submit" 
+                  className="w-full bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71] text-white"
+                >
                   Create Goal
                 </Button>
               </form>

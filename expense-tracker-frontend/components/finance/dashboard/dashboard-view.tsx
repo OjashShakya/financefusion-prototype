@@ -168,56 +168,58 @@ export function DashboardView({
   return (
     <div className="space-y-6 p-4 md:p-6">
       {/* Greeting Section */}
-      <div className="space-y-1">
-        <h2 className="text-[32px] font-semibold tracking-tight">
-          {greeting}, {user?.fullname || "Username"}!
-        </h2>
-        <p className="text-sm text-gray-500 mt-2">
-          Welcome to dashboard. Here's an overview of your finance.
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h2 className="text-[32px] font-semibold tracking-tight text-gray-900 dark:text-white">
+            {greeting}, {user?.fullname || "Username"}!
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            Welcome to dashboard. Here's an overview of your finance.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Income Card */}
-        <Card className="overflow-hidden rounded-[16px] border bg-[#F9F9F9] shadow-sm dark:border-gray-800 dark:bg-[#1c1c1c]">
+        <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
           <div className="p-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-medium text-gray-600">
+              <h3 className="text-base font-medium text-gray-600 dark:text-gray-300">
                 {showTotalIncome ? "Total Income" : "Available Income"}
               </h3>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowTotalIncome(!showTotalIncome)}
-                className="h-8 w-8 text-muted-foreground hover:text-primary"
+                className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
               >
                 <Repeat2 className="h-4 w-4" />
                 <span className="sr-only">Toggle view</span>
               </Button>
             </div>
-            <p className="mt-2 text-3xl font-bold">
+            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
               Rs. {showTotalIncome ? totalIncome : availableIncome}
             </p>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {showTotalIncome ? "Total earnings" : `${incomes.length} income sources`}
             </p>
           </div>
-          <div className="border-t bg-[#F9F9F9] px-4 py-4">
-            <h4 className="flex items-center gap-2 text-base font-medium">
+          <div className="border-t border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] px-4 py-4">
+            <h4 className="flex items-center gap-2 text-base font-medium text-gray-900 dark:text-white">
               <BarChart className="h-5 w-5" />
               Add Income
             </h4>
-            <p className="mt-1 text-sm text-gray-500">Record a new income</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Record a new income</p>
             <Dialog open={incomeDialogOpen} onOpenChange={setIncomeDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="mt-3 w-full gap-2 bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]">
                   <Plus className="h-4 w-4" /> Add Income
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px] rounded-[24px] border-gray-200 bg-white p-0 dark:border-gray-800 dark:bg-[#131313]">
+              <DialogContent className="sm:max-w-[500px] rounded-[24px] border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] p-0">
                 <div className="p-6 space-y-6">
                   <div className="space-y-2">
-                    <DialogTitle className="text-2xl font-semibold">Add Income</DialogTitle>
+                    <DialogTitle className="text-2xl font-semibold text-gray-900 dark:text-white">Add Income</DialogTitle>
                     <DialogDescription className="text-gray-500 dark:text-gray-400">
                       Track and manage your income
                     </DialogDescription>
@@ -235,28 +237,28 @@ export function DashboardView({
         </Card>
 
         {/* Expense Card */}
-        <Card className="overflow-hidden rounded-[16px] border bg-[#F9F9F9] shadow-sm dark:border-gray-800 dark:bg-[#1c1c1c]">
+        <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
           <div className="p-6">
-            <h3 className="text-base font-medium text-gray-600">Total Expenses</h3>
-            <p className="mt-2 text-3xl font-bold">Rs. {totalExpenses}</p>
-            <p className="mt-1 text-sm text-gray-500">{expenses.length} transactions</p>
+            <h3 className="text-base font-medium text-gray-600 dark:text-gray-300">Total Expenses</h3>
+            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">Rs. {totalExpenses}</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{expenses.length} transactions</p>
           </div>
-          <div className="border-t bg-[#F9F9F9] px-4 py-4">
-            <h4 className="flex items-center gap-2 text-base font-medium">
+          <div className="border-t border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] px-4 py-4">
+            <h4 className="flex items-center gap-2 text-base font-medium text-gray-900 dark:text-white">
               <Banknote className="h-5 w-5" />
               Add Expense
             </h4>
-            <p className="mt-1 text-sm text-gray-500">Record a new expense</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Record a new expense</p>
             <Dialog open={expenseDialogOpen} onOpenChange={setExpenseDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="mt-3 bg-[#F9F9F9] w-full gap-2 dark:bg-[#1c1c1c]" variant="outline">
+                <Button className="mt-3 bg-[#f9f9f9] dark:bg-[#131313] w-full gap-2 border border-gray-200 dark:border-[#4e4e4e]" variant="outline">
                   <Plus className="h-4 w-4" /> Add Expense
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px] rounded-[24px] border-gray-200 bg-white p-0 dark:border-gray-800 dark:bg-[#131313]">
+              <DialogContent className="sm:max-w-[500px] rounded-[24px] border-gray-200 dark:border-[#4e4e4e] bg-white dark:bg-[#131313] p-0">
                 <div className="p-6 space-y-6">
                   <div className="space-y-2">
-                    <DialogTitle className="text-2xl font-semibold">Add Expense</DialogTitle>
+                    <DialogTitle className="text-2xl font-semibold text-gray-900 dark:text-white">Add Expense</DialogTitle>
                     <DialogDescription className="text-gray-500 dark:text-gray-400">
                       Track and manage your expenses
                     </DialogDescription>
@@ -274,28 +276,28 @@ export function DashboardView({
         </Card>
 
         {/* Net Income Card */}
-        <Card className="overflow-hidden rounded-[16px] border bg-[#F9F9F9] shadow-sm dark:border-gray-800 dark:bg-[#1c1c1c]">
+        <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
           <div className="p-6">
-            <h3 className="text-base font-medium text-gray-600">Net Income</h3>
+            <h3 className="text-base font-medium text-gray-600 dark:text-gray-300">Net Income</h3>
             <p className={cn(
               "mt-2 text-3xl font-bold",
               netIncome >= 0 ? "text-[#10B981]" : "text-red-500"
             )}>
               Rs. {Math.abs(netIncome)}
             </p>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {netIncome >= 0 ? "Positive cash flow" : "Negative cash flow"}
             </p>
           </div>
-          <div className="border-t bg-[#F9F9F9] px-4 py-4">
-            <h4 className="flex items-center gap-2 text-base font-medium">
+          <div className="border-t border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] px-4 py-4">
+            <h4 className="flex items-center gap-2 text-base font-medium text-gray-900 dark:text-white">
               <ChartPie className="h-5 w-5" />
               Mange Budgets
             </h4>
-            <p className="mt-1 text-sm text-gray-500">Set and track budgets</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Set and track budgets</p>
             <Button 
               variant="outline" 
-              className="mt-3 bg-[#F9F9F9] w-full gap-2" 
+              className="mt-3 bg-[#f9f9f9] dark:bg-[#131313] w-full gap-2 border border-gray-200 dark:border-[#4e4e4e]" 
               onClick={() => setActiveView("budgeting")}
             >
               <ChartPie className="h-4 w-4" /> View Budgets
@@ -304,17 +306,17 @@ export function DashboardView({
         </Card>
 
         {/* Savings Card */}
-        <Card className="overflow-hidden rounded-[16px] border bg-[#F9F9F9] shadow-sm dark:border-gray-800 dark:bg-[#1c1c1c]">
+        <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
           <div className="p-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-medium text-gray-600">
+              <h3 className="text-base font-medium text-gray-600 dark:text-gray-300">
                 {showTotalSavings ? "Total Savings" : "Saving Rate"}
               </h3>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowTotalSavings(!showTotalSavings)}
-                className="h-8 w-8 text-muted-foreground hover:text-primary"
+                className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
               >
                 <Repeat2 className="h-4 w-4" />
                 <span className="sr-only">Toggle view</span>
@@ -322,15 +324,15 @@ export function DashboardView({
             </div>
             {showTotalSavings ? (
               <>
-                <p className="mt-2 text-3xl font-bold">Rs. {totalSavings}</p>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">Rs. {totalSavings}</p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   {savingsGoals.length} savings goals
                 </p>
               </>
             ) : (
               <>
-                <p className="mt-2 text-3xl font-bold">{savingsRate.toFixed(1)}%</p>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{savingsRate.toFixed(1)}%</p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   {savingsRate >= 20 ? "Excellent saving habits" : 
                    savingsRate >= 10 ? "Good saving habits" :
                    savingsRate >= 0 ? "Could save more" :
@@ -339,15 +341,15 @@ export function DashboardView({
               </>
             )}
           </div>
-          <div className="border-t bg-[#F9F9F9] px-4 py-4">
-            <h4 className="flex items-center gap-2 text-base font-medium">
+          <div className="border-t border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] px-4 py-4">
+            <h4 className="flex items-center gap-2 text-base font-medium text-gray-900 dark:text-white">
               <Wallet className="h-5 w-5" />
               Savings Goals
             </h4>
-            <p className="mt-1 text-sm text-gray-500">Track your savings goals</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Track your savings goals</p>
             <Button 
               variant="outline" 
-              className="mt-3 bg-[#F9F9F9] w-full gap-2" 
+              className="mt-3 bg-[#f9f9f9] dark:bg-[#131313] w-full gap-2 border border-gray-200 dark:border-[#4e4e4e]" 
               onClick={() => setActiveView("savings")}
             >
               <Wallet className="h-4 w-4" /> View Goals
@@ -360,20 +362,20 @@ export function DashboardView({
       <div className="space-y-6">
         {/* Section 1: Cash Flow Chart and Recent Transactions side by side */}
         <div className="grid gap-6 md:grid-cols-[2fr,1fr]">
-          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+          <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
             <CardHeader>
-              <CardTitle>Cash Flow</CardTitle>
-              <CardDescription>Your daily income and expenses</CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">Cash Flow</CardTitle>
+              <CardDescription className="text-gray-500 dark:text-gray-400">Your daily income and expenses</CardDescription>
             </CardHeader>
             <CardContent>
               <CashFlowChart data={cashFlowData} />
             </CardContent>
           </Card>
 
-          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+          <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
             <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Your latest financial activities</CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">Recent Transactions</CardTitle>
+              <CardDescription className="text-gray-500 dark:text-gray-400">Your latest financial activities</CardDescription>
             </CardHeader>
             <CardContent>
               <RecentTransactions 
@@ -386,10 +388,10 @@ export function DashboardView({
         </div>
 
         {/* Section 2: Monthly Comparison */}
-        <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+        <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
           <CardHeader>
-            <CardTitle>Monthly Comparison</CardTitle>
-            <CardDescription>Compare your income and expenses this month</CardDescription>
+            <CardTitle className="text-gray-900 dark:text-white">Monthly Comparison</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">Compare your income and expenses this month</CardDescription>
           </CardHeader>
           <CardContent>
             <MonthlyComparisonChart data={monthlyComparisonData} />
@@ -398,20 +400,20 @@ export function DashboardView({
 
         {/* Section 3: Income Sources and Expense Distribution side by side */}
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+          <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
             <CardHeader>
-              <CardTitle>Income Sources</CardTitle>
-              <CardDescription>Breakdown of your income by category</CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">Income Sources</CardTitle>
+              <CardDescription className="text-gray-500 dark:text-gray-400">Breakdown of your income by category</CardDescription>
             </CardHeader>
             <CardContent>
               <IncomeSourcesChart data={incomeSourcesData} />
             </CardContent>
           </Card>
 
-          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+          <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
             <CardHeader>
-              <CardTitle>Expense Distribution</CardTitle>
-              <CardDescription>Breakdown of your expenses by category</CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">Expense Distribution</CardTitle>
+              <CardDescription className="text-gray-500 dark:text-gray-400">Breakdown of your expenses by category</CardDescription>
             </CardHeader>
             <CardContent>
               <ExpenseDistributionChart data={expenseDistributionData} />
@@ -421,10 +423,10 @@ export function DashboardView({
 
         {/* Section 4: Savings Goals and Budget Progress side by side */}
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+          <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
             <CardHeader>
-              <CardTitle>Savings Goals</CardTitle>
-              <CardDescription>Track your progress towards financial goals</CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">Savings Goals</CardTitle>
+              <CardDescription className="text-gray-500 dark:text-gray-400">Track your progress towards financial goals</CardDescription>
             </CardHeader>
             <CardContent>
               <SavingsGoalsList 
@@ -436,10 +438,10 @@ export function DashboardView({
             </CardContent>
           </Card>
 
-          <Card className="overflow-hidden rounded-[16px] border shadow-sm dark:border-gray-800 dark:bg-[#131313]">
+          <Card className="overflow-hidden rounded-[16px] border border-gray-200 dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] shadow-sm">
             <CardHeader>
-              <CardTitle>Budget Progress</CardTitle>
-              <CardDescription>Monitor your spending against budgets</CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">Budget Progress</CardTitle>
+              <CardDescription className="text-gray-500 dark:text-gray-400">Monitor your spending against budgets</CardDescription>
             </CardHeader>
             <CardContent>
               <BudgetProgress budgets={budgets} expenses={expenses} setActiveView={setActiveView} />

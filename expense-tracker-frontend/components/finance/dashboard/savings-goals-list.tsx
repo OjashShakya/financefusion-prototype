@@ -217,8 +217,8 @@ export function SavingsGoalsList({ goals, updateSavingsGoal, setActiveView, onDe
           <div key={goal.id} className="space-y-2">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium">{goal.name}</h4>
-                <p className="text-xs text-muted-foreground">
+                <h4 className="font-medium text-gray-900 dark:text-white">{goal.name}</h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   Target: Rs. {goal.target_amount.toFixed(2)} by {targetDate}
                 </p>
               </div>
@@ -231,12 +231,12 @@ export function SavingsGoalsList({ goals, updateSavingsGoal, setActiveView, onDe
             </div>
             <Progress 
               value={percentage} 
-              className="h-2 bg-[#e8f5e9] [&>div]:!bg-[#27ae60]" 
+              className="h-2 bg-[#e8f5e9] dark:bg-green-900/20 [&>div]:!bg-[#27ae60]" 
             />
             <div className="flex items-center gap-2">
               <Input
                 type="number"
-                placeholder={isComplete ? "Goal Completed" : "Amount"}
+                placeholder="Amount"
                 className="h-8"
                 value={contributions[goal.id] || ""}
                 onChange={(e) =>
