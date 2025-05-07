@@ -69,6 +69,31 @@ export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
         return
       }
 
+      // Check if user has enough available income
+      const availableIncome = localStorage.getItem('availableIncome')
+      const availableIncomeNum = Number(availableIncome || "0")
+      
+      if (!availableIncome || availableIncomeNum <= 0) {
+        toast({
+          title: "Expense Failed",
+          description: "You don't have enough available income to add this expense. Please add income first.",
+          variant: "destructive",
+          duration: 3000,
+        });
+        return;
+      }
+
+      // Check if expense amount is greater than available income
+      if (amount > availableIncomeNum) {
+        toast({
+          title: "Expense Failed",
+          description: `You can only spend up to Rs. ${availableIncomeNum.toFixed(2)} as you cannot spend more than your remaining income`,
+          variant: "destructive",
+          duration: 3000,
+        });
+        return;
+      }
+
       // Create expense object
       const expense: Omit<Expense, "id"> = {
         description: data.description,
