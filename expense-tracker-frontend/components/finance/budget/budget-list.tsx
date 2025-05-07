@@ -50,7 +50,7 @@ export function BudgetList({ budgets, expenses, onDelete }: BudgetListProps) {
             const remaining = budget.amount - spent
 
             return (
-              <Card key={budget.id}>
+              <Card key={budget.id} className="bg-[#f9f9f9] dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e]">
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <div>
