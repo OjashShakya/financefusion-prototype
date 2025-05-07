@@ -12,8 +12,8 @@ interface AuthContextType {
   otpStep: boolean;
   otpEmail: string;
   otpType: 'signup' | 'login' | '';
-  setOtpType: (value: string) => void;
-  register: (userData: { fullname: string; email: string; password: string }) => Promise<AuthResponse>;
+  setOtpType: (value: 'signup' | 'login' | '') => void;
+  register: (fullname: string, email: string, password: string) => Promise<AuthResponse>;
   verifyOTP: (otp: string) => Promise<AuthResponse>;
   login: (credentials: { email: string; password: string }) => Promise<AuthResponse>;
   logout: () => void;
