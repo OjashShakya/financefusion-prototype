@@ -26,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 
 interface SavingsGoalsProps {
   goals: SavingsGoal[]
@@ -278,22 +279,37 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
                       </Button>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500 dark:text-[#4e4e4e]">Progress</span>
-                        <span className="text-gray-900 dark:text-white">{percentage.toFixed(1)}%</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          Rs. {goal.initial_amount.toFixed(2)} of Rs. {goal.target_amount.toFixed(2)}
+                        </span>
+                        <Badge variant={percentage >= 90 ? "destructive" : percentage >= 75 ? "outline" : "secondary"}>
+                          {percentage.toFixed(0)}%
+                        </Badge>
                       </div>
-                      <Progress value={percentage} className="h-2" />
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500 dark:text-[#4e4e4e]">Saved</span>
-                        <span className="text-gray-900 dark:text-white">Rs. {goal.initial_amount.toFixed(2)}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
+                      <Progress
+                        value={percentage}
+                        className={`h-2 ${
+                          percentage >= 90
+                            ? "!bg-red-100 dark:!bg-red-900/20"
+                            : percentage >= 75
+                              ? "!bg-amber-500/20 dark:!bg-amber-900/20"
+                              : "!bg-[#e8f5e9] dark:!bg-green-900/20"
+                        }`}
+                        indicatorClassName={`${
+                          percentage >= 90
+                            ? "!bg-red-500"
+                            : percentage >= 75
+                              ? "!bg-amber-500"
+                              : "!bg-[#27ae60]"
+                        }`}
+                      />
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500 dark:text-[#4e4e4e]">Remaining</span>
                         <span className="text-gray-900 dark:text-white">Rs. {remaining.toFixed(2)}</span>
@@ -302,25 +318,22 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                         <span className="text-gray-500 dark:text-[#4e4e4e]">Target Date</span>
                         <span className="text-gray-900 dark:text-white">{targetDate}</span>
                       </div>
-                      <Progress 
-                        value={percentage} 
-                        className="h-2" 
-                        indicatorClassName="transition-all" 
-                        style={{ backgroundColor: goal.color }}
-                      />
-                      <p className="text-xs text-muted-foreground">Rs. {remaining.toFixed(2)} Remaining</p>
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <div className="flex w-full items-center gap-2">
-                      <Input id={`contribution-${goal.id}`} type="number" placeholder="Amount" className="h-8" />
+                    <div className="flex w-full gap-2">
+                      <Input
+                        id={`contribution-${goal.id}`}
+                        type="number"
+                        placeholder="Enter amount"
+                        className="bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e] text-gray-900 dark:text-white"
+                      />
                       <Button
-                        size="sm"
                         onClick={() => {
                           const input = document.getElementById(`contribution-${goal.id}`) as HTMLInputElement
                           handleContribution(goal.id, input.value)
                         }}
-                        className="rounded-xl bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71]"
+                        className="bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71] text-white"
                       >
                         Add
                       </Button>
