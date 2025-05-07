@@ -327,8 +327,24 @@ export function FinanceDashboard() {
 
   const deleteSavingsGoal = async (id: string) => {
     try {
+      // Get the savings goal to be deleted
+      const goalToDelete = savingsGoals.find(goal => goal.id === id);
+      if (!goalToDelete) {
+        throw new Error("Savings goal not found");
+      }
+
+      // Delete the savings goal
       await savingsApi.deleteSavings(id);
+
+      // Update the available income by adding back the initial amount
+      const availableIncome = localStorage.getItem('availableIncome');
+      const availableIncomeNum = Number(availableIncome || "0");
+      const newAvailableIncome = availableIncomeNum + goalToDelete.initial_amount;
+      localStorage.setItem('availableIncome', newAvailableIncome.toString());
+
+      // Update the state
       setSavingsGoals(prev => prev.filter(goal => goal.id !== id));
+      
       toast({
         title: "Success",
         description: "Savings goal deleted successfully",
@@ -412,6 +428,7 @@ export function FinanceDashboard() {
             setActiveView={setActiveView}
             addExpense={addExpense}
             addIncome={addIncome}
+            deleteSavingsGoal={deleteSavingsGoal}
           />
         );
       case 'expenses':
@@ -453,6 +470,7 @@ export function FinanceDashboard() {
             setActiveView={setActiveView}
             addExpense={addExpense}
             addIncome={addIncome}
+            deleteSavingsGoal={deleteSavingsGoal}
           />
         );
     }

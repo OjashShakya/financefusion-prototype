@@ -39,6 +39,7 @@ interface DashboardViewProps {
   setActiveView: (view: string) => void
   addExpense: (expense: Omit<Expense, "id">) => void
   addIncome: (income: Omit<Income, "id">) => void
+  deleteSavingsGoal: (id: string) => void
 }
 
 interface CashFlowData {
@@ -74,6 +75,7 @@ export function DashboardView({
   setActiveView,
   addExpense,
   addIncome,
+  deleteSavingsGoal,
 }: DashboardViewProps) {
   const { user } = useAuth()
   const [greeting, setGreeting] = useState("Good morning")
@@ -431,6 +433,7 @@ export function DashboardView({
                 goals={savingsGoals} 
                 updateSavingsGoal={updateSavingsGoal} 
                 setActiveView={setActiveView}
+                onDelete={deleteSavingsGoal}
               />
             </CardContent>
           </Card>
