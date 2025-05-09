@@ -30,7 +30,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401 || error.response?.status === 403) {
       const url = error.config?.url || '';
       if (!url.includes('/users/login') && !url.includes('/users/verify-otp')) {
-        Cookies.removeItem('token');
+        Cookies.remove('token');
         window.location.href = '/login';
       }
     }
@@ -186,7 +186,11 @@ export const authAPI = {
       // Check for successful verification
       if (response.data.token) {
         // Store token immediately
-        Cookies.set('token', response.data.token);
+        Cookies.set('token', response.data.token, {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict' as const,
+          expires: 7 // 7 days
+        });
         
         return {
           status: 'success',

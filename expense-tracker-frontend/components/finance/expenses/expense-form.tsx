@@ -29,6 +29,7 @@ import { useToast } from "@/hooks/use-toast"
 import type { Expense } from "@/types/finance"
 import { ExpenseCategory } from "@/types/finance"
 import { useState } from "react"
+import Cookies from "js-cookie"
 
 const expenseFormSchema = z.object({
   description: z.string().min(1, "Description is required").max(100, "Description must be less than 100 characters"),

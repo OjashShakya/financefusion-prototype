@@ -39,7 +39,7 @@ export const savingsApi = {
       
       if (!response.ok) {
         if (response.status === 401) {
-          Cookies.removeItem('token');
+          Cookies.remove('token');
           window.location.href = '/login';
           throw new Error("Session expired. Please log in again.");
         }
@@ -159,7 +159,7 @@ export const savingsApi = {
       
       if (!response.ok) {
         if (response.status === 401) {
-          Cookies.removeItem('token');
+          Cookies.remove('token');
           window.location.href = '/login';
           throw new Error("Session expired. Please log in again.");
         }

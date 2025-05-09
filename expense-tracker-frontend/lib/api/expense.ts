@@ -58,7 +58,7 @@ export async function createExpense(expense: Omit<Expense, "id">): Promise<Expen
     if (!response.ok) {
       if (response.status === 401) {
         // Handle unauthorized error
-        Cookies.removeItem('token');
+        Cookies.remove('token');
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }

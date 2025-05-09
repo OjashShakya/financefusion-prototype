@@ -131,7 +131,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const { token, user } = response.data;
-      Cookies.set("token", token);
+      Cookies.set("token", token, {
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict' as const,
+        expires: 7 // 7 days
+      });
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setUser(user);
       Cookies.set("user", JSON.stringify(user));
@@ -170,7 +174,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (otpType === "login") {
         console.log("Login")
         const { token, user } = response.data;
-        Cookies.set("token", token);
+        Cookies.set("token", token, {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict' as const,
+          expires: 7 // 7 days
+        });
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         setUser(user);
         Cookies.set("user", JSON.stringify(user));
@@ -181,7 +189,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { success: true, message: "Login successful" };
       } else {
         console.log("Sign UP ")
-        Cookies.removeItem("otpEmail");
+        Cookies.remove("otpEmail");
         setOtpStep(false);
         setOtpType("");
         router.push("/dashboard");
