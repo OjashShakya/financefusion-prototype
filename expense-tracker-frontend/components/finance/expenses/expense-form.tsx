@@ -70,7 +70,7 @@ export function ExpenseForm({ onSubmit }: { onSubmit: (data: any) => void }) {
       }
 
       // Check if user has enough available income
-      const availableIncome = localStorage.getItem('availableIncome')
+      const availableIncome = Cookies.get('availableIncome')
       const availableIncomeNum = Number(availableIncome || "0")
       
       if (!availableIncome || availableIncomeNum <= 0) {

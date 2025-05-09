@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input"
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns"
 import { SavingsGoalsList } from "./savings-goals-list"
 import { BudgetProgress } from "./budget-progress"
+import Cookies from "js-cookie"
 
 interface DashboardViewProps {
   expenses: Expense[]
@@ -94,7 +95,7 @@ export function DashboardView({
 
   // Update localStorage with available income
   useEffect(() => {
-    localStorage.setItem('availableIncome', availableIncome.toString())
+    Cookies.set('availableIncome', availableIncome.toString())
   }, [availableIncome])
 
   // Get current month's data

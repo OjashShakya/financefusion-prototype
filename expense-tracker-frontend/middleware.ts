@@ -5,7 +5,8 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
                     request.nextUrl.pathname.startsWith('/signup') ||
-                    request.nextUrl.pathname.startsWith('/verify')
+                    request.nextUrl.pathname.startsWith('/verify') ||
+                    request.nextUrl.pathname.startsWith('/verify-signup')
 
   console.log('Middleware - Current path:', request.nextUrl.pathname)
   console.log('Middleware - Has token:', !!token)
@@ -13,7 +14,7 @@ export function middleware(request: NextRequest) {
 
   if (!token && !isAuthPage) {
     console.log('Middleware - Redirecting to login (no token)')
-    // return NextResponse.redirect(new URL('/login', request.url))
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   if (token && isAuthPage) {

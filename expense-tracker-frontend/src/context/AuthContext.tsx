@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { User, AuthResponse } from "../types/auth";
+import Cookies from "js-cookie";
 
 interface AuthContextType {
   user: User | null;
@@ -50,8 +51,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const storedUser = localStorage.getItem("user");
+        const token = Cookies.get("token");
+        const storedUser = Cookies.get("user");
         
         if (token && storedUser) {
           const isValid = await validateToken(token);
@@ -59,16 +60,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           } else {
             // Clear invalid token and user data
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
+            Cookies.remove("token");
+            Cookies.remove("user");
             delete axios.defaults.headers.common["Authorization"];
             setUser(null);
           }
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        Cookies.remove("token");
+        Cookies.remove("user");
         delete axios.defaults.headers.common["Authorization"];
         setUser(null);
       } finally {
@@ -96,7 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setOtpStep(true);
         setOtpEmail(email);
         setOtpType("signup");
-        localStorage.setItem("otpEmail", email);
+        Cookies.set("otpEmail", email);
         return { success: true, requiresOTP: true, message: "OTP sent to your email" };
       }
 
@@ -125,15 +126,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setOtpStep(true);
         setOtpEmail(credentials.email);
         setOtpType("login");
-        localStorage.setItem("otpEmail", credentials.email);
+        Cookies.set("otpEmail", credentials.email);
         return { success: true, requiresOTP: true, message: "OTP sent to your email" };
       }
 
       const { token, user } = response.data;
-      localStorage.setItem("token", token);
+      Cookies.set("token", token);
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setUser(user);
-      localStorage.setItem("user", JSON.stringify(user));
+      Cookies.set("user", JSON.stringify(user));
       router.push("/dashboard");
       return { success: true, message: "Login successful" };
     } catch (err: any) {
@@ -146,7 +147,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const verifyOTP = async (otp: string): Promise<AuthResponse> => {
     try {
       setError(null);
-      const email = localStorage.getItem("otpEmail");
+      const email = Cookies.get("otpEmail");
       if (!email) {
         setError("Email not found");
         return { success: false, message: "Email not found" };
@@ -169,18 +170,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (otpType === "login") {
         console.log("Login")
         const { token, user } = response.data;
-        localStorage.setItem("token", token);
+        Cookies.set("token", token);
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         setUser(user);
-        localStorage.setItem("user", JSON.stringify(user));
+        Cookies.set("user", JSON.stringify(user));
         setOtpStep(false);
         setOtpType("");
-        localStorage.removeItem("otpEmail");
+        Cookies.remove("otpEmail");
         router.push("/dashboard");
         return { success: true, message: "Login successful" };
       } else {
         console.log("Sign UP ")
-        localStorage.removeItem("otpEmail");
+        Cookies.removeItem("otpEmail");
         setOtpStep(false);
         setOtpType("");
         router.push("/dashboard");
@@ -194,8 +195,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    Cookies.remove("token");
+    Cookies.remove("user");
     delete axios.defaults.headers.common["Authorization"];
     setUser(null);
     router.push("/login");

@@ -5,6 +5,15 @@ import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
+import  Cookies from 'js-cookie'
+
+// Add cookie options for better security
+const COOKIE_OPTIONS = {
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  expires: 7 // 7 days
+};
+
 interface User {
   id: string;
   email: string;
@@ -34,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = Cookies.get("token");
         if (!token) {
           setLoading(false);
           return;
@@ -50,12 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
           setUser(userData);
         } else {
-          localStorage.removeItem('token');
+          Cookies.remove('token');
           setUser(null);
         }
       } catch (error) {
         console.error('Auth check error:', error);
-        localStorage.removeItem('token');
+        Cookies.remove('token');
         setUser(null);
       } finally {
         setLoading(false);
@@ -132,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         router.push(`/verify-login?email=${encodeURIComponent(email)}`);
       } else if (response.status === 'success' && response.token) {
-        localStorage.setItem('token', response.token);
+        Cookies.set('token', response.token, COOKIE_OPTIONS);
         const userData: User = {
           id: response.user.id,
           email: response.user.email,
@@ -161,7 +170,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await authAPI.verifyLoginOTP(otp, email);
       
       if (response.status === 'success' && response.token && response.user) {
-        localStorage.setItem('token', response.token);
+        Cookies.remove('tempToken');
+        Cookies.set('token', response.token, COOKIE_OPTIONS);
         const userData: User = {
           id: response.user.id,
           email: response.user.email,
@@ -198,7 +208,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await authAPI.logout();
       setUser(null);
-      localStorage.removeItem('token');
+      Cookies.remove('token');
       toast({
         title: "Logged Out",
         description: "You have been successfully logged out.",
@@ -223,9 +233,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (response.status === 'success' && response.token && response.user) {
         console.log('OTP verification successful');
-        localStorage.removeItem('tempToken');
-        localStorage.setItem('token', response.token);
-        console.log('Token stored in localStorage');
+        Cookies.remove('tempToken');
+        Cookies.set('token', response.token, COOKIE_OPTIONS);
+        console.log('Token stored in Cookies');
 
         const userData: User = {
           id: response.user.id || '',
@@ -308,6 +318,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await authAPI.verifyOTP(otp, email);
       
       if (response.status === 'success' && response.token && response.user) {
+        Cookies.remove('tempToken');
+        Cookies.set('token', response.token, COOKIE_OPTIONS);
         const userData: User = {
           id: response.user.id || '',
           email: response.user.email || '',
@@ -315,7 +327,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
         
         setUser(userData);
-        localStorage.setItem('token', response.token);
         toast({
           title: "OTP Verified",
           description: "Your email has been verified successfully. Please change your password.",

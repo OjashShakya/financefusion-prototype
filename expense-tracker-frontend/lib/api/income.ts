@@ -1,10 +1,11 @@
 import { Income, IncomeCategory } from "@/types/finance";
+import Cookies from "js-cookie";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Helper function to get headers with auth token
 const getHeaders = () => {
-  const token = localStorage.getItem('token');
+  const token = Cookies.get('token');
   if (!token) {
     throw new Error("No authentication token found");
   }
@@ -24,7 +25,7 @@ export async function getIncomes(): Promise<Income[]> {
     if (!response.ok) {
       if (response.status === 401) {
         // Handle unauthorized error
-        localStorage.removeItem('token');
+        Cookies.remove('token');
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }
@@ -57,7 +58,7 @@ export async function createIncome(income: Omit<Income, "id">): Promise<Income> 
     if (!response.ok) {
       if (response.status === 401) {
         // Handle unauthorized error
-        localStorage.removeItem('token');
+        Cookies.remove('token');
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }
@@ -93,7 +94,7 @@ export async function deleteIncome(id: string): Promise<void> {
     if (!response.ok) {
       if (response.status === 401) {
         // Handle unauthorized error
-        localStorage.removeItem('token');
+        Cookies.remove('token');
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }
@@ -119,7 +120,7 @@ export async function deleteAllIncomes(): Promise<void> {
     if (!response.ok) {
       if (response.status === 401) {
         // Handle unauthorized error
-        localStorage.removeItem('token');
+        Cookies.remove('token');
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }

@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Trash2 } from "lucide-react"
+import Cookies from "js-cookie"
 
 interface SavingsGoalsListProps {
   goals: SavingsGoal[]
@@ -74,7 +75,7 @@ export function SavingsGoalsList({ goals, updateSavingsGoal, setActiveView, onDe
     }
 
     // Check if user has enough available income
-    const availableIncome = localStorage.getItem('availableIncome')
+    const availableIncome = Cookies.get('availableIncome')
     const availableIncomeNum = Number(availableIncome || "0")
     
     if (!availableIncome || availableIncomeNum <= 0) {
@@ -119,7 +120,7 @@ export function SavingsGoalsList({ goals, updateSavingsGoal, setActiveView, onDe
 
       // Update available income in localStorage
       const newAvailableIncome = availableIncomeNum - newAmount
-      localStorage.setItem('availableIncome', newAvailableIncome.toString())
+      Cookies.set('availableIncome', newAvailableIncome.toString())
 
       const newTotal = goal.initial_amount + newAmount
       const newPercentage = (newTotal / goal.target_amount) * 100

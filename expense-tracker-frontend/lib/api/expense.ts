@@ -1,10 +1,11 @@
 import { Expense } from "@/types/finance";
+import Cookies from "js-cookie";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Helper function to get headers with auth token
 const getHeaders = () => {
-  const token = localStorage.getItem('token');
+  const token = Cookies.get('token');
   if (!token) {
     throw new Error("No authentication token found");
   }
@@ -24,7 +25,7 @@ export async function getExpenses(): Promise<Expense[]> {
     if (!response.ok) {
       if (response.status === 401) {
         // Handle unauthorized error
-        localStorage.removeItem('token');
+        Cookies.remove('token');
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }
@@ -57,7 +58,7 @@ export async function createExpense(expense: Omit<Expense, "id">): Promise<Expen
     if (!response.ok) {
       if (response.status === 401) {
         // Handle unauthorized error
-        localStorage.removeItem('token');
+        Cookies.removeItem('token');
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }
@@ -93,7 +94,7 @@ export async function deleteExpense(id: string): Promise<void> {
     if (!response.ok) {
       if (response.status === 401) {
         // Handle unauthorized error
-        localStorage.removeItem('token');
+        Cookies.remove('token');
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }
@@ -121,7 +122,7 @@ export async function deleteAllExpenses(): Promise<void> {
     if (!response.ok) {
       if (response.status === 401) {
         // Handle unauthorized error
-        localStorage.removeItem('token');
+        Cookies.remove('token');
         window.location.href = '/login';
         throw new Error("Session expired. Please log in again.");
       }

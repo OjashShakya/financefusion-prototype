@@ -4,14 +4,14 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../src/context/AuthContext';
 import { FinanceDashboard } from '@/components/finance/finance-dashboard';
-
+import Cookies from 'js-cookie';
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && !user) {
-      const token = localStorage.getItem("token");
+      const token = Cookies.get('token');
       console.log("Token")
       if (!token) {
         router.replace('/login');
@@ -45,3 +45,4 @@ export default function DashboardPage() {
     </div>
   );
 } 
+

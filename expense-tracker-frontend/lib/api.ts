@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import Cookies from 'js-cookie';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
@@ -13,7 +15,7 @@ const api = axios.create({
 
 // Add token to requests if it exists
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = Cookies.get('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -28,7 +30,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401 || error.response?.status === 403) {
       const url = error.config?.url || '';
       if (!url.includes('/users/login') && !url.includes('/users/verify-otp')) {
-        localStorage.removeItem('token');
+        Cookies.removeItem('token');
         window.location.href = '/login';
       }
     }
@@ -184,7 +186,7 @@ export const authAPI = {
       // Check for successful verification
       if (response.data.token) {
         // Store token immediately
-        localStorage.setItem('token', response.data.token);
+        Cookies.set('token', response.data.token);
         
         return {
           status: 'success',
@@ -236,7 +238,7 @@ export const authAPI = {
 
   getCurrentUser: async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
       if (!token) {
         return {
           status: 'error',
@@ -275,7 +277,7 @@ export const authAPI = {
         const data = error.response.data;
 
         if (status === 401 || status === 403) {
-          localStorage.removeItem('token');
+          Cookies.remove('token');
         }
 
         return {
@@ -296,7 +298,7 @@ export const authAPI = {
   },
 
   logout: () => {
-    localStorage.removeItem('token');
+    Cookies.remove('token');
   },
 
   sendPasswordResetEmail: async (email: string) => {

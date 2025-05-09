@@ -6,6 +6,7 @@ import { useAuth } from '../../src/context/AuthContext';
 import Image from 'next/image';
 import mainLogo from '../assets/mainLogo.png';
 import ResetPassword_icon from '../assets/Resetpassword.png';
+import Cookies from 'js-cookie';
 
 const VerifySignup = () => {
   const router = useRouter();
@@ -17,7 +18,7 @@ const VerifySignup = () => {
 
   useEffect(() => {
     // Get email from localStorage if not in context
-    const storedEmail = localStorage.getItem('otpEmail');
+    const storedEmail = Cookies.get('otpEmail');
     if (!otpEmail && !storedEmail) {
       setError("Email not found. Please try signing up again.");
       return;

@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
+import Cookies from "js-cookie"
 
 interface SavingsGoalsProps {
   goals: SavingsGoal[]
@@ -144,7 +145,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     }
 
     // Check if user has enough available income
-    const availableIncome = localStorage.getItem('availableIncome')
+    const availableIncome = Cookies.get('availableIncome')
     const availableIncomeNum = Number(availableIncome || "0")
     
     if (!availableIncome || availableIncomeNum <= 0) {
@@ -184,7 +185,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
 
     // Update available income in localStorage
     const newAvailableIncome = availableIncomeNum - newAmount
-    localStorage.setItem('availableIncome', newAvailableIncome.toString())
+    Cookies.set('availableIncome', newAvailableIncome.toString())
 
     const input = document.getElementById(`contribution-${goalId}`) as HTMLInputElement
     if (input) input.value = ""

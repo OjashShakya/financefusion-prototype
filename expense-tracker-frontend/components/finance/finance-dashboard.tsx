@@ -16,6 +16,7 @@ import { savingsApi } from '@/lib/api/savings';
 import { getBudgets, createBudget, deleteBudget } from '@/lib/api/budget';
 import { useAuth } from '@/src/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
+import Cookies from 'js-cookie';
 
 export function FinanceDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -337,10 +338,10 @@ export function FinanceDashboard() {
       await savingsApi.deleteSavings(id);
 
       // Update the available income by adding back the initial amount
-      const availableIncome = localStorage.getItem('availableIncome');
+      const availableIncome = Cookies.get('availableIncome');
       const availableIncomeNum = Number(availableIncome || "0");
       const newAvailableIncome = availableIncomeNum + goalToDelete.initial_amount;
-      localStorage.setItem('availableIncome', newAvailableIncome.toString());
+      Cookies.set('availableIncome', newAvailableIncome.toString());
 
       // Update the state
       setSavingsGoals(prev => prev.filter(goal => goal.id !== id));
