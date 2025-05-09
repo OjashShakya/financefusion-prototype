@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form"
 import { format } from "date-fns"
-import { CalendarIcon, Check, Trash2 } from "lucide-react"
+import { CalendarIcon, Check, Trash2 , AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -113,7 +113,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
     onAdd(data)
     toast({
       title: "Savings goal created",
-      description: `${data.name}: Rs. ${data.target_amount.toFixed(2)} by ${format(data.date, "MMM d, yyyy")}`,
+      description: `${data.name}: Rs. ${data.target_amount} by ${format(data.date, "MMM d, yyyy")}`,
       variant: "success",
     })
     form.reset({
@@ -134,10 +134,19 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
 
     // Check if goal is already at 100%
     const currentPercentage = (goal.initial_amount / goal.target_amount) * 100
+
+    if(newAmount == 0 || newAmount < 0){
+      toast({
+        title: "Please Enter valid amount",
+        description: "You cannot add Rs 0 or negative amount",
+        variant: "destructive",
+        duration: 3000,
+      })
+    }
     if (currentPercentage >= 100) {
       toast({
         title: "Goal Completed",
-        description: `Congratulations! You have already reached your savings goal for ${goal.name}.`,
+        description: `You have already reached your savings goal for ${goal.name}.`,
         variant: "success",
         duration: 5000,
       })
@@ -210,22 +219,31 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
         duration: 7000,
       })
     } else {
-      toast({
-        title: "Amount Saved Successfully",
-        description: (
-          <div className="mt-2">
-            <p>Added Rs. {newAmount.toFixed(2)} to {goal.name}</p>
-            <p className="text-sm text-muted-foreground">
-              Progress: {newPercentage.toFixed(1)}% ({newTotal.toFixed(2)} / {goal.target_amount.toFixed(2)})
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Remaining: Rs. {newRemaining.toFixed(2)}
-            </p>
-          </div>
-        ),
-        variant: "success",
-        duration: 5000,
-      })
+      if(newAmount == 0 || newAmount < 0){
+        toast({
+          title: "Please Enter valid amount",
+          description: "You cannot add Rs 0 or negative amount",
+          variant: "destructive",
+          duration: 3000,
+        })
+      }else{
+        toast({
+          title: "Amount Saved Successfully",
+          description: (
+            <div className="mt-2">
+              <p>Added Rs. {newAmount.toFixed(2)} to {goal.name}</p>
+              <p className="text-sm text-muted-foreground">
+                Progress: {newPercentage.toFixed(1)}% ({newTotal.toFixed(2)} / {goal.target_amount.toFixed(2)})
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Remaining: Rs. {newRemaining.toFixed(2)}
+              </p>
+            </div>
+          ),
+          variant: "success",
+          duration: 5000,
+        })
+      }
     }
   }
 
@@ -288,7 +306,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-gray-900 dark:text-white">
-                          Rs. {goal.initial_amount.toFixed(2)} of Rs. {goal.target_amount.toFixed(2)}
+                        {isComplete ? "Goal Completed! 🎉" : `Rs. ${remaining.toFixed(2)} Remaining`}
                         </span>
                         <Badge variant={percentage >= 90 ? "destructive" : percentage >= 75 ? "outline" : "secondary"}>
                           {percentage.toFixed(0)}%
@@ -328,6 +346,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                         type="number"
                         placeholder="Enter amount"
                         className="bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e] text-gray-900 dark:text-white"
+                        disabled={isComplete}
                       />
                       <Button
                         onClick={() => {
@@ -336,7 +355,7 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                         }}
                         className="bg-[#27ae60] hover:bg-[#2ecc71] dark:bg-[#27ae60] dark:hover:bg-[#2ecc71] text-white"
                       >
-                        Add
+                        {isComplete ? "Completed" : "Add"}
                       </Button>
                     </div>
                   </CardFooter>
@@ -383,30 +402,57 @@ export function SavingsGoals({ goals, onAdd, onUpdate, onDelete }: SavingsGoalsP
                   )}
                 />
                 <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="target_amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-900 dark:text-white">Target Amount</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="0.00" 
-                            {...field} 
-                            className="bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e] text-gray-900 dark:text-white"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="target_amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center gap-1 relative group w-fit">
+                        <FormLabel className="text-gray-900 dark:text-white">
+                          Target Amount
+                        </FormLabel>
+
+                        {/* Alert Icon with tooltip-like hover */}
+                        <AlertCircle className="h-4 w-4 text-gray-500 dark:text-gray-400 cursor-pointer" />
+
+                        {/* Hover message */}
+                        <div className="absolute -top-7 left-full ml-2 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                          Enter your target savings
+                        </div>
+                      </div>
+
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          {...field}
+                          className="bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e] text-gray-900 dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                   <FormField
                     control={form.control}
                     name="initial_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-900 dark:text-white">Initial Amount</FormLabel>
+                       <div className="flex items-center gap-1 relative group w-fit">
+                        <FormLabel className="text-gray-900 dark:text-white">
+                          Initial Amount
+                        </FormLabel>
+
+                        {/* Alert Icon with tooltip-like hover */}
+                        <AlertCircle className="h-4 w-4 text-gray-500 dark:text-gray-400 cursor-pointer" />
+
+                        {/* Hover message */}
+                        <div className="absolute -top-7 left-full ml-2 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                          Enter the amount you can save
+                        </div>
+                      </div>
+                        
                         <FormControl>
                           <Input 
                             type="number" 
