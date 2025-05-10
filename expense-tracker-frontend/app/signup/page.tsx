@@ -8,6 +8,7 @@ import Signup_icon from "../assets/signup.png";
 import { useAuth } from "../../src/context/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
 import { AuthResponse } from "../../src/types/auth";
+import Link from 'next/link';
 
 const Signup: React.FC = () => {
   const router = useRouter();
@@ -184,7 +185,9 @@ const Signup: React.FC = () => {
               disabled={isLoading}
               className="w-4 h-4 border border-[#9E9E9E] rounded cursor-pointer disabled:opacity-50 bg-white"
             />
-            <span className="text-sm text-[#333]">I accept terms and policy</span>
+            <Link href="/terms" className="text-sm text-[#333] underline hover:text-blue-600">
+              I accept terms and policy
+            </Link>
           </div>
 
           <div className="flex flex-col items-center mt-[15px] gap-4">
