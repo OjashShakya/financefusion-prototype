@@ -89,6 +89,7 @@ export function FinanceSidebar({ activeView, setActiveView, isCollapsed, setIsCo
       <div className="border-t border-[#e2e8f0] dark:border-[#4e4e4e] p-4 mt-auto">
         <div className={`flex items-center gap-[12px] bg-gray-100 dark:bg-[#131313] text-gray-900 dark:text-white rounded-[16px] p-[12px] border border-[#e2e8f0] dark:border-[#4e4e4e] ${isCollapsed ? 'justify-center p-2' : ''}`}>
           <Avatar className={`${isCollapsed ? 'h-[36px] w-[36px]' : 'h-[44px] w-[44px]'}`}>
+            <AvatarImage src={user?.profilePicture?.url || "/assets/profile-placeholder.png"} alt={user?.fullname || "User"} />
             <AvatarFallback className="bg-primary text-primary-foreground">
               {user?.fullname?.split(" ").map((n) => n[0]).join("") || "U"}
             </AvatarFallback>
