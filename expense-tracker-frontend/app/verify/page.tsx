@@ -1,14 +1,14 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import mainLogo from "../assets/mainLogo.png";
 import ResetPassword_icon from "../assets/Resetpassword.png";
 import { useAuth } from "../../src/context/AuthContext";
 import { AuthResponse } from "../../src/types/auth";
 
-const VerifyOTP: React.FC = () => {
+const VerifyOTPContent: React.FC = () => {
   const router = useRouter();
   const { verifyOTP, otpEmail, error: authError, otpType, user, setOtpType } = useAuth();
   const [otp, setOtp] = useState<string>("");
@@ -126,6 +126,18 @@ const VerifyOTP: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const VerifyOTP: React.FC = () => {
+  return (
+    <Suspense fallback={
+      <div className="w-full min-h-screen bg-[#f9f9f9] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#27AE60] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <VerifyOTPContent />
+    </Suspense>
   );
 };
 
