@@ -14,9 +14,9 @@ interface IncomeViewProps {
 
 export function IncomeView({ incomes, onAdd, onDelete, onDeleteAll }: IncomeViewProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Income Tracking</h1>
+        {/* <h1 className="text-3xl font-bold tracking-tight">Income Tracking</h1> */}
         <p className="text-muted-foreground">Monitor your income sources</p>
       </div>
 

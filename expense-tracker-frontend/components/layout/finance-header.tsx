@@ -13,15 +13,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation"
 
 interface FinanceHeaderProps {
   activeView: string
   isSidebarCollapsed: boolean
   setIsSidebarCollapsed: (collapsed: boolean) => void
+  setActiveView: (view: string) => void
 }
 
-export function FinanceHeader({ activeView, isSidebarCollapsed, setIsSidebarCollapsed }: FinanceHeaderProps) {
+export function FinanceHeader({ activeView, isSidebarCollapsed, setIsSidebarCollapsed, setActiveView }: FinanceHeaderProps) {
   const { user, logout } = useAuth()
+  const router = useRouter()
 
   const getTitle = () => {
     switch (activeView) {
@@ -36,7 +39,7 @@ export function FinanceHeader({ activeView, isSidebarCollapsed, setIsSidebarColl
       case "savings":
         return "Savings Goals"
       default:
-        return "FinanceTracker"
+        return "Settings"
     }
   }
 
@@ -68,28 +71,6 @@ export function FinanceHeader({ activeView, isSidebarCollapsed, setIsSidebarColl
             {user?.fullname || "Username"}
           </h1>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild> 
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full text-gray-900 dark:text-white">
-              <Settings className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 bg-[#f9f9f9] dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e]" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none text-gray-900 dark:text-white">{user?.fullname}</p>
-                <p className="text-xs leading-none text-gray-500 dark:text-[#4e4e4e]">{user?.email}</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-[#e2e8f0] dark:bg-[#4e4e4e]" />
-            <DropdownMenuItem className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-[#4e4e4e]">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-[#e2e8f0] dark:bg-[#4e4e4e]" />
-            <DropdownMenuItem className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-[#4e4e4e]" onClick={logout}>Log out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </header>
   )

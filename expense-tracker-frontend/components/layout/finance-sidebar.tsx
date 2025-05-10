@@ -7,6 +7,7 @@ import { useAuth } from "@/src/context/AuthContext"
 import Image from "next/image"
 import mainLogo from "../../app/assets/mainLogo.png"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation"
 
 interface FinanceSidebarProps {
   activeView: string
@@ -17,6 +18,7 @@ interface FinanceSidebarProps {
 
 export function FinanceSidebar({ activeView, setActiveView, isCollapsed, setIsCollapsed }: FinanceSidebarProps) {
   const { user, logout } = useAuth()
+  const router = useRouter()
 
   return (
     <div className={`fixed top-0 left-0 h-screen flex flex-col border-r border-[#e2e8f0] dark:border-[#4e4e4e] bg-[#f9f9f9] dark:bg-[#131313] text-gray-900 dark:text-white transition-all duration-300 ${isCollapsed ? 'w-[80px]' : 'w-[320px]'}`}>
@@ -92,23 +94,18 @@ export function FinanceSidebar({ activeView, setActiveView, isCollapsed, setIsCo
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (
-            <div className="flex-1 truncate">
+            <div className="flex-1 truncate flex flex-row">
+            <div className="flex-1 truncate flex flex-col">
               <div className="flex items-center gap-2">
                 <div className="truncate text-[20px] font-medium text-gray-900 dark:text-white">{user?.fullname || "Username"}</div>
               </div>
               <div className="truncate text-[14px] text-gray-500 dark:text-[#4e4e4e]">{user?.email || "Email"}</div>
             </div>
+                <button onClick={() => setActiveView('settings')} className="ml-2 p-3 rounded-[12px] hover:bg-gray-200 dark:hover:bg-[#232323] border border-[#e2e8f0] hover:border-[#e2e8f0] dark:border-[#4e4e4e] transition-colors">
+                  <Settings className="h-[20px] w-[20px] text-gray-500 dark:text-gray-400" />
+                </button>
+            </div>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className={`flex items-center justify-center rounded-lg border border-[#e2e8f0] dark:border-[#4e4e4e] p-2 hover:bg-gray-100 dark:hover:bg-[#4e4e4e] cursor-pointer ${isCollapsed ? 'p-1.5' : ''}`}>
-                <Settings className={`${isCollapsed ? 'h-4 w-4' : 'h-5 w-5'} text-gray-500 dark:text-[#4e4e4e]`} />
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-white dark:bg-[#131313] border-[#e2e8f0] dark:border-[#4e4e4e]" align="end" forceMount>
-              <DropdownMenuItem className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-[#4e4e4e]" onClick={logout}>Log out</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
     </div>

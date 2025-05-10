@@ -1,13 +1,19 @@
 import { useToast } from "@/hooks/use-toast"
 import type { SavingsGoal } from "@/types/finance"
+import { FinanceSidebar } from "@/components/finance-sidebar"
+import { FinanceHeader } from "@/components/finance-header"
 
 interface FinanceDashboardProps {
   savingsGoals: SavingsGoal[]
   fetchSavingsGoals: () => Promise<void>
   updateSavingsGoal: (id: string, amount: number) => Promise<void>
+  activeView: string
+  setActiveView: (view: string) => void
+  isSidebarCollapsed: boolean
+  setIsSidebarCollapsed: (collapsed: boolean) => void
 }
 
-export function FinanceDashboard({ savingsGoals, fetchSavingsGoals, updateSavingsGoal }: FinanceDashboardProps) {
+export function FinanceDashboard({ savingsGoals, fetchSavingsGoals, updateSavingsGoal, activeView, setActiveView, isSidebarCollapsed, setIsSidebarCollapsed }: FinanceDashboardProps) {
   const { toast } = useToast()
   
   const handleUpdateSavingsGoal = async (id: string, amount: number) => {
@@ -55,5 +61,20 @@ export function FinanceDashboard({ savingsGoals, fetchSavingsGoals, updateSaving
     }
   }
 
-  return null // Add your dashboard UI here
+  return (
+    <>
+      <FinanceSidebar 
+        activeView={activeView} 
+        setActiveView={setActiveView}
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={setIsSidebarCollapsed}
+      />
+      <FinanceHeader 
+        activeView={activeView} 
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+        setActiveView={setActiveView}
+      />
+    </>
+  )
 } 
