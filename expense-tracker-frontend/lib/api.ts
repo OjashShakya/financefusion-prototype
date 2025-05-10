@@ -316,4 +316,78 @@ export const authAPI = {
   },
 };
 
+export const profileAPI = {
+  updateUsername: async (userId: string, newUsername: string) => {
+    try {
+      const response = await api.patch(`/profile/update-username/${userId}`, { newUsername });
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update username'
+      };
+    }
+  },
+
+  updatePassword: async (userId: string, currentPassword: string, newPassword: string) => {
+    try {
+      const response = await api.patch(`/profile/update-password/${userId}`, {
+        currentPassword,
+        newPassword
+      });
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update password'
+      };
+    }
+  },
+
+  uploadProfilePicture: async (userId: string, file: File | null) => {
+    try {
+      const formData = new FormData();
+      if (file) {
+        formData.append('profilePicture', file);
+      }
+
+      const response = await api.post(`/profile/upload-picture/${userId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to upload profile picture'
+      };
+    }
+  },
+
+  removeProfilePicture: async (userId: string) => {
+    try {
+      const response = await api.delete(`/profile/remove-picture/${userId}`);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to remove profile picture'
+      };
+    }
+  }
+};
+
 export default api; 

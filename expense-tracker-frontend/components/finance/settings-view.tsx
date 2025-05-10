@@ -3,18 +3,30 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Settings, LogOut, User as UserIcon } from "lucide-react";
+import { Settings, LogOut, User as UserIcon, Eye, EyeOff, Upload, Trash2 } from "lucide-react";
 import { useAuth } from "@/src/context/AuthContext";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { savingsApi } from "@/lib/api/savings";
+import { profileAPI } from "@/lib/api";
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SettingsView() {
-  const { user, logout, sendPasswordResetEmail } = useAuth();
+  const { user, logout, sendPasswordResetEmail, setUser } = useAuth();
   const [showLogout, setShowLogout] = useState(false);
   const [achievements, setAchievements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'achievements' | 'privacy' | 'profile'>('achievements');
   const [resetStatus, setResetStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
+  const [newUsername, setNewUsername] = useState(user?.fullname || '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchAchievements() {
@@ -60,15 +72,214 @@ export default function SettingsView() {
     fetchAchievements();
   }, [user]);
 
+  const handleUsernameUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.id) return;
+
+    if (!newUsername.trim()) {
+      toast({
+        title: "Error",
+        description: "Username cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const response = await profileAPI.updateUsername(user.id, newUsername);
+
+      if (response.success) {
+        toast({
+          title: "Success",
+          description: "Username updated successfully",
+          variant: "default",
+        });
+        // Update local user state
+        if (user) {
+          user.fullname = newUsername;
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to update username",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update username",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.id) return;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: "Error",
+        description: "All password fields are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const response = await profileAPI.updatePassword(user.id, currentPassword, newPassword);
+
+      if (response.success) {
+        toast({
+          title: "Success",
+          description: "Password updated successfully",
+          variant: "default",
+        });
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to update password",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user?.id || !e.target.files?.length) return;
+
+    const file = e.target.files[0];
+    
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "File size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check file type
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'].includes(file.type)) {
+      toast({
+        title: "Error",
+        description: "Only JPG, PNG, GIF and SVG files are allowed",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const response = await profileAPI.uploadProfilePicture(user.id, file);
+
+      if (response.success) {
+        toast({
+          title: "Success",
+          description: "Profile picture updated successfully",
+          variant: "default",
+        });
+        // Update local user state
+        if (user) {
+          user.profilePicture = response.data.data.profilePicture;
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to update profile picture",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile picture",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleRemoveProfilePicture = async () => {
+    if (!user?.id) return;
+
+    setIsUpdating(true);
+    try {
+      const result = await profileAPI.removeProfilePicture(user.id);
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Profile picture removed successfully",
+          variant: "default",
+        });
+        // Update local state with empty profile picture
+        setUser(user ? {
+          ...user,
+          profilePicture: { public_id: '', url: '' }
+        } : null);
+      } else {
+        toast({
+          title: "Error",
+          description: result.message || "Failed to remove profile picture",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove profile picture",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
-    <div className="space-y-6 p-4 md:p-6 min-h-screen bg-[#f9f9f9] dark:bg-[#131313] flex flex-col items-center w-full">
-      <div className="w-full mx-auto">
+    <div className="space-y-6 p-4 md:p-6 h-[calc(100vh-100px)] overflow-hidden bg-[#f9f9f9] dark:bg-[#131313] flex flex-col items-center w-full">
+      <div className="w-full mx-auto overflow-y-auto">
         {/* Profile/Settings Section */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8 md:gap-0 mb-8 w-full">
           {/* Left: Avatar, Name, Email */}
           <div className="flex items-center gap-6">
             <Avatar className="h-28 w-28 border border-[#e2e8f0] dark:border-[#4e4e4e]">
-              <AvatarImage src={user?.avatar || "/assets/profile-placeholder.png"} alt={user?.fullname || "User"} />
+              <AvatarImage src={user?.profilePicture?.url || "/assets/profile-placeholder.png"} alt={user?.fullname || "User"} />
               <AvatarFallback className="bg-primary text-primary-foreground text-5xl">{user?.fullname?.[0] || "U"}</AvatarFallback>
             </Avatar>
             <div>
@@ -136,44 +347,73 @@ export default function SettingsView() {
           <div className="w-full">
             <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Privacy Settings</h3>
             <div className="border-b border-[#e2e8f0] dark:border-[#4e4e4e] mb-12" />
-            <form className="max-w-2xl">
+            <form className="max-w-2xl" onSubmit={handlePasswordUpdate}>
               <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4">
                 <label className="text-lg font-semibold text-gray-900 dark:text-white w-32" htmlFor="email">Email</label>
                 <input id="email" type="email" className="flex-1 rounded-xl border border-gray-200 dark:border-[#4e4e4e] px-4 py-3 text-lg bg-white dark:bg-[#232323] text-gray-900 dark:text-white" value={user?.email || ''} disabled />
-                <Button type="button" variant="outline" className="rounded-xl px-6 py-2 text-gray-400 dark:text-gray-500 border-gray-300 dark:border-[#4e4e4e]" disabled>Send Code</Button>
+              </div>
+              <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4">
+                <label className="text-lg font-semibold text-gray-900 dark:text-white w-32" htmlFor="currentPassword">Current Password</label>
+                <div className="flex-1 relative">
+                  <input 
+                    id="currentPassword" 
+                    type={showCurrentPassword ? "text" : "password"}
+                    className="w-full rounded-xl border border-gray-200 dark:border-[#4e4e4e] px-4 py-3 text-lg bg-white dark:bg-[#232323] text-gray-900 dark:text-white pr-12" 
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+              <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4">
+                <label className="text-lg font-semibold text-gray-900 dark:text-white w-32" htmlFor="newPassword">New Password</label>
+                <div className="flex-1 relative">
+                  <input 
+                    id="newPassword" 
+                    type={showNewPassword ? "text" : "password"}
+                    className="w-full rounded-xl border border-gray-200 dark:border-[#4e4e4e] px-4 py-3 text-lg bg-white dark:bg-[#232323] text-gray-900 dark:text-white pr-12" 
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
               <div className="mb-8 flex flex-col md:flex-row md:items-center gap-4">
-                <label className="text-lg font-semibold text-gray-900 dark:text-white w-32" htmlFor="password">Password</label>
-                <input id="password" type="password" className="flex-1 rounded-xl border border-gray-200 dark:border-[#4e4e4e] px-4 py-3 text-lg bg-white dark:bg-[#232323] text-gray-900 dark:text-white" value="" disabled />
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="rounded-xl px-6 py-2 text-gray-400 dark:text-gray-500 border-gray-300 dark:border-[#4e4e4e]"
-                  onClick={async () => {
-                    if (!user?.email) return;
-                    try {
-                      const result = await sendPasswordResetEmail(user.email);
-                      if (result.success) {
-                        setResetStatus({ type: 'success', message: 'Password reset email sent. Please check your inbox.' });
-                      } else {
-                        setResetStatus({ type: 'error', message: result.message || 'Failed to send reset email.' });
-                      }
-                    } catch (error: any) {
-                      setResetStatus({ type: 'error', message: error.message || 'Failed to send reset email.' });
-                    }
-                  }}
-                >
-                  Send Link
-                </Button>
-              </div>
-              {resetStatus.type && (
-                <div className={`mb-4 text-sm ${resetStatus.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                  {resetStatus.message}
+                <label className="text-lg font-semibold text-gray-900 dark:text-white w-32" htmlFor="confirmPassword">Confirm Password</label>
+                <div className="flex-1 relative">
+                  <input 
+                    id="confirmPassword" 
+                    type={showConfirmPassword ? "text" : "password"}
+                    className="w-full rounded-xl border border-gray-200 dark:border-[#4e4e4e] px-4 py-3 text-lg bg-white dark:bg-[#232323] text-gray-900 dark:text-white pr-12" 
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
                 </div>
-              )}
+              </div>
               <div className="flex gap-4">
                 <Button type="button" variant="outline" className="bg-transparent rounded-xl px-10 py-3 text-gray-400 hover:text-gray-400 dark:text-gray-200 border-gray-300 dark:border-[#4e4e4e] font-semibold" onClick={() => setActiveTab('achievements')}>Back</Button>
-                <Button type="submit" className="rounded-xl px-10 py-3 bg-[#27ae60] hover:bg-[#219150] text-white text-lg font-semibold">Save</Button>
+                <Button type="submit" className="rounded-xl px-10 py-3 bg-[#27ae60] hover:bg-[#219150] text-white text-lg font-semibold" disabled={isUpdating}>
+                  {isUpdating ? 'Saving...' : 'Save'}
+                </Button>
               </div>
             </form>
           </div>
@@ -182,24 +422,56 @@ export default function SettingsView() {
           <div className="w-full">
             <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Profile Settings</h3>
             <div className="border-b border-[#e2e8f0] dark:border-[#4e4e4e] mb-12" />
-            <form className="max-w-2xl">
+            <form className="max-w-2xl" onSubmit={handleUsernameUpdate}>
               <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4">
                 <label className="text-lg font-semibold text-gray-900 dark:text-white w-32" htmlFor="username">Username</label>
-                <input id="username" type="text" className="flex-1 rounded-xl border border-gray-200 dark:border-[#4e4e4e] px-4 py-3 text-lg bg-white dark:bg-[#232323] text-gray-900 dark:text-white" value={user?.fullname || ''} disabled />
+                <input 
+                  id="username" 
+                  type="text" 
+                  className="flex-1 rounded-xl border border-gray-200 dark:border-[#4e4e4e] px-4 py-3 text-lg bg-white dark:bg-[#232323] text-gray-900 dark:text-white" 
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                />
               </div>
               <div className="mb-8 flex flex-col md:flex-row md:items-center gap-4">
                 <label className="text-lg font-semibold text-gray-900 dark:text-white w-32" htmlFor="avatar">Avatar</label>
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16 border border-[#e2e8f0] dark:border-[#4e4e4e]">
-                    <AvatarImage src={user?.avatar || "/assets/profile-placeholder.png"} alt={user?.fullname || "User"} />
+                    <AvatarImage src={user?.profilePicture?.url || "/assets/profile-placeholder.png"} alt={user?.fullname || "User"} />
                     <AvatarFallback className="bg-primary text-primary-foreground text-3xl">{user?.fullname?.[0] || "U"}</AvatarFallback>
                   </Avatar>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">JPG, GIF or PNG, Max size of 700KB<br /><span className="text-green-600 cursor-pointer">Upload photo</span> <span className="text-green-600 cursor-pointer ml-2">Remove photo</span></div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    JPG, PNG, Max size of 5MB<br />
+                    <div className="flex gap-2 mt-1">
+                      <label className="text-green-600 cursor-pointer hover:text-green-700">
+                        Upload photo
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/jpeg,image/png,image/gif,image/svg+xml"
+                          onChange={handleProfilePictureUpload}
+                          disabled={isUpdating}
+                        />
+                      </label>
+                      {/* {user?.profilePicture?.url && (
+                        <button
+                          type="button"
+                          className="text-green-600 cursor-pointer hover:text-green-700"
+                          onClick={handleRemoveProfilePicture}
+                          disabled={isUpdating}
+                        >
+                          Remove photo
+                        </button>
+                      )} */}
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="flex gap-4">
                 <Button type="button" variant="outline" className="bg-transparent rounded-xl px-10 py-3 text-gray-400 hover:text-gray-400 dark:text-gray-200 border-gray-300 dark:border-[#4e4e4e] font-semibold" onClick={() => setActiveTab('achievements')}>Back</Button>
-                <Button type="submit" className="rounded-xl px-10 py-3 bg-[#27ae60] hover:bg-[#219150] text-white text-lg font-semibold">Save</Button>
+                <Button type="submit" className="rounded-xl px-10 py-3 bg-[#27ae60] hover:bg-[#219150] text-white text-lg font-semibold" disabled={isUpdating}>
+                  {isUpdating ? 'Saving...' : 'Save'}
+                </Button>
               </div>
             </form>
           </div>

@@ -3,6 +3,10 @@ export interface User {
   fullname: string;
   email: string;
   avatar?: string;
+  profilePicture?: {
+    public_id: string;
+    url: string;
+  };
 }
 
 export interface AuthResponse {

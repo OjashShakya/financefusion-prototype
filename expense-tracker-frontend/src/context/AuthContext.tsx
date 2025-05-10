@@ -7,8 +7,9 @@ import { User, AuthResponse } from "../types/auth";
 import Cookies from "js-cookie";
 import { useToast } from "@/hooks/use-toast";
 
-interface AuthContextType {
+export type AuthContextType = {
   user: User | null;
+  setUser: (user: User | null) => void;
   loading: boolean;
   error: string | null;
   otpStep: boolean;
@@ -24,7 +25,7 @@ interface AuthContextType {
   sendPasswordResetEmail: (email: string) => Promise<AuthResponse>;
   resetVerify: (otp: string, email: string) => Promise<AuthResponse>;
   resetPassword: (newPassword: string, email: string) => Promise<AuthResponse>;
-}
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -40,11 +41,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const validateToken = async (token: string): Promise<boolean> => {
     try {
-      const response = await axios.get("http://localhost:5000/api/users/me", {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.status === "success") {
         setUser(response.data.user);
+        // Store the updated user data in cookies
+        Cookies.set("user", JSON.stringify(response.data.user), {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict' as const,
+          expires: 7 // 7 days
+        });
         return true;
       }
       return false;
@@ -59,17 +66,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const token = Cookies.get("token");
         const storedUser = Cookies.get("user");
         
-        if (token && storedUser) {
+        if (token) {
           const isValid = await validateToken(token);
           if (isValid) {
             axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            router.push("/dashboard");
           } else {
             // Clear invalid token and user data
             Cookies.remove("token");
             Cookies.remove("user");
             delete axios.defaults.headers.common["Authorization"];
             setUser(null);
+            router.push("/login");
           }
+        } else if (window.location.pathname !== '/login') {
+          router.push("/login");
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
@@ -77,6 +88,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         Cookies.remove("user");
         delete axios.defaults.headers.common["Authorization"];
         setUser(null);
+        if (window.location.pathname !== '/login') {
+          router.push("/login");
+        }
       } finally {
         setLoading(false);
       }
@@ -314,6 +328,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     sendPasswordResetEmail,
     resetVerify,
     resetPassword,
+    setUser,
+    isAuthenticated: !!user,
+    isLoading: loading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
