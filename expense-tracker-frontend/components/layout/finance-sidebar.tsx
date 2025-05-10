@@ -101,7 +101,7 @@ export function FinanceSidebar({ activeView, setActiveView, isCollapsed, setIsCo
               </div>
               <div className="truncate text-[14px] text-gray-500 dark:text-[#4e4e4e]">{user?.email || "Email"}</div>
             </div>
-                <button onClick={() => setActiveView('settings')} className="ml-2 p-3 rounded-[12px] hover:bg-gray-200 dark:hover:bg-[#232323] border border-[#e2e8f0] hover:border-[#e2e8f0] dark:hover:border-[#4e4e4e] transition-colors">
+                <button onClick={() => setActiveView('settings')} className="ml-2 p-3 rounded-[12px] hover:bg-gray-200 dark:hover:bg-[#232323] border border-[#e2e8f0] hover:border-[#e2e8f0] dark:border-[#4e4e4e] transition-colors">
                   <Settings className="h-[20px] w-[20px] text-gray-500 dark:text-gray-400" />
                 </button>
             </div>

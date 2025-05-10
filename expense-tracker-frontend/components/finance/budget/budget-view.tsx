@@ -14,9 +14,9 @@ interface BudgetViewProps {
 
 export function BudgetView({ budgets, expenses, onAdd, onDelete }: BudgetViewProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Budget Planning</h1>
+        {/* <h1 className="text-3xl font-bold tracking-tight">Budget Planning</h1> */}
         <p className="text-muted-foreground">Set and track your budgets</p>
       </div>
 

@@ -37,9 +37,9 @@ export function ExpensesView({ expenses, onAdd, onDelete, onExpensesChange }: Ex
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Expense Management</h1>
+        {/* <h1 className="text-3xl font-bold tracking-tight">Expense Management</h1> */}
         <p className="text-muted-foreground">Track and manage your expenses</p>
       </div>
 

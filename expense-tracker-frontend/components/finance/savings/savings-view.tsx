@@ -12,9 +12,9 @@ interface SavingsViewProps {
 
 export function SavingsView({ goals, onAdd, onUpdate, onDelete }: SavingsViewProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Savings Goals</h1>
+        {/* <h1 className="text-3xl font-bold tracking-tight">Savings Goals</h1> */}
         <p className="text-muted-foreground">Set and track your savings goals</p>
       </div>
 

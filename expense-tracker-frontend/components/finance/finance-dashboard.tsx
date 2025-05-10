@@ -502,6 +502,7 @@ export function FinanceDashboard() {
             activeView={activeView} 
             isSidebarCollapsed={isSidebarCollapsed}
             setIsSidebarCollapsed={setIsSidebarCollapsed}
+            setActiveView={setActiveView}
           />
           <main className="p-4 md:p-6 w-full mt-[80px]">{renderView()}</main>
         </div>
