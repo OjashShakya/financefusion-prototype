@@ -1,15 +1,15 @@
 'use client';
 
 import Image from "next/image";
-import { useState } from "react";
-import { useRouter , useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import mainLogo from "../assets/mainLogo.png";
 import OTP_icon from "../../../assets/otp.png";
 import NewPassword_icon from "../assets/Newpassword.png";
 import { useAuth } from '../../src/context/AuthContext';
 import { Eye, EyeOff } from "lucide-react";
 
-const NewPassword: React.FC = () => {
+const NewPasswordContent: React.FC = () => {
   const router = useRouter();
   const { resetPassword } = useAuth();
   const [password, setPassword] = useState<string>("");
@@ -174,6 +174,18 @@ const NewPassword: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const NewPassword: React.FC = () => {
+  return (
+    <Suspense fallback={
+      <div className="w-full min-h-screen bg-[#f9f9f9] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#27AE60] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <NewPasswordContent />
+    </Suspense>
   );
 };
 
