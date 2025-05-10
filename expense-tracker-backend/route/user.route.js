@@ -70,30 +70,7 @@ router.post(
 );  
 
 
-router.post(
-  "/profile/:id/update-email",
-  authenticateUser,
-  updateEmail
-);
 
-router.post(
-  "/profile/:id/verify-new-email",
-  authenticateUser,
-  verifyNewEmail
-);
-
-router.post(
-  "/profile/:id/update-password",
-  authenticateUser,
-  updatePassword
-);
-
-router.post(
-  "/profile/:id/upload-picture",
-  authenticateUser,
-  upload.single('profilePicture'),
-  uploadProfilePicture
-);
 
 
 module.exports = router;
