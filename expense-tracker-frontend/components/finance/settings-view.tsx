@@ -9,11 +9,12 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { savingsApi } from "@/lib/api/savings";
 
 export default function SettingsView() {
-  const { user, logout } = useAuth();
+  const { user, logout, sendPasswordResetEmail } = useAuth();
   const [showLogout, setShowLogout] = useState(false);
   const [achievements, setAchievements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'achievements' | 'privacy' | 'profile'>('achievements');
+  const [resetStatus, setResetStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
 
   useEffect(() => {
     async function fetchAchievements() {
@@ -144,8 +145,32 @@ export default function SettingsView() {
               <div className="mb-8 flex flex-col md:flex-row md:items-center gap-4">
                 <label className="text-lg font-semibold text-gray-900 dark:text-white w-32" htmlFor="password">Password</label>
                 <input id="password" type="password" className="flex-1 rounded-xl border border-gray-200 dark:border-[#4e4e4e] px-4 py-3 text-lg bg-white dark:bg-[#232323] text-gray-900 dark:text-white" value="" disabled />
-                <Button type="button" variant="outline" className="rounded-xl px-6 py-2 text-gray-400 dark:text-gray-500 border-gray-300 dark:border-[#4e4e4e]" disabled>Send Link</Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="rounded-xl px-6 py-2 text-gray-400 dark:text-gray-500 border-gray-300 dark:border-[#4e4e4e]"
+                  onClick={async () => {
+                    if (!user?.email) return;
+                    try {
+                      const result = await sendPasswordResetEmail(user.email);
+                      if (result.success) {
+                        setResetStatus({ type: 'success', message: 'Password reset email sent. Please check your inbox.' });
+                      } else {
+                        setResetStatus({ type: 'error', message: result.message || 'Failed to send reset email.' });
+                      }
+                    } catch (error: any) {
+                      setResetStatus({ type: 'error', message: error.message || 'Failed to send reset email.' });
+                    }
+                  }}
+                >
+                  Send Link
+                </Button>
               </div>
+              {resetStatus.type && (
+                <div className={`mb-4 text-sm ${resetStatus.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                  {resetStatus.message}
+                </div>
+              )}
               <div className="flex gap-4">
                 <Button type="button" variant="outline" className="bg-transparent rounded-xl px-10 py-3 text-gray-400 hover:text-gray-400 dark:text-gray-200 border-gray-300 dark:border-[#4e4e4e] font-semibold" onClick={() => setActiveTab('achievements')}>Back</Button>
                 <Button type="submit" className="rounded-xl px-10 py-3 bg-[#27ae60] hover:bg-[#219150] text-white text-lg font-semibold">Save</Button>

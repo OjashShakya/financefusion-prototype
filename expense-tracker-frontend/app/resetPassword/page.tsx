@@ -25,9 +25,13 @@ const ResetPassword: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await sendPasswordResetEmail(email);
-      setSuccess("Password reset email sent. Please check your inbox.");
-      
+      const result = await sendPasswordResetEmail(email);
+      if (result.success) {
+        setSuccess("Password reset email sent. Please check your inbox.");
+        router.push(`/resetVerify?email=${encodeURIComponent(email)}`);
+      } else {
+        setError(result.message || "Failed to send reset email. Please try again.");
+      }
     } catch (err: any) {
       setError(err.message || "Failed to send reset email. Please try again.");
     } finally {

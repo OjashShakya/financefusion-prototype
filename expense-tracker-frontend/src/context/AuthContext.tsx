@@ -5,6 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { User, AuthResponse } from "../types/auth";
 import Cookies from "js-cookie";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: User | null;
@@ -20,6 +21,9 @@ interface AuthContextType {
   logout: () => void;
   setOtpStep: (value: boolean) => void;
   signup: (fullname: string, email: string, password: string) => Promise<AuthResponse>;
+  sendPasswordResetEmail: (email: string) => Promise<AuthResponse>;
+  resetVerify: (otp: string, email: string) => Promise<AuthResponse>;
+  resetPassword: (newPassword: string, email: string) => Promise<AuthResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [otpEmail, setOtpEmail] = useState("");
   const [otpType, setOtpType] = useState<'signup' | 'login' | ''>("");
   const router = useRouter();
+  const { toast } = useToast();
 
   const validateToken = async (token: string): Promise<boolean> => {
     try {
@@ -210,6 +215,88 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push("/login");
   };
 
+  const sendPasswordResetEmail = async (email: string): Promise<AuthResponse> => {
+    try {
+      setError(null);
+      const response = await axios.post(
+        "http://localhost:5000/api/users/password-reset/request",
+        { email }
+      );
+
+      if (response.data.status === "error") {
+        setError(response.data.message);
+        return { success: false, message: response.data.message };
+      }
+
+      return { success: true, message: "Password reset email sent successfully" };
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Failed to send reset email";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+  };
+
+  const resetVerify = async (otp: string, email: string): Promise<AuthResponse> => {
+    try {
+      setError(null);
+      const response = await axios.post(
+        "http://localhost:5000/api/users/verify-otp",
+        { email, otp }
+      );
+
+      if (response.data.status === "error") {
+        setError(response.data.message);
+        return { success: false, message: response.data.message };
+      }
+
+      if (response.data.status === "success") {
+        return { success: true, message: "OTP verified successfully" };
+      }
+
+      return { success: false, message: "Verification failed" };
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "An error occurred during verification";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+  };
+
+  const resetPassword = async (newPassword: string, email: string): Promise<AuthResponse> => {
+    try {
+      setError(null);
+      const response = await axios.post(
+        "http://localhost:5000/api/users/password-reset/reset",
+        { newPassword, email }
+      );
+
+      if (response.data.success === false) {
+        setError(response.data.message);
+        toast({
+          title: "Password Reset Failed",
+          description: response.data.message,
+          variant: "destructive",
+        });
+        return { success: false, message: response.data.message };
+      }
+
+      toast({
+        title: "Password Reset Successful",
+        description: "Your password has been reset successfully. Please login with your new password.",
+        variant: "success",
+      });
+      return { success: true, message: "Password reset successfully" };
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Failed to reset password";
+      setError(errorMessage);
+      toast({
+        title: "Password Reset Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return { success: false, message: errorMessage };
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -224,6 +311,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     logout,
     setOtpStep,
     signup,
+    sendPasswordResetEmail,
+    resetVerify,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

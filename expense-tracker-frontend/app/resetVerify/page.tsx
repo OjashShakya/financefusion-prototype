@@ -25,8 +25,12 @@ const VerifyOTP: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await resetVerify(otp, email);
-      // router.push("/newPassword");
+      const result = await resetVerify(otp, email);
+      if (result.success) {
+        router.push(`/newPassword?email=${encodeURIComponent(email)}`);
+      } else {
+        setError(result.message || "Invalid OTP. Please try again.");
+      }
     } catch (err: any) {
       setError(err.message || "Invalid OTP. Please try again.");
     } finally {
