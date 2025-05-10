@@ -290,38 +290,6 @@ const getUserById = async (req, res, next) => {
   });
 };
 
-// const getProfile = async (req, res, next) => {
-//   const userId = req.user.userId;
-//   try {
-//     const user = await User.findById(userId)
-//       .populate({
-//         path: "appliedJobs.jobId",
-//         select: "jobTitle",
-//       })
-//       .populate({
-//         path: "savedJobs.jobId",
-//         select: "jobTitle",
-//       });
-//     if (!user) {
-//       return res.status(StatusCodes.NOT_FOUND).json({
-//         success: false,
-//         message: `User with Id ${userId} was not found`,
-//       });
-//     }
-//     return res.status(StatusCodes.OK).json({
-//       success: true,
-//       message: "Data Fetched successfully",
-//       data: {
-//         fullName: user.fullName,
-//         email: user.email,
-//         profilePicture: user.profilePicture,
-//       },
-//     });
-//   } catch (error) {
-//     next(error);
-//     console.log(error);
-//   }
-// };
 
 module.exports = {
   registerUser,
@@ -332,5 +300,4 @@ module.exports = {
   getUserById,
   requestPasswordReset,
   resetPassword,
-  // getProfile,
 };

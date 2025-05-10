@@ -9,17 +9,9 @@ const {
   requestPasswordReset,
   resetPassword,
 } = require("../controller/user.controller");
-const {
-  updateEmail,
-  verifyNewEmail,
-  updatePassword,
-  uploadProfilePicture,
-} = require("../controller/profile.controller");
 const { validate } = require("../middlewares/validation.middleware");
 const { signupSchema } = require("../validations/ZodValidation.user");
-const { currentUser } = require("../controller/decodeToken.controller");
 const authenticateUser = require("../middlewares/auth.middleware");
-const upload = require("../middlewares/fileUpload.middleware");
 
 const router = express.Router();
 
@@ -51,13 +43,6 @@ router.get(
   getAllUser
 );
 
-// router.get(
-//   "/:id",
-//   currentUser,
-//   getUserById
-// );
-
-
 
 router.post(
   "/password-reset/request",
@@ -68,9 +53,5 @@ router.post(
   "/password-reset/reset",
   resetPassword
 );  
-
-
-
-
 
 module.exports = router;
