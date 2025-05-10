@@ -1,28 +1,21 @@
 const express = require("express");
 const {
-    updateEmail,
-    verifyNewEmail,
     updatePassword,
     uploadProfilePicture,
+    updateUsername,
 } = require("../controller/profile.controller");
-const upload = require("../middlewares/fileUpload.middleware");
+const uploadMiddleware = require("../middlewares/fileUpload.middleware");
 const authenticateUser = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
-// Update email endpoint (change from POST to PATCH or PUT)
+// Update username endpoint
 router.patch(
-    "/update-email/:id",
+    "/update-username/:id",
     authenticateUser,
-    updateEmail
+    updateUsername
 );
 
-// Verify new email endpoint (change from POST to PATCH or PUT)
-router.patch(
-    "/verify-new-email/:id",
-    authenticateUser,
-    verifyNewEmail
-);
 
 // Update password endpoint (change from POST to PATCH or PUT)
 router.patch(
@@ -31,11 +24,11 @@ router.patch(
     updatePassword
 );
 
-// Upload profile picture endpoint remains POST since it creates a new resource (profile picture)
+// Upload profile picture endpoint
 router.post(
     "/upload-picture/:id",
     authenticateUser,
-    upload.single('profilePicture'),
+    uploadMiddleware,
     uploadProfilePicture
 );
 
