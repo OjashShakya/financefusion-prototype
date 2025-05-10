@@ -6,7 +6,7 @@ const {
   comparePassword,
   generateToken,
 } = require("../utils/authUtils");
-const { generateOTP, sendVerificationEmail } = require("../utils/OTPUtils");
+const { generateOTP, sendVerificationEmail,sendLoginEmail } = require("../utils/OTPUtils");
 
 const path = require("path");
 
@@ -132,7 +132,7 @@ const loginUser = async (req, res) => {
     }
     await user.save();
 
-    await sendVerificationEmail(email, user.fullname, otp);
+    await sendLoginEmail(email, user.fullname, otp);
 
     return res.status(StatusCodes.OK).json({
       status: 'otp_required',
