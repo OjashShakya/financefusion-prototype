@@ -126,6 +126,10 @@ const loginUser = async (req, res) => {
 
     const otp = generateOTP().otp;
     user.otp = otp;
+    // Ensure profilePicture is an object
+    if (!user.profilePicture || typeof user.profilePicture !== 'object') {
+      user.profilePicture = {};
+    }
     await user.save();
 
     await sendVerificationEmail(email, user.fullname, otp);
@@ -179,7 +183,8 @@ const verifyLoginOTP = async (req, res) => {
       user: {
         id: user._id,
         fullname: user.fullname,
-        email: user.email
+        email: user.email,
+        profilePicture: user.profilePicture || {}
       }
     });
   } catch (error) {

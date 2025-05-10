@@ -17,7 +17,8 @@ const currentUser = async (req, res) => {
       user: {
         id: user._id,
         fullname: user.fullname,
-        email: user.email
+        email: user.email,
+        profilePicture: user.profilePicture || {}
       }
     });
   } catch (error) {

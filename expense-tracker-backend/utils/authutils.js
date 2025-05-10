@@ -15,7 +15,7 @@ const generateToken = (user) => {
     userId: user._id,
     name: user.fullname,
     email: user.email,
-    // profile: user.profilePicture,
+    profilePicture: user.profilePicture || {}
   };
 
   return jwt.sign(payload, process.env.JWT_SECRET, {
