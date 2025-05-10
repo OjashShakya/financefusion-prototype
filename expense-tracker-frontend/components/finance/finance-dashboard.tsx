@@ -17,6 +17,7 @@ import { getBudgets, createBudget, deleteBudget } from '@/lib/api/budget';
 import { useAuth } from '@/src/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import Cookies from 'js-cookie';
+import SettingsView from './settings-view';
 
 export function FinanceDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -459,6 +460,8 @@ export function FinanceDashboard() {
             onDelete={deleteSavingsGoal}
           />
         );
+      case 'settings':
+        return <SettingsView />;
       default:
         return (
           <DashboardView
