@@ -118,66 +118,86 @@ export default function SettingsView() {
   };
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.id) return;
+  e.preventDefault();
+  if (!user?.id) return;
 
-    if (!currentPassword || !newPassword || !confirmPassword) {
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    toast({
+      title: "Error",
+      description: "All password fields are required",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])/;
+  if (!passwordRegex.test(newPassword)) {
+    toast({
+      title: "Error",
+      description: "Password must include at least one number and one special character (@, #, $, etc.)",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    toast({
+      title: "Error",
+      description: "Passwords do not match",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    toast({
+      title: "Error",
+      description: "Password must be at least 6 characters long",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setIsUpdating(true);
+  try {
+    const response = await profileAPI.updatePassword(user.id, currentPassword, newPassword);
+
+    if (response.success) {
+      toast({
+        title: "Success",
+        description: "Password updated successfully",
+        variant: "default",
+      });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } else {
+      // Modified error for incorrect current password
+      const errorMsg = response.message?.toLowerCase().includes('incorrect') 
+        ? 'Incorrect current password'
+        : response.message || 'Failed to update password';
+
       toast({
         title: "Error",
-        description: "All password fields are required",
+        description: errorMsg,
         variant: "destructive",
       });
-      return;
     }
+  } catch (error: any) {
+    const errorMsg = error.message?.toLowerCase().includes('incorrect') 
+      ? 'Incorrect current password'
+      : error.message || 'Failed to update password';
 
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
+    toast({
+      title: "Error",
+      description: errorMsg,
+      variant: "destructive",
+    });
+  } finally {
+    setIsUpdating(false);
+  }
+};
 
-    if (newPassword.length < 6) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 6 characters long",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      const response = await profileAPI.updatePassword(user.id, currentPassword, newPassword);
-
-      if (response.success) {
-        toast({
-          title: "Success",
-          description: "Password updated successfully",
-          variant: "default",
-        });
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to update password",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update password",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpdating(false);
-    }
-  };
 
   const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!user?.id || !e.target.files?.length) return;
