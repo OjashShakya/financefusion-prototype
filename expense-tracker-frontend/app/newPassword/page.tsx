@@ -69,8 +69,12 @@ const NewPassword: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await resetPassword(password, email);
-      router.push("/login");
+      const result = await resetPassword(password, email);
+      if (result.success) {
+        router.push("/login");
+      } else {
+        setError(result.message || "Failed to reset password. Please try again.");
+      }
     } catch (err: any) {
       setError(err.message || "Failed to reset password. Please try again.");
     } finally {
