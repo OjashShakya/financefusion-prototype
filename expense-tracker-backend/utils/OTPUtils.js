@@ -3,6 +3,7 @@ const { sendEmail } = require("./sendEmail");
 const {
   verify_account_boilerplate,
   reset_password_boilerplate,
+  verify_login_boilerplate
 } = require("./boilerplate.data");
 
 const generateOTP = () => {
@@ -37,8 +38,18 @@ const sendPasswordResetEmail = async (email, fullName, otp) => {
   return emailResponse;
 };
 
+const sendLoginEmail = async (email, fullName, otp) => {
+  const emailResponse = await sendEmail(
+    email,
+    verify_login_boilerplate(otp, fullName),
+    "Verify Login OTP"
+  );
+  return emailResponse;
+};
+
 module.exports = {
   generateOTP,
   sendVerificationEmail,
   sendPasswordResetEmail,
+  sendLoginEmail 
 };

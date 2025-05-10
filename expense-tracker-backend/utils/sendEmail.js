@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const path = require("path");
 
 const sendEmail = async (email, html, subject, cc = [], bcc = []) => {
   try {
@@ -17,14 +18,20 @@ const sendEmail = async (email, html, subject, cc = [], bcc = []) => {
       html: html,
       cc: cc,
       bcc: bcc,
+      attachments: [
+        {
+          filename: "financefusionlogo.png",
+          path: path.join(__dirname, "financefusionlogo.png"), // Put the logo in /utils
+          cid: "financefusionlogo", // Refer this in the HTML img tag
+        },
+      ],
     };
 
     const response = await transporter.sendMail(mailOptions);
-    console.log("Email has been sent successfully");
-    console.log(response);
-    return { success: true, response: response };
+    console.log("✅ Email sent successfully.");
+    return { success: true, response };
   } catch (error) {
-    console.log("Email could not be sent due to error: " + error);
+    console.error("❌ Email failed to send: " + error);
     return { success: false, error: error.message };
   }
 };
